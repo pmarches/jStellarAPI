@@ -1,4 +1,5 @@
 bin
+testAccount.txt
 *.class
 
 # Package Files #
