@@ -11,9 +11,3 @@ Library used
 *  [Jetty](http://www.eclipse.org/jetty/) as the websocket client
 *  [JSONSimple](https://code.google.com/p/json-simple/) for JSON handling
 
-
-TODO
-==
-
-*  Maven setup
-*  Support all of the ripple operations

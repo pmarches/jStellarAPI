@@ -2,21 +2,21 @@ package jrippleapi.beans;
 
 import org.json.simple.JSONObject;
 
-import jrippleapi.JSONSerializable;
+import jrippleapi.connection.JSONSerializable;
 
 public class OrderBookEntry implements JSONSerializable {
 	String accountStr;
-	DenominatedAmount takerGetsAmount;
-	DenominatedAmount takerPaysAmount;
+	DenominatedIssuedCurrency takerGetsAmount;
+	DenominatedIssuedCurrency takerPaysAmount;
 
 	@Override
 	public void copyFrom(JSONObject jsonOrderBookEntry) {
 		jsonOrderBookEntry.get("index");
 
-		takerPaysAmount = new DenominatedAmount();
+		takerPaysAmount = new DenominatedIssuedCurrency();
 		takerPaysAmount.copyFrom(jsonOrderBookEntry.get("TakerPays"));
 		
-		takerGetsAmount = new DenominatedAmount();
+		takerGetsAmount = new DenominatedIssuedCurrency();
 		takerGetsAmount.copyFrom(jsonOrderBookEntry.get("TakerGets"));
 		
 		accountStr=(String) jsonOrderBookEntry.get("Account");

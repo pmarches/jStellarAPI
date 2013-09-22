@@ -1,6 +1,8 @@
-package jrippleapi;
+package jrippleapi.utils;
 
 import java.io.IOException;
+
+import jrippleapi.connection.AbstractRippleMessageHandler;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;

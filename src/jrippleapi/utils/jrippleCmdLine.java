@@ -1,4 +1,4 @@
-package jrippleapi;
+package jrippleapi.utils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

@@ -2,15 +2,15 @@ package jrippleapi.beans;
 
 import org.json.simple.JSONObject;
 
-import jrippleapi.JSONSerializable;
+import jrippleapi.connection.JSONSerializable;
 
-public class Denomination implements JSONSerializable {
+public class IssuedCurrency implements JSONSerializable {
 	public String currencyStr;
 	public String issuerStr;
 	
-	public static final Denomination XRP_DENOMINATION = new Denomination();
-	public static final Denomination USD_DENOMINATION = new Denomination();
-	public static final Denomination BTC_DENOMINATION = new Denomination();
+	public static final IssuedCurrency XRP_DENOMINATION = new IssuedCurrency();
+	public static final IssuedCurrency USD_DENOMINATION = new IssuedCurrency();
+	public static final IssuedCurrency BTC_DENOMINATION = new IssuedCurrency();
 	static {
 		XRP_DENOMINATION.currencyStr="XRP";
 
@@ -46,7 +46,7 @@ public class Denomination implements JSONSerializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Denomination other = (Denomination) obj;
+		IssuedCurrency other = (IssuedCurrency) obj;
 		if (currencyStr == null) {
 			if (other.currencyStr != null)
 				return false;

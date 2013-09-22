@@ -1,13 +1,13 @@
 package jrippleapi.beans;
 
-import jrippleapi.JSONSerializable;
+import jrippleapi.connection.JSONSerializable;
 
 import org.json.simple.JSONObject;
 
 public class ExchangeOffer implements JSONSerializable {
 	public long sequenceNumber;
-	public DenominatedAmount takerGets;
-	public DenominatedAmount takerPays;
+	public DenominatedIssuedCurrency takerGets;
+	public DenominatedIssuedCurrency takerPays;
 
 	@Override
 	public void copyFrom(JSONObject jsonOffer) {
@@ -16,13 +16,13 @@ public class ExchangeOffer implements JSONSerializable {
 		takerPays = jsonToDenominatedAmount(jsonOffer.get("taker_pays"));
 	}
 
-	private DenominatedAmount jsonToDenominatedAmount(Object jsonDenominatedAmount) {
-		DenominatedAmount amount = new DenominatedAmount();
+	private DenominatedIssuedCurrency jsonToDenominatedAmount(Object jsonDenominatedAmount) {
+		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency();
 		if(jsonDenominatedAmount instanceof JSONObject){
 			amount.copyFrom((JSONObject) jsonDenominatedAmount);
 		}
 		else{
-			amount.denomination = Denomination.XRP_DENOMINATION;
+			amount.denomination = IssuedCurrency.XRP_DENOMINATION;
 			//FIXME XRPs are specified with 6 zeroes
 			//1 XRP == 1 000 000
 			amount.amountStr = (String) jsonDenominatedAmount;

@@ -1,4 +1,4 @@
-package jrippleapi;
+package jrippleapi.connection;
 
 import java.io.IOException;
 import java.net.URI;
@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import jrippleapi.beans.AccountInformation;
-import jrippleapi.beans.Denomination;
+import jrippleapi.beans.IssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RandomString;
@@ -17,9 +17,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-@WebSocket(maxMessageSize = 1000 * 1024)
+@WebSocket
 public class RippleConnection extends AbstractRippleMessageHandler {
-	private int requestCounter=2;
+	private int requestCounter=1;
 	final static URI RIPPLE_SERVER_URL=URI.create("wss://s1.ripple.com");
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
     
@@ -104,7 +104,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 //		}
 //	}
 	
-	public Future<OrderBook> getOrderBookFuture(Denomination takerGets, Denomination takerPays, int nbEntries){
+	public Future<OrderBook> getOrderBookFuture(IssuedCurrency takerGets, IssuedCurrency takerPays, int nbEntries){
 		JSONObject jsonTakerGets = new JSONObject();
 		if(takerGets.issuerStr!=null){
 			jsonTakerGets.put("issuer", takerGets.issuerStr);
@@ -127,7 +127,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		return sendCommand(orderBookComand, new OrderBook());
 	}
 
-	public OrderBook getOrderBook(Denomination takerGets, Denomination takerPays, int nbEntries) {
+	public OrderBook getOrderBook(IssuedCurrency takerGets, IssuedCurrency takerPays, int nbEntries) {
 		try {
 			return getOrderBookFuture(takerGets, takerPays, nbEntries).get();
 		} catch (InterruptedException | ExecutionException e) {

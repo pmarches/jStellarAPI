@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import jrippleapi.JSONSerializable;
+import jrippleapi.connection.JSONSerializable;
 
 public class OrderBook extends ArrayList<OrderBookEntry> implements JSONSerializable {
 	private static final long serialVersionUID = 7170053946114996963L;

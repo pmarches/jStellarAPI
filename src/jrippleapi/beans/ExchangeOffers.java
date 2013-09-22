@@ -2,7 +2,7 @@ package jrippleapi.beans;
 
 import java.util.ArrayList;
 
-import jrippleapi.JSONSerializable;
+import jrippleapi.connection.JSONSerializable;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

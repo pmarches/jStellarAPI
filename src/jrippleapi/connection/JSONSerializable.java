@@ -1,4 +1,4 @@
-package jrippleapi;
+package jrippleapi.connection;
 
 import org.json.simple.JSONObject;
 
