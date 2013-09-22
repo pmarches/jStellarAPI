@@ -13,16 +13,51 @@ public class Denomination implements JSONSerializable {
 	public static final Denomination BTC_DENOMINATION = new Denomination();
 	static {
 		XRP_DENOMINATION.currencyStr="XRP";
+
 		USD_DENOMINATION.currencyStr="USD";
-		USD_DENOMINATION.issuerStr="rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh";
+		USD_DENOMINATION.issuerStr=Account.RIPPLE_ADDRESS_BITSTAMP;
+
 		BTC_DENOMINATION.currencyStr="BTC";
-		BTC_DENOMINATION.issuerStr="rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B";
+		BTC_DENOMINATION.issuerStr=Account.RIPPLE_ADDRESS_BITSTAMP;
 	}
 	
 	@Override
 	public void copyFrom(JSONObject jsonDenomination) {
 		currencyStr = ((String) jsonDenomination.get("currency")).intern();
 		issuerStr = ((String) jsonDenomination.get("issuer")).intern();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((currencyStr == null) ? 0 : currencyStr.hashCode());
+		result = prime * result
+				+ ((issuerStr == null) ? 0 : issuerStr.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Denomination other = (Denomination) obj;
+		if (currencyStr == null) {
+			if (other.currencyStr != null)
+				return false;
+		} else if (!currencyStr.equals(other.currencyStr))
+			return false;
+		if (issuerStr == null) {
+			if (other.issuerStr != null)
+				return false;
+		} else if (!issuerStr.equals(other.issuerStr))
+			return false;
+		return true;
 	}
 
 	@Override

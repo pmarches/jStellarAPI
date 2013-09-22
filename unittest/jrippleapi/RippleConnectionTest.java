@@ -1,26 +1,19 @@
 package jrippleapi;
 
-import static org.junit.Assert.*;
-
-import java.util.concurrent.Future;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
 import jrippleapi.beans.DenominatedAmount;
 import jrippleapi.beans.Denomination;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
-import jrippleapi.beans.RandomString;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class RippleConnectionTest {
-
-	private static final String ROOT_ACCOUNT = "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh";
-	private static final String PMARCHES_ACCOUNT = "rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS";
-	private static final String BITSTAMP_ACCOUNT = "rhkBt4tgr1Lt4qjghn1NXpWTcABUTQc6Cv";
 	static RippleConnection conn;
 	
 	@BeforeClass
@@ -35,9 +28,9 @@ public class RippleConnectionTest {
 	
 	@Test
 	public void testAccountInfo() throws Exception {
-		Future<AccountInformation> futureAccountInfo = conn.getAccountInfoFuture(ROOT_ACCOUNT);
-		assertEquals(ROOT_ACCOUNT, conn.getAccountInfo(ROOT_ACCOUNT).account);
-		assertEquals(ROOT_ACCOUNT, futureAccountInfo.get().account);
+		AccountInformation jRippleAccount = conn.getAccountInfo(Account.RIPPLE_ADDRESS_JRIPPLEAPI);
+		assertEquals(Account.RIPPLE_ADDRESS_JRIPPLEAPI, jRippleAccount.account);
+		assertEquals("199999910", jRippleAccount.balance);
 	}
 	
 	@Test
@@ -47,28 +40,30 @@ public class RippleConnectionTest {
 	
 	@Test
 	public void testRandom() throws Exception {
-		Future<RandomString> randomFuture = conn.getRandomFuture();
-		String random = conn.getRandom();
-		assertFalse("", random.equals(randomFuture.get().random));
+		assertEquals("wrong random", 64, conn.getRandom().length());
 	}
 	
 	@Test
-//	@Ignore
 	public void testOrderBook() throws Exception {
 		final int NB_ENTRIES=12;
 		OrderBook book = conn.getOrderBook(Denomination.BTC_DENOMINATION, Denomination.XRP_DENOMINATION, NB_ENTRIES);
-		assertNotNull(book);
 		assertEquals(NB_ENTRIES, book.size());
+		
 	}
 	
 	@Test
 	public void testAccountOffers() throws Exception {
-//		conn.getAccountCreditLines("rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh");
-		ExchangeOffers offers = conn.getAccountOffers(PMARCHES_ACCOUNT);
+		ExchangeOffers offers = conn.getAccountOffers(Account.RIPPLE_ADDRESS_JRIPPLEAPI);
 		assertEquals(2, offers.size());
-		assertEquals(BITSTAMP_ACCOUNT, offers.get(0).takerGets.denomination.issuerStr);
-		assertEquals(Denomination.XRP_DENOMINATION, offers.get(1).takerGets.denomination);
-	}
+		DenominatedAmount takerGets0 = offers.get(0).takerGets;
+		DenominatedAmount takerPays0 = offers.get(0).takerPays;
+		assertEquals(Denomination.XRP_DENOMINATION, takerGets0.denomination);
+		assertEquals(Denomination.BTC_DENOMINATION, takerPays0.denomination);
 
+		DenominatedAmount takerGets1 = offers.get(1).takerGets;
+		DenominatedAmount takerPays1 = offers.get(1).takerPays;
+		assertEquals(Denomination.XRP_DENOMINATION, takerGets1.denomination);
+		assertEquals(Denomination.USD_DENOMINATION, takerPays1.denomination);
+	}
 
 }
