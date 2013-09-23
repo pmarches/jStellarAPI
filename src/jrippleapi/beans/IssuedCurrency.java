@@ -8,17 +8,17 @@ public class IssuedCurrency implements JSONSerializable {
 	public String currencyStr;
 	public String issuerStr;
 	
-	public static final IssuedCurrency XRP_DENOMINATION = new IssuedCurrency();
-	public static final IssuedCurrency USD_DENOMINATION = new IssuedCurrency();
-	public static final IssuedCurrency BTC_DENOMINATION = new IssuedCurrency();
+	public static final IssuedCurrency CURRENCY_XRP = new IssuedCurrency();
+	public static final IssuedCurrency CURRENCY_BITSTAMP_USD = new IssuedCurrency();
+	public static final IssuedCurrency CURRENCY_BITSTAMP_BTC = new IssuedCurrency();
 	static {
-		XRP_DENOMINATION.currencyStr="XRP";
+		CURRENCY_XRP.currencyStr="XRP";
 
-		USD_DENOMINATION.currencyStr="USD";
-		USD_DENOMINATION.issuerStr=Account.RIPPLE_ADDRESS_BITSTAMP;
+		CURRENCY_BITSTAMP_USD.currencyStr="USD";
+		CURRENCY_BITSTAMP_USD.issuerStr=Account.RIPPLE_ADDRESS_BITSTAMP;
 
-		BTC_DENOMINATION.currencyStr="BTC";
-		BTC_DENOMINATION.issuerStr=Account.RIPPLE_ADDRESS_BITSTAMP;
+		CURRENCY_BITSTAMP_BTC.currencyStr="BTC";
+		CURRENCY_BITSTAMP_BTC.issuerStr=Account.RIPPLE_ADDRESS_BITSTAMP;
 	}
 	
 	@Override
@@ -62,9 +62,14 @@ public class IssuedCurrency implements JSONSerializable {
 
 	@Override
 	public String toString() {
-		if(this==XRP_DENOMINATION){
+		if(this==CURRENCY_XRP){
 			return currencyStr;
 		}
 		return currencyStr+"/"+issuerStr;
+	}
+
+	public void toJSON(JSONObject jsonThis) {
+		jsonThis.put("currency", currencyStr);
+		jsonThis.put("issuer", issuerStr);
 	}
 }

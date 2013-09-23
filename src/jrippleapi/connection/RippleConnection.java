@@ -5,11 +5,14 @@ import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
+import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.IssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RandomString;
+import jrippleapi.beans.Transaction;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -40,11 +43,25 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		}
     }
 
-	public void sendString(String string) throws IOException {
-		session.getRemote().sendString(string);
+	public void sendString(String jsonString) throws IOException {
+		System.out.println(jsonString);
+		session.getRemote().sendString(jsonString);
 	}
 
-	
+	public <T extends JSONSerializable> FutureJSONResponse<T> sendCommand(JSONObject command, T unserializedResponse){
+        try {
+        	command.put("id", requestCounter);
+			sendString(command.toJSONString());
+			FutureJSONResponse<T> pendingResponse=new FutureJSONResponse<T>(requestCounter, responseHolder, unserializedResponse);
+			responseHolder.addPendingResponse(pendingResponse);
+        	requestCounter++;
+			return pendingResponse;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public boolean ping(){
 		JSONObject accountInfoComand = new JSONObject();
 		accountInfoComand.put("command", "ping");
@@ -162,18 +179,21 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 //		sendCommand(command, new );
 //	}
 	
-	public <T extends JSONSerializable> FutureJSONResponse<T> sendCommand(JSONObject command, T unserializedResponse){
-        try {
-        	command.put("id", requestCounter);
-			sendString(command.toJSONString());
-			FutureJSONResponse<T> pendingResponse=new FutureJSONResponse<T>(requestCounter, responseHolder, unserializedResponse);
-			responseHolder.addPendingResponse(pendingResponse);
-        	requestCounter++;
-			return pendingResponse;
-		} catch (IOException e) {
+	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(Account payer, String payee, DenominatedIssuedCurrency amount){	
+		JSONObject jsonTx = Transaction.createPayment(payer, payee, amount);
+		JSONObject command = new JSONObject();
+    	command.put("command", "submit");
+    	command.put("tx_json", jsonTx);
+    	command.put("secret", payer.secret);
+		return sendCommand(command, new GenericJSONSerializable());
+	}
+	
+	public GenericJSONSerializable sendPayment(Account payer, String payee, DenominatedIssuedCurrency amount){
+		try {
+			return sendPaymentFuture(payer, payee, amount).get();
+		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-
 }

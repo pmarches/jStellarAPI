@@ -22,7 +22,7 @@ public class ExchangeOffer implements JSONSerializable {
 			amount.copyFrom((JSONObject) jsonDenominatedAmount);
 		}
 		else{
-			amount.denomination = IssuedCurrency.XRP_DENOMINATION;
+			amount.issuance = IssuedCurrency.CURRENCY_XRP;
 			//FIXME XRPs are specified with 6 zeroes
 			//1 XRP == 1 000 000
 			amount.amountStr = (String) jsonDenominatedAmount;
