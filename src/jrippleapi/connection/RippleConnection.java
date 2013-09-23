@@ -8,8 +8,8 @@ import java.util.concurrent.Future;
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
 import jrippleapi.beans.DenominatedIssuedCurrency;
-import jrippleapi.beans.IssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
+import jrippleapi.beans.IssuedCurrency;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RandomString;
 import jrippleapi.beans.Transaction;
@@ -192,6 +192,28 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		try {
 			return sendPaymentFuture(payer, payee, amount).get();
 		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public Future<GenericJSONSerializable> setCreditLineFuture(Account creditorAccount, String debtorAccount, DenominatedIssuedCurrency creditAmount){
+		JSONObject command = new JSONObject();
+    	command.put("command", "submit");
+    	JSONObject jsonTx = new JSONObject();
+    	jsonTx.put("TransactionType", "TrustSet");
+    	jsonTx.put("Account", creditorAccount.account);
+    	jsonTx.put("LimitAmount", creditAmount.toJSON());
+    	
+		command.put("tx_json", jsonTx);
+    	command.put("secret", creditorAccount.secret);
+		return sendCommand(command, new GenericJSONSerializable());
+	}
+
+	public GenericJSONSerializable setCreditLine(Account creditorAccount, String debtorAccount, DenominatedIssuedCurrency creditAmount){
+		try {
+			return setCreditLineFuture(creditorAccount, debtorAccount, creditAmount).get();
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}

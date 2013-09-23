@@ -13,6 +13,7 @@ import jrippleapi.connection.RippleConnection;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class RippleConnectionTest {
@@ -32,7 +33,7 @@ public class RippleConnectionTest {
 	public void testAccountInfo() throws Exception {
 		AccountInformation jRippleAccount = conn.getAccountInfo(Account.RIPPLE_ADDRESS_JRIPPLEAPI);
 		assertEquals(Account.RIPPLE_ADDRESS_JRIPPLEAPI, jRippleAccount.account);
-		assertEquals("199999910", jRippleAccount.balance);
+		assertEquals("197999865", jRippleAccount.balance);
 	}
 	
 	@Test
@@ -69,6 +70,7 @@ public class RippleConnectionTest {
 	}
 
 	@Test
+	@Ignore
 	public void testPayment() throws Exception{
 //		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
 //		oneXRP.amountStr="1000000";
@@ -81,5 +83,15 @@ public class RippleConnectionTest {
 		oneSatoshi.issuance.currencyStr="BTC";
 		oneSatoshi.issuance.issuerStr=Account.RIPPLE_ADDRESS_JRIPPLEAPI;
 		conn.sendPayment(AccountTest.getTestAccount(), Account.RIPPLE_ADDRESS_PMARCHES, oneSatoshi);
+	}
+	
+	@Test
+	public void testSetCreditLine() throws Exception{
+		DenominatedIssuedCurrency creditAmount = new DenominatedIssuedCurrency();
+		creditAmount.amountStr="11";
+		creditAmount.issuance=new IssuedCurrency();
+		creditAmount.issuance.currencyStr="BTC";
+		creditAmount.issuance.issuerStr=Account.RIPPLE_ADDRESS_PMARCHES;
+		conn.setCreditLine(AccountTest.getTestAccount(), Account.RIPPLE_ADDRESS_PMARCHES, creditAmount);
 	}
 }
