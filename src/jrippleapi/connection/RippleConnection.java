@@ -2,11 +2,14 @@ package jrippleapi.connection;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
+import jrippleapi.beans.CreditLine;
+import jrippleapi.beans.CreditLines;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.IssuedCurrency;
@@ -105,21 +108,6 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 			return null;
 		}
 	}
-
-//	
-//	public void getAccountCreditLines(String account){
-//		JSONObject creditLinesComand = new JSONObject();
-//		creditLinesComand.put("command", "account_lines");
-//		creditLinesComand.put("account", account);
-//		FutureJSONResponse creditLineResponse = sendCommand(creditLinesComand);
-//		try {
-//			JSONObject jsonResult=(JSONObject) creditLineResponse.get().get("result");
-//			System.out.println(jsonResult);
-//		} catch (InterruptedException | ExecutionException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
 	
 	public Future<OrderBook> getOrderBookFuture(IssuedCurrency takerGets, IssuedCurrency takerPays, int nbEntries){
 		JSONObject jsonTakerGets = new JSONObject();
@@ -214,6 +202,22 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		try {
 			return setCreditLineFuture(creditorAccount, debtorAccount, creditAmount).get();
 		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public Future<CreditLines> getCreditLinesFuture(String ourAccount) {
+		JSONObject command = new JSONObject();
+    	command.put("command", "account_lines");
+    	command.put("account", ourAccount);
+		return sendCommand(command, new CreditLines());
+	}
+
+	public CreditLines getCreditLines(String ourAccount) {
+		try {
+			return getCreditLinesFuture(ourAccount).get();
+		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			return null;
 		}
