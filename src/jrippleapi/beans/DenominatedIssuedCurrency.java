@@ -1,24 +1,30 @@
 package jrippleapi.beans;
 
-import jrippleapi.connection.JSONSerializable;
+import java.math.BigDecimal;
 
 import org.json.simple.JSONObject;
 
+import jrippleapi.connection.JSONSerializable;
+
 public class DenominatedIssuedCurrency implements JSONSerializable {
-	public String amountStr;
-	public IssuedCurrency issuance;
-	
+	public BigDecimal amount;
+	public String issuerStr;
+	public CurrencyUnit currency;
+		
 	@Override
-	public void copyFrom(JSONObject jsonCommandResult) {
-		amountStr = (String) jsonCommandResult.get("value");
-		issuance = new IssuedCurrency();
-		issuance.copyFrom(jsonCommandResult);
+	public void copyFrom(JSONObject jsonDenomination) {
+		issuerStr = ((String) jsonDenomination.get("issuer"));
+		String currencyStr = ((String) jsonDenomination.get("currency"));
+		currency = CurrencyUnit.parse(currencyStr);
+
+		String amountStr = (String) jsonDenomination.get("value");
+		amount=currency.fromString(amountStr);
 	}
 
 	public void copyFrom(Object jsonObject) {
 		if(jsonObject instanceof String){
-			issuance=IssuedCurrency.CURRENCY_XRP;
-			amountStr=(String) jsonObject;
+			currency = CurrencyUnit.XRP;
+			amount=currency.fromString((String) jsonObject);
 		}
 		else{
 			copyFrom((JSONObject) jsonObject);
@@ -26,49 +32,16 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	}
 
 	public Object toJSON(){
-		if(issuance==IssuedCurrency.CURRENCY_XRP){
-			return amountStr;
+		if(currency==CurrencyUnit.XRP){
+			return currency.toString(amount);
 		}
 		else{
 			JSONObject jsonThis = new JSONObject();
-			jsonThis.put("value", amountStr);
-			issuance.toJSON(jsonThis);
+			jsonThis.put("value", currency.toString(amount));
+			jsonThis.put("issuer", issuerStr);
+			jsonThis.put("currency", currency.currencyCode);
 			return jsonThis;
 		}
 	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((amountStr == null) ? 0 : amountStr.hashCode());
-		result = prime * result
-				+ ((issuance == null) ? 0 : issuance.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DenominatedIssuedCurrency other = (DenominatedIssuedCurrency) obj;
-		if (amountStr == null) {
-			if (other.amountStr != null)
-				return false;
-		} else if (!amountStr.equals(other.amountStr))
-			return false;
-		if (issuance == null) {
-			if (other.issuance != null)
-				return false;
-		} else if (!issuance.equals(other.issuance))
-			return false;
-		return true;
-	}
-
 
 }

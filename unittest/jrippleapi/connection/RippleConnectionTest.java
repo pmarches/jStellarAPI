@@ -3,18 +3,16 @@ package jrippleapi.connection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
 import jrippleapi.beans.AccountTest;
-import jrippleapi.beans.CreditLine;
 import jrippleapi.beans.CreditLines;
+import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
-import jrippleapi.beans.IssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
-import jrippleapi.connection.RippleConnection;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -38,7 +36,7 @@ public class RippleConnectionTest {
 	public void testAccountInfo() throws Exception {
 		AccountInformation jRippleAccount = conn.getAccountInfo(Account.RIPPLE_ADDRESS_JRIPPLEAPI);
 		assertEquals(Account.RIPPLE_ADDRESS_JRIPPLEAPI, jRippleAccount.account);
-		assertEquals("297999825", jRippleAccount.balance);
+		assertEquals(-1, new BigDecimal(200).compareTo(jRippleAccount.xrpBalance));
 	}
 	
 	@Test
@@ -54,7 +52,7 @@ public class RippleConnectionTest {
 	@Test
 	public void testOrderBook() throws Exception {
 		final int NB_ENTRIES=12;
-		OrderBook book = conn.getOrderBook(IssuedCurrency.CURRENCY_BITSTAMP_BTC, IssuedCurrency.CURRENCY_XRP, NB_ENTRIES);
+		OrderBook book = conn.getOrderBook(Account.RIPPLE_ADDRESS_BITSTAMP, CurrencyUnit.BTC, CurrencyUnit.XRP, NB_ENTRIES);
 		assertEquals(NB_ENTRIES, book.size());
 		
 	}
@@ -65,38 +63,37 @@ public class RippleConnectionTest {
 		assertEquals(2, offers.size());
 		DenominatedIssuedCurrency takerGets0 = offers.get(0).takerGets;
 		DenominatedIssuedCurrency takerPays0 = offers.get(0).takerPays;
-		assertEquals(IssuedCurrency.CURRENCY_XRP, takerGets0.issuance);
-		assertEquals(IssuedCurrency.CURRENCY_BITSTAMP_BTC, takerPays0.issuance);
+		assertEquals(CurrencyUnit.XRP, takerGets0.currency);
+		assertEquals(CurrencyUnit.BTC, takerPays0.currency);
 
 		DenominatedIssuedCurrency takerGets1 = offers.get(1).takerGets;
 		DenominatedIssuedCurrency takerPays1 = offers.get(1).takerPays;
-		assertEquals(IssuedCurrency.CURRENCY_XRP, takerGets1.issuance);
-		assertEquals(IssuedCurrency.CURRENCY_BITSTAMP_USD, takerPays1.issuance);
+		assertEquals(CurrencyUnit.XRP, takerGets1.currency);
+		assertEquals(CurrencyUnit.USD, takerPays1.currency);
 	}
 
 	@Test
-	@Ignore
+//	@Ignore
 	public void testPayment() throws Exception{
-//		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
-//		oneXRP.amountStr="1000000";
-//		oneXRP.issuance=IssuedCurrency.XRP_CURRENCY;
-//		GenericJSONSerializable tx = conn.sendPayment(AccountTest.getTestAccount(), Account.RIPPLE_ADDRESS_PMARCHES, oneXRP);
+		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
+		oneXRP.issuerStr=Account.RIPPLE_ADDRESS_JRIPPLEAPI;
+		oneXRP.currency=CurrencyUnit.XRP;
+		oneXRP.amount=oneXRP.currency.fromString("1000000");
+		conn.sendPayment(AccountTest.getTestAccount(), Account.RIPPLE_ADDRESS_PMARCHES, oneXRP);
 
 		DenominatedIssuedCurrency oneMiliBTC = new DenominatedIssuedCurrency();
-		oneMiliBTC.amountStr="0.001";
-		oneMiliBTC.issuance=new IssuedCurrency();
-		oneMiliBTC.issuance.currencyStr="BTC";
-		oneMiliBTC.issuance.issuerStr=Account.RIPPLE_ADDRESS_JRIPPLEAPI;
+		oneMiliBTC.issuerStr=Account.RIPPLE_ADDRESS_JRIPPLEAPI;
+		oneMiliBTC.currency=CurrencyUnit.BTC;
+		oneMiliBTC.amount=oneMiliBTC.currency.fromString("0.001");
 		conn.sendPayment(AccountTest.getTestAccount(), Account.RIPPLE_ADDRESS_PMARCHES, oneMiliBTC);
 	}
 	
 	@Test
 	public void testSetCreditLine() throws Exception{
 		DenominatedIssuedCurrency creditAmount = new DenominatedIssuedCurrency();
-		creditAmount.amountStr="1";
-		creditAmount.issuance=new IssuedCurrency();
-		creditAmount.issuance.currencyStr="BTC";
-		creditAmount.issuance.issuerStr=Account.RIPPLE_ADDRESS_PMARCHES;
+		creditAmount.currency=CurrencyUnit.BTC;
+		creditAmount.issuerStr=Account.RIPPLE_ADDRESS_PMARCHES;
+		creditAmount.amount=creditAmount.currency.fromString("1");
 		conn.setCreditLine(AccountTest.getTestAccount(), Account.RIPPLE_ADDRESS_PMARCHES, creditAmount);
 	}
 	

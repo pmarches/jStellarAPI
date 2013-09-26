@@ -2,17 +2,15 @@ package jrippleapi.connection;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
-import jrippleapi.beans.CreditLine;
 import jrippleapi.beans.CreditLines;
+import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
-import jrippleapi.beans.IssuedCurrency;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RandomString;
 import jrippleapi.beans.Transaction;
@@ -109,18 +107,18 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		}
 	}
 	
-	public Future<OrderBook> getOrderBookFuture(IssuedCurrency takerGets, IssuedCurrency takerPays, int nbEntries){
+	public Future<OrderBook> getOrderBookFuture(String takerGetsIssuerStr, CurrencyUnit takerGets, CurrencyUnit takerPays, int nbEntries){
 		JSONObject jsonTakerGets = new JSONObject();
-		if(takerGets.issuerStr!=null){
-			jsonTakerGets.put("issuer", takerGets.issuerStr);
+		if(takerGetsIssuerStr!=null){
+			jsonTakerGets.put("issuer", takerGetsIssuerStr);
 		}
-		jsonTakerGets.put("currency", takerGets.currencyStr);
+		jsonTakerGets.put("currency", takerGets.currencyCode);
 
 		JSONObject jsonTakerPays = new JSONObject();
-		if(takerPays.issuerStr!=null){
-			jsonTakerPays.put("issuer", takerPays.issuerStr);
-		}
-		jsonTakerPays.put("currency", takerPays.currencyStr);
+//		if(takerPays.issuerStr!=null){
+//			jsonTakerPays.put("issuer", takerPays.issuerStr);
+//		}
+		jsonTakerPays.put("currency", takerPays.currencyCode);
 
 		JSONObject orderBookComand = new JSONObject();
 		orderBookComand.put("command", "book_offers");
@@ -132,9 +130,9 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		return sendCommand(orderBookComand, new OrderBook());
 	}
 
-	public OrderBook getOrderBook(IssuedCurrency takerGets, IssuedCurrency takerPays, int nbEntries) {
+	public OrderBook getOrderBook(String issuerStr, CurrencyUnit takerGets, CurrencyUnit takerPays, int nbEntries) {
 		try {
-			return getOrderBookFuture(takerGets, takerPays, nbEntries).get();
+			return getOrderBookFuture(issuerStr, takerGets, takerPays, nbEntries).get();
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			return null;
