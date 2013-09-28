@@ -24,11 +24,12 @@ import org.json.simple.parser.ParseException;
 @WebSocket
 public class RippleConnection extends AbstractRippleMessageHandler {
 	private int requestCounter=1;
-	final static URI RIPPLE_SERVER_URL=URI.create("wss://s1.ripple.com");
+	public final static URI RIPPLE_SERVER_URL=URI.create("wss://s1.ripple.com");
+	public final static URI LOCALHOST_SERVER_URL=URI.create("ws://localhost:5006");
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
     
     public RippleConnection() throws Exception {
-    	super();
+    	super(LOCALHOST_SERVER_URL);
 	}
     
 	@OnWebSocketMessage
@@ -52,9 +53,9 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 	public <T extends JSONSerializable> FutureJSONResponse<T> sendCommand(JSONObject command, T unserializedResponse){
         try {
         	command.put("id", requestCounter);
-			sendString(command.toJSONString());
 			FutureJSONResponse<T> pendingResponse=new FutureJSONResponse<T>(requestCounter, responseHolder, unserializedResponse);
 			responseHolder.addPendingResponse(pendingResponse);
+			sendString(command.toJSONString());
         	requestCounter++;
 			return pendingResponse;
 		} catch (IOException e) {

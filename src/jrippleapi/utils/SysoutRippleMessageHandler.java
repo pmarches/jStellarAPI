@@ -3,6 +3,7 @@ package jrippleapi.utils;
 import java.io.IOException;
 
 import jrippleapi.connection.AbstractRippleMessageHandler;
+import jrippleapi.connection.RippleConnection;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -13,7 +14,7 @@ import org.eclipse.jetty.websocket.api.extensions.Frame;
 public class SysoutRippleMessageHandler extends AbstractRippleMessageHandler {
 
 	public SysoutRippleMessageHandler() throws Exception {
-		super();
+		super(RippleConnection.LOCALHOST_SERVER_URL);
 	}
 
 	synchronized public void sendString(String string) throws IOException{

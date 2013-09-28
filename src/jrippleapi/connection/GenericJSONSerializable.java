@@ -6,5 +6,8 @@ public class GenericJSONSerializable implements JSONSerializable {
 	@Override
 	public void copyFrom(JSONObject jsonCommandResult) {
 		System.out.println("GenericJSONSerializable "+jsonCommandResult);
+		if("error".equals(jsonCommandResult.get("status"))){
+			
+		}
 	}
 }
