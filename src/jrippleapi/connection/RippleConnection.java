@@ -29,7 +29,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
     
     public RippleConnection() throws Exception {
-    	super(LOCALHOST_SERVER_URL);
+    	super(RIPPLE_SERVER_URL);
 	}
     
 	@OnWebSocketMessage
@@ -167,7 +167,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 //	}
 	
 	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(Account payer, String payee, DenominatedIssuedCurrency amount){	
-		JSONObject jsonTx = Transaction.createPayment(payer, payee, amount);
+		JSONObject jsonTx = new Transaction(payer.account, payee, amount).getTxJSON();
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	command.put("tx_json", jsonTx);
@@ -221,4 +221,41 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 			return null;
 		}
 	}
+	
+	public Future<Transaction> signTransactionFuture(String secret, Transaction txToSign){
+		JSONObject command = new JSONObject();
+    	command.put("command", "sign");
+    	command.put("secret", secret);
+		command.put("tx_json", txToSign.getTxJSON());
+		return sendCommand(command, txToSign);
+	}
+	
+	public Transaction signTransaction(String secret, Transaction txToSign) {
+		try {
+			return signTransactionFuture(secret, txToSign).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public Future<Transaction> submitTransactionFuture(Transaction txToSign){
+		if(txToSign.getSignedTxBlob()==null){
+			throw new NullPointerException("Transaction must be signed before being submitted");
+		}
+		JSONObject command = new JSONObject();
+    	command.put("command", "submit");
+		command.put("tx_blob", txToSign.getSignedTxBlob());
+		return sendCommand(command, txToSign);
+	}
+	
+	public Transaction submitTransaction(Transaction txToSign) {
+		try {
+			return submitTransactionFuture(txToSign).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

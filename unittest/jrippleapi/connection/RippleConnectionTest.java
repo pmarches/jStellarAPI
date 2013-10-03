@@ -1,6 +1,7 @@
 package jrippleapi.connection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
@@ -13,10 +14,10 @@ import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
+import jrippleapi.beans.Transaction;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class RippleConnectionTest {
@@ -102,4 +103,18 @@ public class RippleConnectionTest {
 		CreditLines creditLines = conn.getCreditLines(Account.RIPPLE_ADDRESS_JRIPPLEAPI);
 		assertEquals(2, creditLines.size());
 	}
+	
+	@Test
+	public void testSignTransaction() throws Exception {
+		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
+		oneXRP.issuerStr=Account.RIPPLE_ADDRESS_JRIPPLEAPI;
+		oneXRP.currency=CurrencyUnit.XRP;
+		oneXRP.amount=oneXRP.currency.fromString("1000000");
+		Account testAccount=AccountTest.getTestAccount();
+		Transaction tx = new Transaction(testAccount.account, Account.RIPPLE_ADDRESS_PMARCHES, oneXRP);
+		Transaction signedTx = conn.signTransaction(testAccount.secret, tx);
+		assertNotNull(signedTx.publicKeyUsedToSign);
+		assertNotNull(signedTx.signature);
+	}
+
 }
