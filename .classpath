@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="lib/websocket-api-9.0.5.v20130815.jar"/>
 	<classpathentry kind="lib" path="lib/websocket-client-9.0.5.v20130815.jar"/>
 	<classpathentry kind="lib" path="lib/websocket-common-9.0.5.v20130815.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.bouncycastle"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15on-149.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
