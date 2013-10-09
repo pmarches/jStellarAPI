@@ -18,7 +18,7 @@ package jrippleapi.keys;
 
 import java.math.BigInteger;
 
-public class Base58 {
+public class RippleBase58 {
     private static final String ALPHABET = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
     private static final BigInteger BASE = BigInteger.valueOf(58);
 

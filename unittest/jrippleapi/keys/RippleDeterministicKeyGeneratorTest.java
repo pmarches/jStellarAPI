@@ -40,14 +40,14 @@ public class RippleDeterministicKeyGeneratorTest {
 		assertEquals("shHM53KPZ87Gwdqarm1bAmPeXg8Tn", generator.getHumandReadableSeed());
 		assertEquals("fht5yrLWh3P8DrJgQuVNDPQVXGTMyPpgRHFKGQzFQ66o3ssesk3o", generator.getPublicGeneratorFamily());
 		assertEquals("aBRoQibi2jpDofohooFuzZi9nEzKw9Zdfc4ExVNmuXHaJpSPh8uJ", generator.getAccountPublicKey(0));
-		assertEquals("rhcfR9Cg98qCxHpCcPBmMonbDBXo84wyTn", generator.getAccountId(0));
+		assertEquals("rhcfR9Cg98qCxHpCcPBmMonbDBXo84wyTn", generator.getAccountId(0).toString());
 	}
 	
 	@Test
 	public void testOurAccount() throws Exception{
 		Account testAccount = AccountTest.getTestAccount();
 		RippleDeterministicKeyGenerator generator = new RippleDeterministicKeyGenerator(testAccount.secret);
-		assertEquals(testAccount.account, generator.getAccountId(0));
+		assertEquals(testAccount.address, generator.getAccountId(0));
 	}
 
 }

@@ -167,7 +167,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 //	}
 	
 	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(Account payer, String payee, DenominatedIssuedCurrency amount){	
-		JSONObject jsonTx = new Transaction(payer.account, payee, amount).getTxJSON();
+		JSONObject jsonTx = new Transaction(payer.address.toString(), payee, amount).getTxJSON();
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	command.put("tx_json", jsonTx);
@@ -189,7 +189,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
     	command.put("command", "submit");
     	JSONObject jsonTx = new JSONObject();
     	jsonTx.put("TransactionType", "TrustSet");
-    	jsonTx.put("Account", creditorAccount.account);
+    	jsonTx.put("Account", creditorAccount.address);
     	jsonTx.put("LimitAmount", creditAmount.toJSON());
     	
 		command.put("tx_json", jsonTx);

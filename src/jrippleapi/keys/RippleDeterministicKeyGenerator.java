@@ -4,6 +4,9 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
+import jrippleapi.beans.RippleAddress;
+import jrippleapi.beans.RippleIdentifier;
+
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
@@ -21,7 +24,7 @@ public class RippleDeterministicKeyGenerator {
 	}
 
 	public RippleDeterministicKeyGenerator(String secretSeed) {
-		byte[] secretBytes = Base58.decode(secretSeed);
+		byte[] secretBytes = RippleBase58.decode(secretSeed);
 		//TODO check the checksum
 		seedBytes = Arrays.copyOfRange(secretBytes, 1, 17);
 	}
@@ -41,22 +44,12 @@ public class RippleDeterministicKeyGenerator {
 	}
 
 	public String getHumandReadableSeed() throws Exception {
-		return toRippleHumanReadable(seedBytes, (byte) 33);
+		return new RippleIdentifier(seedBytes, 33).toString();
 	}
 
 	//See https://ripple.com/wiki/Encodings
 	protected String toRippleHumanReadable(byte[] payloadBytes, byte version) throws Exception {
-		byte[] versionPayloadChecksumBytes=new byte[1+payloadBytes.length+4];
-		versionPayloadChecksumBytes[0]=version;
-		System.arraycopy(payloadBytes, 0, versionPayloadChecksumBytes, 1, payloadBytes.length);
-
-		MessageDigest mda = MessageDigest.getInstance("SHA-256", "BC");
-		mda.update(versionPayloadChecksumBytes, 0, 1+payloadBytes.length);
-		byte[] firstHash = mda.digest();
-		mda.reset();
-		System.arraycopy(mda.digest(firstHash ), 0, versionPayloadChecksumBytes, 1+payloadBytes.length, 4);
-		
-		return Base58.encode(versionPayloadChecksumBytes);
+		return new RippleIdentifier(payloadBytes, version).toString();
 	}
 
 	public byte[] getPrivateGeneratorBytes() throws Exception{
@@ -112,7 +105,7 @@ public class RippleDeterministicKeyGenerator {
 		return publicKey.getEncoded();
 	}
 
-	public String getAccountId(int accountNumber) throws Exception {
+	public RippleAddress getAccountId(int accountNumber) throws Exception {
 		byte[] publicKeyBytes = getAccountPublicBytes(accountNumber);
 		//Hashing of the publicKey is performed with a single SHA256 instead of the typical ripple HalfSHA512
         MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
@@ -123,7 +116,7 @@ public class RippleDeterministicKeyGenerator {
         byte[] accountIdBytes = new byte[20];
         digest.doFinal(accountIdBytes, 0);
 
-        return toRippleHumanReadable(accountIdBytes, (byte) 0);
+        return new RippleAddress(accountIdBytes);
 	}
 
 	public String getPublicGeneratorFamily() throws Exception {
