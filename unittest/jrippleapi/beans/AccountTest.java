@@ -14,7 +14,7 @@ public class AccountTest {
 	@Test
 	public void testAccount() throws Exception {
 		Account jRippleAPIAccount = getTestAccount();
-		assertEquals("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT", jRippleAPIAccount.address);
+		assertEquals("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT", jRippleAPIAccount.address.toString());
 		assertNotNull(jRippleAPIAccount.secret);
 	}
 

@@ -36,9 +36,12 @@ public class RippleConnection extends AbstractRippleMessageHandler {
     public void onMessage(String msg) {
     	try {
 			JSONObject jsonMessage = (JSONObject) new JSONParser().parse(msg);
-			System.out.println("Command:"+jsonMessage.toJSONString());
+			System.out.println("response:"+jsonMessage.toJSONString());
 			if("response".equals(jsonMessage.get("type"))){
 				responseHolder.setResponseContent(jsonMessage);
+			}
+			else if(jsonMessage.get("error")!=null){
+				responseHolder.setResponseError(jsonMessage);
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -189,7 +192,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
     	command.put("command", "submit");
     	JSONObject jsonTx = new JSONObject();
     	jsonTx.put("TransactionType", "TrustSet");
-    	jsonTx.put("Account", creditorAccount.address);
+    	jsonTx.put("Account", creditorAccount.address.toString());
     	jsonTx.put("LimitAmount", creditAmount.toJSON());
     	
 		command.put("tx_json", jsonTx);

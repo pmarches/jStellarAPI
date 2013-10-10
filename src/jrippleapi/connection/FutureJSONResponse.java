@@ -22,7 +22,11 @@ public class FutureJSONResponse<T extends JSONSerializable> implements Future<T>
 	
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		return responseHolder.cancel(this);
+		boolean hasCompleted = responseHolder.remove(this);
+		synchronized (this) {
+			notifyAll();
+		}
+		return hasCompleted;
 	}
 
 	synchronized public void set(JSONObject response){

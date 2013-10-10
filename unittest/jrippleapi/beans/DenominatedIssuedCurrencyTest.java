@@ -10,7 +10,7 @@ public class DenominatedIssuedCurrencyTest {
 	public void testToJSON() {
 		DenominatedIssuedCurrency xrpAmount = new DenominatedIssuedCurrency();
 		xrpAmount.currency = CurrencyUnit.XRP;
-		xrpAmount.currency.fromString("1");
+		xrpAmount.amount = xrpAmount.currency.fromString("1");
 		
 		DenominatedIssuedCurrency xrpAmount2 = new DenominatedIssuedCurrency();
 		xrpAmount2.copyFrom(xrpAmount.toJSON());
