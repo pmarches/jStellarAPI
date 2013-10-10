@@ -2,6 +2,8 @@ package jrippleapi.serialization;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -12,8 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import jrippleapi.beans.Account;
-import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
+import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 
 import org.junit.Test;
 
@@ -47,7 +49,23 @@ public class RippleBinarySerializerTest {
 		Path trustSet1Path = fs.getPath(filename);
 		FileChannel trust1FC = FileChannel.open(trustSet1Path, StandardOpenOption.READ);
 		MappedByteBuffer trust1ByteBuffer = trust1FC.map(MapMode.READ_ONLY, 0, trust1FC.size());
+		trust1FC.close();
 		return trust1ByteBuffer;
 	}
 
+	@Test
+	public void testManyFiles() throws IOException{
+		RippleBinarySerializer binSer = new RippleBinarySerializer();
+
+		File binDir = new File("testdata/10k");
+		for(File binFile : binDir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".bin");
+			}
+		})){
+			MappedByteBuffer buffer = fileToBuffer(binFile.getAbsolutePath());
+			RippleSerializedObject serObj = binSer.readSerializedObject(buffer);
+		}
+	}
 }

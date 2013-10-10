@@ -25,6 +25,7 @@ public class RippleBinarySerializer {
 			int field=0x0F & firstByte;
 			if(field==0){
 				field = input.get();
+				firstByte=(byte)field;
 			}
 
 			BinaryFormatField serializedField = BinaryFormatField.lookup(type, field);
@@ -36,7 +37,7 @@ public class RippleBinarySerializer {
 
 	private Object readPrimitive(PrimitiveTypes primitive) {
 		if(primitive==PrimitiveTypes.UINT16){
-			return input.getShort();//FIXME SIGNED
+			return input.getShort();//FIXME SIGNED Always return BigInt? Long? Different types? Custom Unsigned Int of various length?
 		}
 		else if(primitive==PrimitiveTypes.UINT32){
 			return input.getInt();//FIXME SIGNED
@@ -62,8 +63,7 @@ public class RippleBinarySerializer {
 			return DatatypeConverter.printHexBinary(dataBytes);
 		}
 		else if(primitive==PrimitiveTypes.ACCOUNT){
-			byte[] accountBytes = readVariableLength();
-			return new RippleAddress(accountBytes);
+			return readAccount();
 		}
 		else if(primitive==PrimitiveTypes.OBJECT){
 			throw new RuntimeException("Object type, not yet supported");
@@ -75,17 +75,20 @@ public class RippleBinarySerializer {
 			return input.get();
 		}
 		else if(primitive==PrimitiveTypes.HASH160){
-			byte[] twentyBytes = new byte[20];
-			input.get(twentyBytes);
-			return DatatypeConverter.printHexBinary(twentyBytes);
+			return readIssuer();
 		}
 		else if(primitive==PrimitiveTypes.PATHSET){
-			throw new RuntimeException("Path set");
+			return readPathSet();
 		}
 		else if(primitive==PrimitiveTypes.VECTOR256){
 			throw new RuntimeException("Vector");
 		}
 		throw new RuntimeException("Unsupported primitive "+primitive);
+	}
+
+	private Object readAccount() {
+		byte[] accountBytes = readVariableLength();
+		return new RippleAddress(accountBytes);
 	}
 
 	//FIXME return amount object
@@ -102,17 +105,26 @@ public class RippleBinarySerializer {
 			return magnitude;
 		}
 		else{
-			byte[] unknown = new byte[12];
-			input.get(unknown);
-			byte[] currency = new byte[8];
-			input.get(currency);
-			//TODO See https://ripple.com/wiki/Currency_Format for format
-			
-			byte[] issuer = new byte[20];
-			input.get(issuer);
-			//TODO If issuer is all 0, this means any issuer
+			readCurrency(); //TODO Add to returned object
+			readIssuer(); //TODO Add to returned object
 			return magnitude;
 		}
+	}
+
+	private RippleAddress readIssuer() {
+		byte[] issuerBytes = new byte[20];
+		input.get(issuerBytes);
+		//TODO If issuer is all 0, this means any issuer
+		return new RippleAddress(issuerBytes);
+	}
+
+	private String readCurrency() {
+		byte[] unknown = new byte[12];
+		input.get(unknown);
+		byte[] currency = new byte[8];
+		input.get(currency);
+		return new String(currency);
+		//TODO See https://ripple.com/wiki/Currency_Format for format
 	}
 
 	private byte[] readVariableLength() {
@@ -137,6 +149,30 @@ public class RippleBinarySerializer {
 		byte[] variableBytes = new byte[byteLen];
 		input.get(variableBytes);
 		return variableBytes;
+	}
+
+	private String readPathSet() {
+		while(true){
+			byte pathElementType = input.get();
+			if(pathElementType==(byte)0x00){ //End of Path set
+				break;
+			}
+			else if(pathElementType==(byte)0xFF){ //End of Path
+			}
+			else{
+				if((pathElementType&0x01)!=0){ //Account bit is set
+					readIssuer();
+				}
+				if((pathElementType&0x10)!=0){ //Currency bit is set
+					readCurrency();
+				}
+				if((pathElementType&0x20)!=0){ //Issuer bit is set
+					readIssuer();
+				}
+			}
+		}
+		
+		return "PathSet";
 	}
 
 }

@@ -1,10 +1,5 @@
 package jrippleapi.serialization;
 
-
-
-
-
-
 public class RippleBinarySchema {
 	public enum PrimitiveTypes {
 		UINT16(1),
@@ -27,9 +22,14 @@ public class RippleBinarySchema {
 			this.typeCode = typeCode;
 		}
 
-		static int MAXBYTEVALUE = VECTOR256.typeCode+1;
-		static final PrimitiveTypes reverseLookup[] = new PrimitiveTypes[MAXBYTEVALUE];
+		static int MAXBYTEVALUE=0;
+		static final PrimitiveTypes reverseLookup[];
 		static {
+			for(PrimitiveTypes type : values()){
+				MAXBYTEVALUE=Math.max(MAXBYTEVALUE, type.typeCode);
+			}
+			MAXBYTEVALUE++;
+			reverseLookup = new PrimitiveTypes[MAXBYTEVALUE];
 			for(PrimitiveTypes type : values()){
 				reverseLookup[type.typeCode] = type;
 			}
@@ -167,15 +167,21 @@ public class RippleBinarySchema {
 		Sufficient(PrimitiveTypes.ARRAY, 7),
 		AffectedNodes(PrimitiveTypes.ARRAY, 8);
 
-		static int MAXBYTEVALUE=ClearFlag.fieldId+1; //ClearFlags has the greatest byte value FIXME this is flaky
 		PrimitiveTypes primitive;
 		int fieldId;
 		BinaryFormatField(PrimitiveTypes primitve, int fieldValue){
 			this.primitive = primitve;
 			this.fieldId = fieldValue;
 		}
-		static final BinaryFormatField[][] typeFieldLookup = new BinaryFormatField[PrimitiveTypes.MAXBYTEVALUE][BinaryFormatField.MAXBYTEVALUE];
+		static int MAXBYTEVALUE=0;
+		static final BinaryFormatField[][] typeFieldLookup;
 		static {
+			for(BinaryFormatField f : values()){
+				MAXBYTEVALUE = Math.max(MAXBYTEVALUE, f.fieldId);
+			}
+			MAXBYTEVALUE++;
+			typeFieldLookup = new BinaryFormatField[PrimitiveTypes.MAXBYTEVALUE][BinaryFormatField.MAXBYTEVALUE];
+			
 			for(BinaryFormatField f : values()){
 				typeFieldLookup[f.primitive.typeCode][f.fieldId] = f;
 			}
@@ -185,10 +191,12 @@ public class RippleBinarySchema {
 			if(type<0 || type>=PrimitiveTypes.MAXBYTEVALUE){
 				fieldToReturn=null;
 			}
-			if(fieldType<0 || fieldType>=BinaryFormatField.MAXBYTEVALUE){
+			else if(fieldType<0 || fieldType>=BinaryFormatField.MAXBYTEVALUE){
 				fieldToReturn=null;
 			}
-			fieldToReturn = typeFieldLookup[type][fieldType];
+			else {
+				fieldToReturn = typeFieldLookup[type][fieldType];
+			}
 			if(fieldToReturn==null){
 				throw new RuntimeException("Could not find type "+type+", field "+fieldType);
 			}
@@ -212,9 +220,14 @@ public class RippleBinarySchema {
 		FEATURE(100),
 		FEE(101);
 		
-		static int MAXBYTEVALUE = FEE.byteValue+1;
-		static final TransactionTypes reverseLookup[] = new TransactionTypes[MAXBYTEVALUE];
+		static int MAXBYTEVALUE=0;
+		static TransactionTypes reverseLookup[];
 		static {
+			for(TransactionTypes type : values()){
+				MAXBYTEVALUE = Math.max(MAXBYTEVALUE, type.byteValue);
+			}
+			MAXBYTEVALUE++;
+			reverseLookup = new TransactionTypes[MAXBYTEVALUE];
 			for(TransactionTypes type : values()){
 				reverseLookup[type.byteValue] = type;
 			}
