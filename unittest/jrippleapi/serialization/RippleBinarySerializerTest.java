@@ -13,7 +13,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import jrippleapi.beans.Account;
+import jrippleapi.beans.RippleAddress;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 
@@ -40,7 +40,7 @@ public class RippleBinarySerializerTest {
 		RippleBinarySerializer binSer = new RippleBinarySerializer();
 		RippleSerializedObject serObj = binSer.readSerializedObject(trustet1ByteBuffer);
 		assertEquals(TransactionTypes.TRUST_SET, serObj.getTransactionType());
-		assertEquals(Account.RIPPLE_ADDRESS_JRIPPLEAPI, serObj.getField(BinaryFormatField.Account));
+		assertEquals(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI, serObj.getField(BinaryFormatField.Account));
 		assertEquals("1000000000000000", serObj.getField(BinaryFormatField.LimitAmount).toString());
 	}
 

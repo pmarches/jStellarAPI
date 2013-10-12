@@ -5,7 +5,9 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.RippleIdentifier;
+import jrippleapi.beans.RipplePublicGeneratorAddress;
+import jrippleapi.beans.RipplePublickKeyAddress;
+import jrippleapi.beans.RippleSeedAddress;
 
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
@@ -23,10 +25,8 @@ public class RippleDeterministicKeyGenerator {
         ecParams = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
 	}
 
-	public RippleDeterministicKeyGenerator(String secretSeed) {
-		byte[] secretBytes = RippleBase58.decode(secretSeed);
-		//TODO check the checksum
-		seedBytes = Arrays.copyOfRange(secretBytes, 1, 17);
+	public RippleDeterministicKeyGenerator(RippleSeedAddress secret) {
+		seedBytes = secret.getBytes();
 	}
 
 	public RippleDeterministicKeyGenerator(byte[] bytesSeed) {
@@ -43,24 +43,15 @@ public class RippleDeterministicKeyGenerator {
 		return first256BitsOfHash;
 	}
 
-	public String getHumandReadableSeed() throws Exception {
-		return new RippleIdentifier(seedBytes, 33).toString();
-	}
-
-	//See https://ripple.com/wiki/Encodings
-	protected String toRippleHumanReadable(byte[] payloadBytes, byte version) throws Exception {
-		return new RippleIdentifier(payloadBytes, version).toString();
-	}
-
 	public byte[] getPrivateGeneratorBytes() throws Exception{
 		for(int seq=0;; seq++){
 			byte[] seqBytes = ByteBuffer.allocate(4).putInt(seq).array();
 			byte[] seedAndSeqBytes = Arrays.concatenate(seedBytes, seqBytes);
-			byte[] privateGenerator = halfSHA512(seedAndSeqBytes);
-			BigInteger hashOfSeedAndSEQ = new BigInteger(1, privateGenerator);
+			byte[] privateGeneratorBytes = halfSHA512(seedAndSeqBytes);
+			BigInteger hashOfSeedAndSEQ = new BigInteger(1, privateGeneratorBytes);
 			
 	        if(hashOfSeedAndSEQ.compareTo(ecParams.getN()) ==-1){
-	        	return privateGenerator; //We return the byte[] instead of the BigInteger because the toArray of BigInt allocates only the minimal number of bytes to represent the value.
+	        	return privateGeneratorBytes; //We return the byte[] instead of the BigInteger because the toArray of BigInt allocates only the minimal number of bytes to represent the value.
 	        }
 		}
 	}
@@ -96,8 +87,8 @@ public class RippleDeterministicKeyGenerator {
         return new ECPoint.Fp(ecParams.getCurve(), uncompressed.getX(), uncompressed.getY(), true);
 	}
 
-	public String getAccountPublicKey(int accountNumber) throws Exception {
-		return toRippleHumanReadable(getAccountPublicBytes(accountNumber), (byte) 35);
+	public RipplePublickKeyAddress getAccountPublicKey(int accountNumber) throws Exception {
+		return new RipplePublickKeyAddress(getAccountPublicBytes(accountNumber));
 	}
 
 	private byte[] getAccountPublicBytes(int accountNumber) throws Exception {
@@ -119,9 +110,9 @@ public class RippleDeterministicKeyGenerator {
         return new RippleAddress(accountIdBytes);
 	}
 
-	public String getPublicGeneratorFamily() throws Exception {
+	public RipplePublicGeneratorAddress getPublicGeneratorFamily() throws Exception {
 		byte[] publicGeneratorBytes = getPublicGeneratorPoint().getEncoded();
-		return toRippleHumanReadable(publicGeneratorBytes, (byte) 41);
+		return new RipplePublicGeneratorAddress(publicGeneratorBytes);
 	}
 	
 }

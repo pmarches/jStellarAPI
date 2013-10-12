@@ -20,7 +20,7 @@ public class AccountTest {
 
 	public static Account getTestAccount() throws Exception {
 		JSONParser parser = new JSONParser();
-		JSONObject jsonAccountObject=(JSONObject) parser.parse(new FileReader("testAccount.txt"));
+		JSONObject jsonAccountObject=(JSONObject) parser.parse(new FileReader("jrippleapi-wallet.json"));
 		Account jRippleAPIAccount=new Account(jsonAccountObject);
 		return jRippleAPIAccount;
 	}

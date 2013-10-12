@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="lib/websocket-client-9.0.5.v20130815.jar"/>
 	<classpathentry kind="lib" path="lib/websocket-common-9.0.5.v20130815.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15on-149.jar"/>
+	<classpathentry kind="lib" path="lib/jreadline-0.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

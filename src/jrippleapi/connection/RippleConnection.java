@@ -13,6 +13,7 @@ import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RandomString;
+import jrippleapi.beans.RippleSeedAddress;
 import jrippleapi.beans.Transaction;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -174,7 +175,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	command.put("tx_json", jsonTx);
-    	command.put("secret", payer.secret);
+    	command.put("secret", payer.secret.toString());
 		return sendCommand(command, new GenericJSONSerializable());
 	}
 	
@@ -196,7 +197,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
     	jsonTx.put("LimitAmount", creditAmount.toJSON());
     	
 		command.put("tx_json", jsonTx);
-    	command.put("secret", creditorAccount.secret);
+    	command.put("secret", creditorAccount.secret.toString());
 		return sendCommand(command, new GenericJSONSerializable());
 	}
 
@@ -225,15 +226,15 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		}
 	}
 	
-	public Future<Transaction> signTransactionFuture(String secret, Transaction txToSign){
+	public Future<Transaction> signTransactionFuture(RippleSeedAddress secret, Transaction txToSign){
 		JSONObject command = new JSONObject();
     	command.put("command", "sign");
-    	command.put("secret", secret);
+    	command.put("secret", secret.toString());
 		command.put("tx_json", txToSign.getTxJSON());
 		return sendCommand(command, txToSign);
 	}
 	
-	public Transaction signTransaction(String secret, Transaction txToSign) {
+	public Transaction signTransaction(RippleSeedAddress secret, Transaction txToSign) {
 		try {
 			return signTransactionFuture(secret, txToSign).get();
 		} catch (InterruptedException | ExecutionException e) {
