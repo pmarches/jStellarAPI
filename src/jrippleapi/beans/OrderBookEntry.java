@@ -1,8 +1,8 @@
 package jrippleapi.beans;
 
-import org.json.simple.JSONObject;
-
 import jrippleapi.connection.JSONSerializable;
+
+import org.json.simple.JSONObject;
 
 public class OrderBookEntry implements JSONSerializable {
 	String accountStr;

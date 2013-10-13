@@ -3,11 +3,11 @@ package jrippleapi.serialization;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.json.simple.JSONObject;
-
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
+
+import org.json.simple.JSONObject;
 
 public class RippleSerializedObject {
 	HashMap<BinaryFormatField, Object> fields = new HashMap<BinaryFormatField, Object>();

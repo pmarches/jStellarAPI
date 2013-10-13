@@ -4,7 +4,7 @@ import jrippleapi.connection.JSONSerializable;
 
 import org.json.simple.JSONObject;
 
-public class Transaction implements JSONSerializable {
+public class RippleTransaction implements JSONSerializable {
 	String payer;
 	String payee;
 	DenominatedIssuedCurrency amount;
@@ -14,7 +14,7 @@ public class Transaction implements JSONSerializable {
 	public String signature;
 	public String publicKeyUsedToSign;
 	
-	public Transaction(String payer, String payee, DenominatedIssuedCurrency amount){
+	public RippleTransaction(String payer, String payee, DenominatedIssuedCurrency amount){
 		this.payer=payer;
 		this.payee=payee;
 		this.amount = amount;

@@ -2,18 +2,18 @@ package jrippleapi.beans;
 
 import java.math.BigDecimal;
 
-import org.json.simple.JSONObject;
-
 import jrippleapi.connection.JSONSerializable;
+
+import org.json.simple.JSONObject;
 
 public class DenominatedIssuedCurrency implements JSONSerializable {
 	public BigDecimal amount;
-	public String issuerStr;
+	public RippleAddress issuerStr;
 	public CurrencyUnit currency;
 		
 	@Override
 	public void copyFrom(JSONObject jsonDenomination) {
-		issuerStr = ((String) jsonDenomination.get("issuer"));
+		issuerStr = new RippleAddress(((String) jsonDenomination.get("issuer")));
 		String currencyStr = ((String) jsonDenomination.get("currency"));
 		currency = CurrencyUnit.parse(currencyStr);
 
@@ -38,7 +38,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		else{
 			JSONObject jsonThis = new JSONObject();
 			jsonThis.put("value", currency.toString(amount));
-			jsonThis.put("issuer", issuerStr);
+			jsonThis.put("issuer", issuerStr.toString());
 			jsonThis.put("currency", currency.currencyCode);
 			return jsonThis;
 		}

@@ -7,14 +7,15 @@ import java.util.concurrent.Future;
 
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
-import jrippleapi.beans.CreditLines;
+import jrippleapi.beans.RippleAddress;
+import jrippleapi.beans.TrustLines;
 import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RandomString;
 import jrippleapi.beans.RippleSeedAddress;
-import jrippleapi.beans.Transaction;
+import jrippleapi.beans.RippleTransaction;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -23,13 +24,13 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 @WebSocket
-public class RippleConnection extends AbstractRippleMessageHandler {
+public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 	private int requestCounter=1;
 	public final static URI RIPPLE_SERVER_URL=URI.create("wss://s1.ripple.com");
 	public final static URI LOCALHOST_SERVER_URL=URI.create("ws://localhost:5006");
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
     
-    public RippleConnection() throws Exception {
+    public RippleDaemonConnection() throws Exception {
     	super(RIPPLE_SERVER_URL);
 	}
     
@@ -171,7 +172,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 //	}
 	
 	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(Account payer, String payee, DenominatedIssuedCurrency amount){	
-		JSONObject jsonTx = new Transaction(payer.address.toString(), payee, amount).getTxJSON();
+		JSONObject jsonTx = new RippleTransaction(payer.address.toString(), payee, amount).getTxJSON();
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	command.put("tx_json", jsonTx);
@@ -188,7 +189,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		}
 	}
 	
-	public Future<GenericJSONSerializable> setCreditLineFuture(Account creditorAccount, String debtorAccount, DenominatedIssuedCurrency creditAmount){
+	public Future<GenericJSONSerializable> setCreditLineFuture(Account creditorAccount, RippleAddress debtorAccount, DenominatedIssuedCurrency creditAmount){
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	JSONObject jsonTx = new JSONObject();
@@ -201,7 +202,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		return sendCommand(command, new GenericJSONSerializable());
 	}
 
-	public GenericJSONSerializable setCreditLine(Account creditorAccount, String debtorAccount, DenominatedIssuedCurrency creditAmount){
+	public GenericJSONSerializable setTrustLine(Account creditorAccount, RippleAddress debtorAccount, DenominatedIssuedCurrency creditAmount){
 		try {
 			return setCreditLineFuture(creditorAccount, debtorAccount, creditAmount).get();
 		} catch (Exception e) {
@@ -210,14 +211,14 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		}
 	}
 
-	public Future<CreditLines> getCreditLinesFuture(String ourAccount) {
+	public Future<TrustLines> getCreditLinesFuture(String ourAccount) {
 		JSONObject command = new JSONObject();
     	command.put("command", "account_lines");
     	command.put("account", ourAccount);
-		return sendCommand(command, new CreditLines());
+		return sendCommand(command, new TrustLines());
 	}
 
-	public CreditLines getCreditLines(String ourAccount) {
+	public TrustLines getCreditLines(String ourAccount) {
 		try {
 			return getCreditLinesFuture(ourAccount).get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -226,7 +227,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		}
 	}
 	
-	public Future<Transaction> signTransactionFuture(RippleSeedAddress secret, Transaction txToSign){
+	public Future<RippleTransaction> signTransactionFuture(RippleSeedAddress secret, RippleTransaction txToSign){
 		JSONObject command = new JSONObject();
     	command.put("command", "sign");
     	command.put("secret", secret.toString());
@@ -234,7 +235,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		return sendCommand(command, txToSign);
 	}
 	
-	public Transaction signTransaction(RippleSeedAddress secret, Transaction txToSign) {
+	public RippleTransaction signTransaction(RippleSeedAddress secret, RippleTransaction txToSign) {
 		try {
 			return signTransactionFuture(secret, txToSign).get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -243,7 +244,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		}
 	}
 
-	public Future<Transaction> submitTransactionFuture(Transaction txToSign){
+	public Future<RippleTransaction> submitTransactionFuture(RippleTransaction txToSign){
 		if(txToSign.getSignedTxBlob()==null){
 			throw new NullPointerException("Transaction must be signed before being submitted");
 		}
@@ -253,7 +254,7 @@ public class RippleConnection extends AbstractRippleMessageHandler {
 		return sendCommand(command, txToSign);
 	}
 	
-	public Transaction submitTransaction(Transaction txToSign) {
+	public RippleTransaction submitTransaction(RippleTransaction txToSign) {
 		try {
 			return submitTransactionFuture(txToSign).get();
 		} catch (InterruptedException | ExecutionException e) {

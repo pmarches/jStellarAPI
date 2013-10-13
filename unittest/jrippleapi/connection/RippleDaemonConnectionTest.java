@@ -9,24 +9,24 @@ import java.math.BigDecimal;
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
 import jrippleapi.beans.AccountTest;
-import jrippleapi.beans.CreditLines;
+import jrippleapi.beans.TrustLines;
 import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.Transaction;
+import jrippleapi.beans.RippleTransaction;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class RippleConnectionTest {
-	static RippleConnection conn;
+public class RippleDaemonConnectionTest {
+	static RippleDaemonConnection conn;
 	
 	@BeforeClass
 	public static void setupConnection() throws Exception{
-		conn = new RippleConnection();
+		conn = new RippleDaemonConnection();
 	}
 	
 	@AfterClass
@@ -78,42 +78,42 @@ public class RippleConnectionTest {
 //	@Ignore
 	public void testPayment() throws Exception{
 		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
-		oneXRP.issuerStr=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString();
+		oneXRP.issuerStr=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
 		oneXRP.currency=CurrencyUnit.XRP;
 		oneXRP.amount=oneXRP.currency.fromString("1000000");
 		conn.sendPayment(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), oneXRP);
 
 		DenominatedIssuedCurrency oneMiliBTC = new DenominatedIssuedCurrency();
-		oneMiliBTC.issuerStr=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString();
+		oneMiliBTC.issuerStr=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
 		oneMiliBTC.currency=CurrencyUnit.BTC;
 		oneMiliBTC.amount=oneMiliBTC.currency.fromString("0.001");
 		conn.sendPayment(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), oneMiliBTC);
 	}
 	
 	@Test
-	public void testSetCreditLine() throws Exception{
-		DenominatedIssuedCurrency creditAmount = new DenominatedIssuedCurrency();
-		creditAmount.currency=CurrencyUnit.BTC;
-		creditAmount.issuerStr=RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString();
-		creditAmount.amount=creditAmount.currency.fromString("1");
-		conn.setCreditLine(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), creditAmount);
+	public void testSetTrustLine() throws Exception{
+		DenominatedIssuedCurrency trustAmount = new DenominatedIssuedCurrency();
+		trustAmount.currency=CurrencyUnit.BTC;
+		trustAmount.issuerStr=RippleAddress.RIPPLE_ADDRESS_PMARCHES;
+		trustAmount.amount=trustAmount.currency.fromString("1");
+		conn.setTrustLine(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, trustAmount);
 	}
 	
 	@Test
 	public void testGetCreditLines() throws Exception {
-		CreditLines creditLines = conn.getCreditLines(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString());
+		TrustLines creditLines = conn.getCreditLines(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString());
 		assertEquals(2, creditLines.size());
 	}
 	
 	@Test
 	public void testSignTransaction() throws Exception {
 		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
-		oneXRP.issuerStr=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString();
+		oneXRP.issuerStr=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
 		oneXRP.currency=CurrencyUnit.XRP;
 		oneXRP.amount=oneXRP.currency.fromString("1000000");
 		Account testAccount=AccountTest.getTestAccount();
-		Transaction tx = new Transaction(testAccount.address.toString(), RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), oneXRP);
-		Transaction signedTx = conn.signTransaction(testAccount.secret, tx);
+		RippleTransaction tx = new RippleTransaction(testAccount.address.toString(), RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), oneXRP);
+		RippleTransaction signedTx = conn.signTransaction(testAccount.secret, tx);
 		assertNotNull(signedTx.publicKeyUsedToSign);
 		assertNotNull(signedTx.signature);
 	}
