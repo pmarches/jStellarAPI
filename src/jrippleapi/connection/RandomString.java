@@ -1,6 +1,4 @@
-package jrippleapi.beans;
-
-import jrippleapi.connection.JSONSerializable;
+package jrippleapi.connection;
 
 import org.json.simple.JSONObject;
 

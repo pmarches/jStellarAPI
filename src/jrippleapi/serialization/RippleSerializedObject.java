@@ -1,8 +1,12 @@
 package jrippleapi.serialization;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
+import jrippleapi.connection.RipplePaymentTransaction;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
@@ -12,6 +16,15 @@ import org.json.simple.JSONObject;
 public class RippleSerializedObject {
 	HashMap<BinaryFormatField, Object> fields = new HashMap<BinaryFormatField, Object>();
 
+	public RippleSerializedObject(){
+	}
+	
+	public RippleSerializedObject(RipplePaymentTransaction payment){
+		fields.put(BinaryFormatField.TransactionType, TransactionTypes.PAYMENT);
+		fields.put(BinaryFormatField.Destination, payment.payee);
+		fields.put(BinaryFormatField.Amount, payment.amount);
+	}
+	
 	public Object getField(BinaryFormatField transactiontype) {
 		Object obj = fields.get(transactiontype);
 		if(obj==null){
@@ -41,6 +54,12 @@ public class RippleSerializedObject {
 			}
 		}
 		return root.toJSONString();
+	}
+
+	public List<BinaryFormatField> getSortedField() {
+		ArrayList<BinaryFormatField> sortedFields = new ArrayList<BinaryFormatField>(fields.keySet());
+		Collections.sort(sortedFields);
+		return sortedFields;
 	}
 
 }

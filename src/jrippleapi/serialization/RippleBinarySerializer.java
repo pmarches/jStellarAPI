@@ -1,10 +1,12 @@
 package jrippleapi.serialization;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.List;
 
-import javax.xml.bind.DatatypeConverter;
-
+import jrippleapi.beans.CurrencyUnit;
+import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.RippleAddress;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
@@ -48,19 +50,18 @@ public class RippleBinarySerializer {
 		else if(primitive==PrimitiveTypes.HASH128){
 			byte[] sixteenBytes = new byte[16];
 			input.get(sixteenBytes);
-			return DatatypeConverter.printHexBinary(sixteenBytes);
+			return sixteenBytes;
 		}
 		else if(primitive==PrimitiveTypes.HASH256){
 			byte[] thirtyTwoBytes = new byte[32];
 			input.get(thirtyTwoBytes);
-			return DatatypeConverter.printHexBinary(thirtyTwoBytes);
+			return thirtyTwoBytes;
 		}
 		else if(primitive==PrimitiveTypes.AMOUNT){
 			return readAmount();
 		}
 		else if(primitive==PrimitiveTypes.VARIABLE_LENGTH){
-			byte[] dataBytes = readVariableLength();
-			return DatatypeConverter.printHexBinary(dataBytes);
+			return readVariableLength();
 		}
 		else if(primitive==PrimitiveTypes.ACCOUNT){
 			return readAccount();
@@ -86,28 +87,32 @@ public class RippleBinarySerializer {
 		throw new RuntimeException("Unsupported primitive "+primitive);
 	}
 
-	private Object readAccount() {
+	private RippleAddress readAccount() {
 		byte[] accountBytes = readVariableLength();
 		return new RippleAddress(accountBytes);
 	}
-
-	//FIXME return amount object
-	private Object readAmount() {
+	//See https://ripple.com/wiki/Currency_Format
+	private DenominatedIssuedCurrency readAmount() {
 		long offsetNativeSignMagnitudeBytes = input.getLong();
+		//1 bit for Native
 		boolean isXRPAmount =(0x8000000000000000l & offsetNativeSignMagnitudeBytes)==0; 
-		int sign =(0x4000000000000000l & offsetNativeSignMagnitudeBytes)==0?-1:1;
+		//1 bit for sign
+		int sign = (0x4000000000000000l & offsetNativeSignMagnitudeBytes)==0?-1:1;
 		//8 bits of offset
+		long offset = (offsetNativeSignMagnitudeBytes & 0x3FC0000000000000l)>>>54;
+		offset-=73; //FIXME This is fishy
 		//The remaining 54 bits are magnitude
-		long MAGNITUDE_MASK = 0x3FFFFFFFFFFFFFl;
-		long longMagnitude = (offsetNativeSignMagnitudeBytes & MAGNITUDE_MASK);
-		BigInteger magnitude = BigInteger.valueOf(sign*longMagnitude);
+		long longMagnitude = offsetNativeSignMagnitudeBytes&0x3FFFFFFFFFFFFFl;
 		if(isXRPAmount){
-			return magnitude;
+			BigInteger magnitude = BigInteger.valueOf(sign*longMagnitude);
+			return new DenominatedIssuedCurrency(magnitude);
 		}
 		else{
-			readCurrency(); //TODO Add to returned object
-			readIssuer(); //TODO Add to returned object
-			return magnitude;
+			String currencyStr = readCurrency();
+			CurrencyUnit currency = CurrencyUnit.parse(currencyStr);
+			RippleAddress issuer = readIssuer();
+			double fractionalValue= longMagnitude*Math.pow(10, -offset); //FIXME! Should not need to go thru a double
+			return new DenominatedIssuedCurrency(BigInteger.valueOf((long)fractionalValue), issuer, currency);
 		}
 	}
 
@@ -123,7 +128,7 @@ public class RippleBinarySerializer {
 		input.get(unknown);
 		byte[] currency = new byte[8];
 		input.get(currency);
-		return new String(currency);
+		return new String(currency, 0, 3);
 		//TODO See https://ripple.com/wiki/Currency_Format for format
 	}
 
@@ -139,6 +144,7 @@ public class RippleBinarySerializer {
 			byteLen=193+(firstByte-193)*256 + secondByte;
 		}
 		else if(firstByte<254){
+			secondByte = input.get();
 			int thirdByte = input.get();
 			byteLen=12481 + (firstByte-241)*65536 + secondByte*256 + thirdByte;
 		}
@@ -173,6 +179,135 @@ public class RippleBinarySerializer {
 		}
 		
 		return "PathSet";
+	}
+
+	public ByteBuffer writeSerializedObject(RippleSerializedObject serializedObj) {
+		ByteBuffer output = ByteBuffer.allocate(2000); //FIXME Hum..
+		List<BinaryFormatField> sortedFields = serializedObj.getSortedField();
+		for(BinaryFormatField field: sortedFields){
+			byte typeHalfByte=0;
+			if(field.primitive.typeCode<=15){
+				typeHalfByte = (byte) (field.primitive.typeCode<<4);
+			}
+			byte fieldHalfByte = 0;
+			if(field.fieldId<=15){
+				fieldHalfByte = (byte) (field.fieldId&0x0F);
+			}
+			output.put((byte) (typeHalfByte|fieldHalfByte));
+			if(typeHalfByte==0){
+				output.put((byte) field.primitive.typeCode);
+			}
+			if(fieldHalfByte==0){
+				output.put((byte) field.fieldId);
+			}
+			
+			writePrimitive(output, field.primitive, serializedObj.getField(field));
+		}
+		return output;
+	}
+
+	private void writePrimitive(ByteBuffer output, PrimitiveTypes primitive, Object value) {
+		if(primitive==PrimitiveTypes.UINT16){
+			output.putShort((short) value);//FIXME SIGNED Always return BigInt? Long? Different types? Custom Unsigned Int of various length?
+		}
+		else if(primitive==PrimitiveTypes.UINT32){
+			output.putInt((int) value);//FIXME SIGNED
+		}
+		else if(primitive==PrimitiveTypes.UINT64){
+			output.putLong((long) value); //FIXME SIGNED
+		}
+		else if(primitive==PrimitiveTypes.HASH128){
+			byte[] sixteenBytes = (byte[]) value;
+			if(sixteenBytes.length!=16){
+				throw new RuntimeException("value "+value+" is not a HASH128");
+			}
+			output.put(sixteenBytes);
+		}
+		else if(primitive==PrimitiveTypes.HASH256){
+			byte[] thirtyTwoBytes = (byte[]) value;
+			if(thirtyTwoBytes.length!=32){
+				throw new RuntimeException("value "+value+" is not a HASH256");
+			}
+			input.put(thirtyTwoBytes);
+		}
+		else if(primitive==PrimitiveTypes.AMOUNT){
+			writeAmount(output, (DenominatedIssuedCurrency) value);
+		}
+		else if(primitive==PrimitiveTypes.VARIABLE_LENGTH){
+			writeVariableLength(output, (byte[]) value);
+		}
+		else if(primitive==PrimitiveTypes.ACCOUNT){
+			writeAccount(output, (RippleAddress) value);
+		}
+		else if(primitive==PrimitiveTypes.OBJECT){
+			throw new RuntimeException("Object type, not yet supported");
+		}
+		else if(primitive==PrimitiveTypes.ARRAY){
+			throw new RuntimeException("Array type, not yet supported");
+		}
+		else if(primitive==PrimitiveTypes.UINT8){
+			input.put((byte) value); //FIXME Signed
+		}
+		else if(primitive==PrimitiveTypes.HASH160){
+			writeIssuer(output, (RippleAddress) value);
+		}
+		else if(primitive==PrimitiveTypes.PATHSET){
+			writePathSet(output, value);
+		}
+		else if(primitive==PrimitiveTypes.VECTOR256){
+			throw new RuntimeException("Vector");
+		}
+		throw new RuntimeException("Unsupported primitive "+primitive);
+	}
+
+	private void writePathSet(ByteBuffer output, Object value) {
+		throw new RuntimeException("Not implemented, implement PathSet model first");
+	}
+
+	private void writeIssuer(ByteBuffer output, RippleAddress value) {
+		byte[] issuerBytes = value.getBytes();
+		output.put(issuerBytes);
+	}
+
+	private void writeAccount(ByteBuffer output, RippleAddress address) {
+		writeVariableLength(output, address.getBytes());
+	}
+
+	//TODO Unit test this function
+	private void writeVariableLength(ByteBuffer output, byte[] value) {
+		if(value.length<192){
+			output.put((byte) value.length);
+		}
+		else if(value.length<12480){ //193 + (b1-193)*256 + b2
+			//FIXME This is not right...
+			int firstByte=(value.length/256)+193;
+			output.put((byte) firstByte);
+			//FIXME What about arrays of length 193?
+			int secondByte=value.length-firstByte-193;
+			output.put((byte) secondByte);
+		}
+		else if(value.length<918744){ //12481 + (b1-241)*65536 + b2*256 + b3
+			int firstByte=(value.length/65536)+241;
+			output.put((byte) firstByte);
+			int secondByte=(value.length-firstByte)/256;
+			output.put((byte) secondByte);
+			int thirdByte=value.length-firstByte-secondByte-12481;
+			output.put((byte) thirdByte);
+		}
+		output.put(value);
+	}
+
+	private void writeAmount(ByteBuffer output, DenominatedIssuedCurrency denominatedCurrency) {
+		long offsetNativeSignMagnitudeBytes=0;
+		if(denominatedCurrency.currency.equals(CurrencyUnit.XRP)){
+			offsetNativeSignMagnitudeBytes|= 0x8000000000000000l;
+		}
+		if(denominatedCurrency.amount.signum()>=0){
+			offsetNativeSignMagnitudeBytes|= 0x4000000000000000l;
+		}
+		offsetNativeSignMagnitudeBytes|=denominatedCurrency.amount.intValue(); //FIXME we are truncating decimals here
+		//FIXME ensure long does not overflow..
+		output.putLong(offsetNativeSignMagnitudeBytes);
 	}
 
 }

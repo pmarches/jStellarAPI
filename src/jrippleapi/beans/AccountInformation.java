@@ -1,6 +1,6 @@
 package jrippleapi.beans;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import jrippleapi.connection.JSONSerializable;
 
@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 
 public class AccountInformation implements JSONSerializable {
 	public String account;
-	public BigDecimal xrpBalance;
+	public BigInteger xrpBalance;
 	public String urlgravatar;
 
 	@Override

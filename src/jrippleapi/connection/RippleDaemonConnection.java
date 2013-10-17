@@ -13,9 +13,7 @@ import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
-import jrippleapi.beans.RandomString;
 import jrippleapi.beans.RippleSeedAddress;
-import jrippleapi.beans.RippleTransaction;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -171,8 +169,8 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 //		sendCommand(command, new );
 //	}
 	
-	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(Account payer, String payee, DenominatedIssuedCurrency amount){	
-		JSONObject jsonTx = new RippleTransaction(payer.address.toString(), payee, amount).getTxJSON();
+	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(Account payer, RippleAddress payee, DenominatedIssuedCurrency amount){	
+		JSONObject jsonTx = new RipplePaymentTransaction(payer.address, payee, amount).getTxJSON();
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	command.put("tx_json", jsonTx);
@@ -180,7 +178,7 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		return sendCommand(command, new GenericJSONSerializable());
 	}
 	
-	public GenericJSONSerializable sendPayment(Account payer, String payee, DenominatedIssuedCurrency amount){
+	public GenericJSONSerializable sendPayment(Account payer, RippleAddress payee, DenominatedIssuedCurrency amount){
 		try {
 			return sendPaymentFuture(payer, payee, amount).get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -227,7 +225,7 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		}
 	}
 	
-	public Future<RippleTransaction> signTransactionFuture(RippleSeedAddress secret, RippleTransaction txToSign){
+	public Future<RipplePaymentTransaction> signTransactionFuture(RippleSeedAddress secret, RipplePaymentTransaction txToSign){
 		JSONObject command = new JSONObject();
     	command.put("command", "sign");
     	command.put("secret", secret.toString());
@@ -235,7 +233,7 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		return sendCommand(command, txToSign);
 	}
 	
-	public RippleTransaction signTransaction(RippleSeedAddress secret, RippleTransaction txToSign) {
+	public RipplePaymentTransaction signTransaction(RippleSeedAddress secret, RipplePaymentTransaction txToSign) {
 		try {
 			return signTransactionFuture(secret, txToSign).get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -244,7 +242,7 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		}
 	}
 
-	public Future<RippleTransaction> submitTransactionFuture(RippleTransaction txToSign){
+	public Future<RipplePaymentTransaction> submitTransactionFuture(RipplePaymentTransaction txToSign){
 		if(txToSign.getSignedTxBlob()==null){
 			throw new NullPointerException("Transaction must be signed before being submitted");
 		}
@@ -254,7 +252,7 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		return sendCommand(command, txToSign);
 	}
 	
-	public RippleTransaction submitTransaction(RippleTransaction txToSign) {
+	public RipplePaymentTransaction submitTransaction(RipplePaymentTransaction txToSign) {
 		try {
 			return submitTransactionFuture(txToSign).get();
 		} catch (InterruptedException | ExecutionException e) {

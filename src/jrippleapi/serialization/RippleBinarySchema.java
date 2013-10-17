@@ -17,7 +17,7 @@ public class RippleBinarySchema {
 		PATHSET(18),
 		VECTOR256(19);
 
-		private int typeCode;
+		public int typeCode;
 		PrimitiveTypes(int typeCode){
 			this.typeCode = typeCode;
 		}

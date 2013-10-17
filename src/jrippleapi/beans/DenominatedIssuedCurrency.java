@@ -1,19 +1,41 @@
 package jrippleapi.beans;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import jrippleapi.connection.JSONSerializable;
 
 import org.json.simple.JSONObject;
 
 public class DenominatedIssuedCurrency implements JSONSerializable {
-	public BigDecimal amount;
-	public RippleAddress issuerStr;
+	public BigInteger amount;
+	public RippleAddress issuer;
 	public CurrencyUnit currency;
-		
+	
+	public DenominatedIssuedCurrency(){
+	}
+	
+	public DenominatedIssuedCurrency(BigInteger amount, RippleAddress issuer, CurrencyUnit currency){
+		this.amount = amount;
+		this.issuer = issuer;
+		this.currency = currency;
+	}
+	
+	public DenominatedIssuedCurrency(BigInteger amount) {
+		this.amount=amount;
+		this.currency = CurrencyUnit.XRP;
+	}
+	
+	@Override
+	public String toString() {
+		if(issuer==null || currency==null || currency==CurrencyUnit.XRP){
+			return CurrencyUnit.XRP.toString(amount);
+		}
+		return currency.toString(amount)+"/"+issuer;
+	}
+
 	@Override
 	public void copyFrom(JSONObject jsonDenomination) {
-		issuerStr = new RippleAddress(((String) jsonDenomination.get("issuer")));
+		issuer = new RippleAddress(((String) jsonDenomination.get("issuer")));
 		String currencyStr = ((String) jsonDenomination.get("currency"));
 		currency = CurrencyUnit.parse(currencyStr);
 
@@ -38,7 +60,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		else{
 			JSONObject jsonThis = new JSONObject();
 			jsonThis.put("value", currency.toString(amount));
-			jsonThis.put("issuer", issuerStr.toString());
+			jsonThis.put("issuer", issuer.toString());
 			jsonThis.put("currency", currency.currencyCode);
 			return jsonThis;
 		}
@@ -52,7 +74,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		result = prime * result
 				+ ((currency == null) ? 0 : currency.hashCode());
 		result = prime * result
-				+ ((issuerStr == null) ? 0 : issuerStr.hashCode());
+				+ ((issuer == null) ? 0 : issuer.hashCode());
 		return result;
 	}
 
@@ -75,10 +97,10 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 				return false;
 		} else if (!currency.equals(other.currency))
 			return false;
-		if (issuerStr == null) {
-			if (other.issuerStr != null)
+		if (issuer == null) {
+			if (other.issuer != null)
 				return false;
-		} else if (!issuerStr.equals(other.issuerStr))
+		} else if (!issuer.equals(other.issuer))
 			return false;
 		return true;
 	}
