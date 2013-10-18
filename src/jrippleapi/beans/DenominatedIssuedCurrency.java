@@ -1,5 +1,6 @@
 package jrippleapi.beans;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import jrippleapi.connection.JSONSerializable;
@@ -7,20 +8,20 @@ import jrippleapi.connection.JSONSerializable;
 import org.json.simple.JSONObject;
 
 public class DenominatedIssuedCurrency implements JSONSerializable {
-	public BigInteger amount;
+	public BigDecimal amount;
 	public RippleAddress issuer;
 	public CurrencyUnit currency;
 	
 	public DenominatedIssuedCurrency(){
 	}
 	
-	public DenominatedIssuedCurrency(BigInteger amount, RippleAddress issuer, CurrencyUnit currency){
+	public DenominatedIssuedCurrency(BigDecimal amount, RippleAddress issuer, CurrencyUnit currency){
 		this.amount = amount;
 		this.issuer = issuer;
 		this.currency = currency;
 	}
 	
-	public DenominatedIssuedCurrency(BigInteger amount) {
+	public DenominatedIssuedCurrency(BigDecimal amount) {
 		this.amount=amount;
 		this.currency = CurrencyUnit.XRP;
 	}

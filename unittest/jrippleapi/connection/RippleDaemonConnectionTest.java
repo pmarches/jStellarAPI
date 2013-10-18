@@ -38,7 +38,7 @@ public class RippleDaemonConnectionTest {
 	public void testAccountInfo() throws Exception {
 		AccountInformation jRippleAccount = conn.getAccountInfo(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString());
 		assertEquals(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString(), jRippleAccount.account);
-		assertEquals(1, jRippleAccount.xrpBalance.compareTo(BigInteger.valueOf(200000000)));
+		assertEquals(1, jRippleAccount.xrpBalance.compareTo(BigDecimal.valueOf(200)));
 	}
 	
 	@Test

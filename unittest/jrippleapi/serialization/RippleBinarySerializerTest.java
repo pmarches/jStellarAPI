@@ -1,15 +1,12 @@
 package jrippleapi.serialization;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -31,7 +28,6 @@ import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -60,10 +56,10 @@ public class RippleBinarySerializerTest {
 		assertEquals(TransactionTypes.TRUST_SET, serObj.getTransactionType());
 		assertEquals(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI, serObj.getField(BinaryFormatField.Account));
 
-		final DenominatedIssuedCurrency EXPECTED_FEE = new DenominatedIssuedCurrency(BigInteger.TEN);
+		final DenominatedIssuedCurrency EXPECTED_FEE = new DenominatedIssuedCurrency(BigDecimal.TEN);
 		assertEquals(EXPECTED_FEE, serObj.getField(BinaryFormatField.Fee));
 
-		final DenominatedIssuedCurrency EXPECTED_TRUST_AMOUNT = new DenominatedIssuedCurrency(BigInteger.valueOf(100000000), RippleAddress.RIPPLE_ADDRESS_PMARCHES, CurrencyUnit.BTC);
+		final DenominatedIssuedCurrency EXPECTED_TRUST_AMOUNT = new DenominatedIssuedCurrency(BigDecimal.valueOf(1), RippleAddress.RIPPLE_ADDRESS_PMARCHES, CurrencyUnit.BTC);
 		assertEquals(EXPECTED_TRUST_AMOUNT, serObj.getField(BinaryFormatField.LimitAmount));
 
 		assertNotNull(serObj.getField(BinaryFormatField.SigningPubKey));
@@ -110,7 +106,7 @@ public class RippleBinarySerializerTest {
 			RippleSerializedObject txRead = binSer.readSerializedObject(buffer);
 			assertEquals(tx.get("payee"), txRead.getField(BinaryFormatField.Destination).toString());
 			assertEquals(tx.get("payer"), txRead.getField(BinaryFormatField.Account).toString());
-//			assertEquals(tx.get("amount"), txRead.getField(BinaryFormatField.Amount).toString());
+			assertEquals(tx.get("amount"), txRead.getField(BinaryFormatField.Amount).toString());
 //			assertEquals(tx.get("fee"), txRead.getField(BinaryFormatField.Fee).toString());
 		}
 	}
@@ -119,7 +115,7 @@ public class RippleBinarySerializerTest {
 	@Ignore
 	public void testWriteAndReadPaymentTransaction(){
 		RippleBinarySerializer binSer = new RippleBinarySerializer();
-		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(BigInteger.valueOf(1000000));
+		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(BigDecimal.valueOf(.1));
 		RipplePaymentTransaction payment = new RipplePaymentTransaction(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI, RippleAddress.RIPPLE_ADDRESS_PMARCHES, amount);
 		ByteBuffer byteBuffer = binSer.writeSerializedObject(new RippleSerializedObject(payment));
 		RippleSerializedObject serObjRead = binSer.readSerializedObject(byteBuffer);

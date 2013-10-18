@@ -1,7 +1,6 @@
 package jrippleapi.serialization;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -99,20 +98,20 @@ public class RippleBinarySerializer {
 		//1 bit for sign
 		int sign = (0x4000000000000000l & offsetNativeSignMagnitudeBytes)==0?-1:1;
 		//8 bits of offset
-		long offset = (offsetNativeSignMagnitudeBytes & 0x3FC0000000000000l)>>>54;
-		offset-=73; //FIXME This is fishy
+		int offset = (int) ((offsetNativeSignMagnitudeBytes & 0x3FC0000000000000l)>>>54);
 		//The remaining 54 bits are magnitude
 		long longMagnitude = offsetNativeSignMagnitudeBytes&0x3FFFFFFFFFFFFFl;
 		if(isXRPAmount){
-			BigInteger magnitude = BigInteger.valueOf(sign*longMagnitude);
+			BigDecimal magnitude = BigDecimal.valueOf(sign*longMagnitude);
 			return new DenominatedIssuedCurrency(magnitude);
 		}
 		else{
 			String currencyStr = readCurrency();
 			CurrencyUnit currency = CurrencyUnit.parse(currencyStr);
 			RippleAddress issuer = readIssuer();
-			double fractionalValue= longMagnitude*Math.pow(10, -offset); //FIXME! Should not need to go thru a double
-			return new DenominatedIssuedCurrency(BigInteger.valueOf((long)fractionalValue), issuer, currency);
+			int decimalPosition = 97-offset; //FIXME This will change when we change to a BigInteger to store moneys
+			double fractionalValue= longMagnitude*Math.pow(10, -decimalPosition); //FIXME! Should not need to go thru a double
+			return new DenominatedIssuedCurrency(BigDecimal.valueOf(fractionalValue), issuer, currency);
 		}
 	}
 

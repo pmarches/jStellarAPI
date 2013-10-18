@@ -1,6 +1,5 @@
 package jrippleapi.beans;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.DecimalFormat;
 
 
@@ -18,19 +17,18 @@ public class CurrencyUnit {
 	public static final CurrencyUnit EUR = new CurrencyUnit("EUR", 2);
 	public static final CurrencyUnit BTC = new CurrencyUnit("BTC", 8); //1 BTC==100 000 000 satoshis
 	public static final CurrencyUnit XRP = new CurrencyUnit("XRP", 6){ //1 XRP==  1 000 000 drops
-		DecimalFormat TWO_DIGIT_PRECISION_FORMAT =new DecimalFormat("## #### ####.## XRP");
-		public String toString(BigInteger amount) {
-			BigDecimal humanReadableAmount=new BigDecimal(amount);
-			return TWO_DIGIT_PRECISION_FORMAT.format(humanReadableAmount.scaleByPowerOfTen(-scale));
+		DecimalFormat TWO_DIGIT_PRECISION_FORMAT =new DecimalFormat("###.## XRP");
+		@Override
+		public String toString(BigDecimal amount) {
+			return TWO_DIGIT_PRECISION_FORMAT.format(amount.scaleByPowerOfTen(-scale));
 		}
 	};
 
-	public BigInteger fromString(String strDenomination) {
-		BigDecimal fractionalForm = new BigDecimal(strDenomination);
-		return fractionalForm.scaleByPowerOfTen(scale).toBigInteger();
+	public BigDecimal fromString(String strDenomination) {
+		return new BigDecimal(strDenomination);
 	}
 
-	public String toString(BigInteger amount) {
+	public String toString(BigDecimal amount) {
 		return amount.toString()+" "+currencyCode;
 	}
 
