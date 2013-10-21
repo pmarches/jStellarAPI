@@ -1,7 +1,9 @@
 package jrippleapi.serialization;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 import java.util.List;
 
 import jrippleapi.beans.CurrencyUnit;
@@ -106,12 +108,15 @@ public class RippleBinarySerializer {
 			return new DenominatedIssuedCurrency(magnitude);
 		}
 		else{
+			BigInteger biMagnitude = BigInteger.valueOf(longMagnitude);
+
 			String currencyStr = readCurrency();
 			CurrencyUnit currency = CurrencyUnit.parse(currencyStr);
 			RippleAddress issuer = readIssuer();
 			int decimalPosition = 97-offset; //FIXME This will change when we change to a BigInteger to store moneys
-			double fractionalValue= longMagnitude*Math.pow(10, -decimalPosition); //FIXME! Should not need to go thru a double
-			return new DenominatedIssuedCurrency(BigDecimal.valueOf(fractionalValue), issuer, currency);
+			
+			BigDecimal fractionalValue=new BigDecimal(biMagnitude, decimalPosition).stripTrailingZeros();
+			return new DenominatedIssuedCurrency(fractionalValue, issuer, currency);
 		}
 	}
 
@@ -202,7 +207,10 @@ public class RippleBinarySerializer {
 			
 			writePrimitive(output, field.primitive, serializedObj.getField(field));
 		}
-		return output;
+		output.flip();
+		ByteBuffer compactBuffer = ByteBuffer.allocate(output.limit());
+		compactBuffer.put(output);
+		return compactBuffer;
 	}
 
 	private void writePrimitive(ByteBuffer output, PrimitiveTypes primitive, Object value) {
@@ -227,7 +235,7 @@ public class RippleBinarySerializer {
 			if(thirtyTwoBytes.length!=32){
 				throw new RuntimeException("value "+value+" is not a HASH256");
 			}
-			input.put(thirtyTwoBytes);
+			output.put(thirtyTwoBytes);
 		}
 		else if(primitive==PrimitiveTypes.AMOUNT){
 			writeAmount(output, (DenominatedIssuedCurrency) value);
@@ -245,7 +253,7 @@ public class RippleBinarySerializer {
 			throw new RuntimeException("Array type, not yet supported");
 		}
 		else if(primitive==PrimitiveTypes.UINT8){
-			input.put((byte) value); //FIXME Signed
+			output.put((byte) value); //FIXME Signed
 		}
 		else if(primitive==PrimitiveTypes.HASH160){
 			writeIssuer(output, (RippleAddress) value);
@@ -256,7 +264,9 @@ public class RippleBinarySerializer {
 		else if(primitive==PrimitiveTypes.VECTOR256){
 			throw new RuntimeException("Vector");
 		}
-		throw new RuntimeException("Unsupported primitive "+primitive);
+		else{
+			throw new RuntimeException("Unsupported primitive "+primitive);
+		}
 	}
 
 	private void writePathSet(ByteBuffer output, Object value) {
@@ -298,15 +308,54 @@ public class RippleBinarySerializer {
 
 	private void writeAmount(ByteBuffer output, DenominatedIssuedCurrency denominatedCurrency) {
 		long offsetNativeSignMagnitudeBytes=0;
-		if(denominatedCurrency.currency.equals(CurrencyUnit.XRP)){
-			offsetNativeSignMagnitudeBytes|= 0x8000000000000000l;
-		}
 		if(denominatedCurrency.amount.signum()>=0){
 			offsetNativeSignMagnitudeBytes|= 0x4000000000000000l;
 		}
-		offsetNativeSignMagnitudeBytes|=denominatedCurrency.amount.intValue(); //FIXME we are truncating decimals here
-		//FIXME ensure long does not overflow..
-		output.putLong(offsetNativeSignMagnitudeBytes);
+		if(denominatedCurrency.currency.equals(CurrencyUnit.XRP)){
+			long drops = denominatedCurrency.amount.longValue(); //XRP does not have fractional portion
+			offsetNativeSignMagnitudeBytes|=drops;
+			output.putLong(offsetNativeSignMagnitudeBytes);
+		}
+		else{
+			offsetNativeSignMagnitudeBytes|= 0x8000000000000000l;
+			BigDecimal rescaledBD = denominatedCurrency.amount.setScale(14);
+			int scale = rescaledBD.scale();
+			long offset = 97-scale;
+			offsetNativeSignMagnitudeBytes|=(offset<<54);
+			BigInteger unscaledValue = rescaledBD.unscaledValue();
+			offsetNativeSignMagnitudeBytes|=unscaledValue.longValue();
+			output.putLong(offsetNativeSignMagnitudeBytes);
+			writeCurrency(output, denominatedCurrency.currency);
+			writeIssuer(output, denominatedCurrency.issuer);
+		}
+	}
+//	long offsetNativeSignMagnitudeBytes = input.getLong();
+//	//1 bit for Native
+//	boolean isXRPAmount =(0x8000000000000000l & offsetNativeSignMagnitudeBytes)==0; 
+//	//1 bit for sign
+//	int sign = (0x4000000000000000l & offsetNativeSignMagnitudeBytes)==0?-1:1;
+//	//8 bits of offset
+//	int offset = (int) ((offsetNativeSignMagnitudeBytes & 0x3FC0000000000000l)>>>54);
+//	//The remaining 54 bits are magnitude
+//	long longMagnitude = offsetNativeSignMagnitudeBytes&0x3FFFFFFFFFFFFFl;
+//	if(isXRPAmount){
+//		BigDecimal magnitude = BigDecimal.valueOf(sign*longMagnitude);
+//		return new DenominatedIssuedCurrency(magnitude);
+//	}
+//	else{
+//		String currencyStr = readCurrency();
+//		CurrencyUnit currency = CurrencyUnit.parse(currencyStr);
+//		RippleAddress issuer = readIssuer();
+//		int decimalPosition = 97-offset; //FIXME This will change when we change to a BigInteger to store moneys
+//		double fractionalValue= longMagnitude*Math.pow(10, -decimalPosition); //FIXME! Should not need to go thru a double
+//		return new DenominatedIssuedCurrency(BigDecimal.valueOf(fractionalValue), issuer, currency);
+//	}
+
+	private void writeCurrency(ByteBuffer output, CurrencyUnit currency) {
+		byte[] currencyBytes = new byte[20];
+		System.arraycopy(currency.currencyCode.getBytes(), 0, currencyBytes, 12, 3);
+		output.put(currencyBytes);
+		//TODO See https://ripple.com/wiki/Currency_Format for format
 	}
 
 }
