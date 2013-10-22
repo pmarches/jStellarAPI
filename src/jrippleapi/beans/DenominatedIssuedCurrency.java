@@ -1,6 +1,7 @@
 package jrippleapi.beans;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import jrippleapi.connection.JSONSerializable;
 
@@ -27,7 +28,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	@Override
 	public String toString() {
 		if(issuer==null || currency==null){
-			return amount+" XRP";
+			return amount.movePointLeft(6).setScale(0, RoundingMode.HALF_UP)+" XRP";
 		}
 		return amount+" "+currency+"/"+issuer;
 	}
