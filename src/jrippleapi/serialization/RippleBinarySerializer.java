@@ -306,7 +306,7 @@ public class RippleBinarySerializer {
 			
 			output.put((byte) 0xFF); //End of path
 		}
-		output.put((byte) 0); //End if path set
+		output.put((byte) 0); //End of path set
 	}
 
 	private void writeIssuer(ByteBuffer output, RippleAddress value) {

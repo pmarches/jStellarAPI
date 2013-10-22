@@ -49,7 +49,7 @@
 	"txtype": "Payment",
 	"payer": "rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS",
 	"payee": "r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
-	"amount": "100 XRP",
+	"amount": "100.000000 XRP",
 	"fee": "0.000015 XRP",
 	"ledger": 2349278
 }

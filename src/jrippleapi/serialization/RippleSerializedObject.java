@@ -20,7 +20,7 @@ public class RippleSerializedObject {
 	}
 	
 	public RippleSerializedObject(RipplePaymentTransaction payment){
-		fields.put(BinaryFormatField.TransactionType, TransactionTypes.PAYMENT);
+		fields.put(BinaryFormatField.TransactionType, (short) TransactionTypes.PAYMENT.byteValue);
 		fields.put(BinaryFormatField.Destination, payment.payee);
 		fields.put(BinaryFormatField.Amount, payment.amount);
 	}
