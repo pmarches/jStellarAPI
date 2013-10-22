@@ -7,6 +7,9 @@ import java.util.List;
 
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.RippleAddress;
+import jrippleapi.beans.RipplePath;
+import jrippleapi.beans.RipplePathElement;
+import jrippleapi.beans.RipplePathSet;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 
@@ -158,28 +161,37 @@ public class RippleBinarySerializer {
 		return variableBytes;
 	}
 
-	private String readPathSet() {
+	private RipplePathSet readPathSet() {
+		RipplePathSet pathSet = new RipplePathSet();
+		RipplePath path = null;
 		while(true){
 			byte pathElementType = input.get();
 			if(pathElementType==(byte)0x00){ //End of Path set
 				break;
 			}
-			else if(pathElementType==(byte)0xFF){ //End of Path
+			if(path==null){
+				path = new RipplePath();
+				pathSet.add(path);
 			}
-			else{
-				if((pathElementType&0x01)!=0){ //Account bit is set
-					readIssuer();
-				}
-				if((pathElementType&0x10)!=0){ //Currency bit is set
-					readCurrency();
-				}
-				if((pathElementType&0x20)!=0){ //Issuer bit is set
-					readIssuer();
-				}
+			if(pathElementType==(byte)0xFF){ //End of Path
+				path = null;
+				continue;
+			}
+
+			RipplePathElement pathElement = new RipplePathElement();
+			path.add(pathElement);
+			if((pathElementType&0x01)!=0){ //Account bit is set
+				pathElement.account = readIssuer();
+			}
+			if((pathElementType&0x10)!=0){ //Currency bit is set
+				pathElement.currency = readCurrency();
+			}
+			if((pathElementType&0x20)!=0){ //Issuer bit is set
+				pathElement.issuer = readIssuer();
 			}
 		}
 		
-		return "PathSet";
+		return pathSet;
 	}
 
 	public ByteBuffer writeSerializedObject(RippleSerializedObject serializedObj) {
@@ -256,7 +268,7 @@ public class RippleBinarySerializer {
 			writeIssuer(output, (RippleAddress) value);
 		}
 		else if(primitive==PrimitiveTypes.PATHSET){
-			writePathSet(output, value);
+			writePathSet(output, (RipplePathSet) value);
 		}
 		else if(primitive==PrimitiveTypes.VECTOR256){
 			throw new RuntimeException("Vector");
@@ -266,8 +278,35 @@ public class RippleBinarySerializer {
 		}
 	}
 
-	private void writePathSet(ByteBuffer output, Object value) {
-		throw new RuntimeException("Not implemented, implement PathSet model first");
+	private void writePathSet(ByteBuffer output, RipplePathSet pathSet) {
+		for(RipplePath path : pathSet){
+			for(RipplePathElement pathElement : path){
+				byte pathElementType=0;
+				if(pathElement.account!=null){
+					pathElementType|=0x01;
+				}
+				if(pathElement.currency!=null){
+					pathElementType|=0x10;
+				}
+				if(pathElement.issuer!=null){ //Issuer bit is set
+					pathElementType|=0x20;
+				}
+				output.put(pathElementType);
+				
+				if(pathElement.account!=null){ //Account bit is set
+					writeIssuer(output, pathElement.account);
+				}
+				if(pathElement.currency!=null){
+					writeCurrency(output, pathElement.currency);
+				}
+				if(pathElement.issuer!=null){ //Issuer bit is set
+					writeIssuer(output, pathElement.issuer);
+				}
+			}
+			
+			output.put((byte) 0xFF); //End of path
+		}
+		output.put((byte) 0); //End if path set
 	}
 
 	private void writeIssuer(ByteBuffer output, RippleAddress value) {
