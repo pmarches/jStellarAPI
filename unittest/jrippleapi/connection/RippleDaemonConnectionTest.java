@@ -2,20 +2,19 @@ package jrippleapi.connection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
 import jrippleapi.beans.AccountTest;
-import jrippleapi.beans.TrustLines;
-import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RippleAddress;
+import jrippleapi.beans.TrustLines;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -54,7 +53,7 @@ public class RippleDaemonConnectionTest {
 	@Test
 	public void testOrderBook() throws Exception {
 		final int NB_ENTRIES=12;
-		OrderBook book = conn.getOrderBook(RippleAddress.RIPPLE_ADDRESS_BITSTAMP.toString(), CurrencyUnit.BTC, CurrencyUnit.XRP, NB_ENTRIES);
+		OrderBook book = conn.getOrderBook(RippleAddress.RIPPLE_ADDRESS_BITSTAMP.toString(), "BTC", "XRP", NB_ENTRIES);
 		assertEquals(NB_ENTRIES, book.size());
 		
 	}
@@ -65,13 +64,13 @@ public class RippleDaemonConnectionTest {
 		assertEquals(2, offers.size());
 		DenominatedIssuedCurrency takerGets0 = offers.get(0).takerGets;
 		DenominatedIssuedCurrency takerPays0 = offers.get(0).takerPays;
-		assertEquals(CurrencyUnit.XRP, takerGets0.currency);
-		assertEquals(CurrencyUnit.BTC, takerPays0.currency);
+		assertNull(takerGets0.currency);
+		assertEquals("BTC", takerPays0.currency);
 
 		DenominatedIssuedCurrency takerGets1 = offers.get(1).takerGets;
 		DenominatedIssuedCurrency takerPays1 = offers.get(1).takerPays;
-		assertEquals(CurrencyUnit.XRP, takerGets1.currency);
-		assertEquals(CurrencyUnit.USD, takerPays1.currency);
+		assertNull(takerGets1.currency);
+		assertEquals("USD", takerPays1.currency);
 	}
 
 	@Test
@@ -79,23 +78,22 @@ public class RippleDaemonConnectionTest {
 	public void testPayment() throws Exception{
 		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
 		oneXRP.issuer=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
-		oneXRP.currency=CurrencyUnit.XRP;
-		oneXRP.amount=oneXRP.currency.fromString("1000000");
+		oneXRP.amount=new BigDecimal("1000000");
 		conn.sendPayment(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP);
 
 		DenominatedIssuedCurrency oneMiliBTC = new DenominatedIssuedCurrency();
 		oneMiliBTC.issuer=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
-		oneMiliBTC.currency=CurrencyUnit.BTC;
-		oneMiliBTC.amount=oneMiliBTC.currency.fromString("0.001");
+		oneMiliBTC.currency="BTC";
+		oneMiliBTC.amount=new BigDecimal("0.001");
 		conn.sendPayment(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneMiliBTC);
 	}
 	
 	@Test
 	public void testSetTrustLine() throws Exception{
 		DenominatedIssuedCurrency trustAmount = new DenominatedIssuedCurrency();
-		trustAmount.currency=CurrencyUnit.BTC;
+		trustAmount.currency="BTC";
 		trustAmount.issuer=RippleAddress.RIPPLE_ADDRESS_PMARCHES;
-		trustAmount.amount=trustAmount.currency.fromString("1");
+		trustAmount.amount=new BigDecimal("1");
 		conn.setTrustLine(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, trustAmount);
 	}
 	
@@ -109,8 +107,7 @@ public class RippleDaemonConnectionTest {
 	public void testSignTransaction() throws Exception {
 		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
 		oneXRP.issuer=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
-		oneXRP.currency=CurrencyUnit.XRP;
-		oneXRP.amount=oneXRP.currency.fromString("1000000");
+		oneXRP.amount=new BigDecimal("1000000");
 		Account testAccount=AccountTest.getTestAccount();
 		RipplePaymentTransaction tx = new RipplePaymentTransaction(testAccount.address, RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP);
 		RipplePaymentTransaction signedTx = conn.signTransaction(testAccount.secret, tx);

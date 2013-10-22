@@ -7,13 +7,12 @@ import java.util.concurrent.Future;
 
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
-import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.TrustLines;
-import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
+import jrippleapi.beans.RippleAddress;
 import jrippleapi.beans.RippleSeedAddress;
+import jrippleapi.beans.TrustLines;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -111,18 +110,18 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		}
 	}
 	
-	public Future<OrderBook> getOrderBookFuture(String takerGetsIssuerStr, CurrencyUnit takerGets, CurrencyUnit takerPays, int nbEntries){
+	public Future<OrderBook> getOrderBookFuture(String takerGetsIssuerStr, String takerGetsCurrency, String takerPaysCurrency, int nbEntries){
 		JSONObject jsonTakerGets = new JSONObject();
 		if(takerGetsIssuerStr!=null){
 			jsonTakerGets.put("issuer", takerGetsIssuerStr);
 		}
-		jsonTakerGets.put("currency", takerGets.currencyCode);
+		jsonTakerGets.put("currency", takerGetsCurrency);
 
 		JSONObject jsonTakerPays = new JSONObject();
 //		if(takerPays.issuerStr!=null){
 //			jsonTakerPays.put("issuer", takerPays.issuerStr);
 //		}
-		jsonTakerPays.put("currency", takerPays.currencyCode);
+		jsonTakerPays.put("currency", takerPaysCurrency);
 
 		JSONObject orderBookComand = new JSONObject();
 		orderBookComand.put("command", "book_offers");
@@ -134,7 +133,7 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		return sendCommand(orderBookComand, new OrderBook());
 	}
 
-	public OrderBook getOrderBook(String issuerStr, CurrencyUnit takerGets, CurrencyUnit takerPays, int nbEntries) {
+	public OrderBook getOrderBook(String issuerStr, String takerGets, String takerPays, int nbEntries) {
 		try {
 			return getOrderBookFuture(issuerStr, takerGets, takerPays, nbEntries).get();
 		} catch (InterruptedException | ExecutionException e) {

@@ -1,5 +1,7 @@
 package jrippleapi.beans;
 
+import java.math.BigDecimal;
+
 import jrippleapi.connection.JSONSerializable;
 
 import org.json.simple.JSONObject;
@@ -17,15 +19,14 @@ public class ExchangeOffer implements JSONSerializable {
 	}
 
 	private DenominatedIssuedCurrency jsonToDenominatedAmount(Object jsonDenominatedAmount) {
-		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency();
 		if(jsonDenominatedAmount instanceof JSONObject){
+			DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency();
 			amount.copyFrom((JSONObject) jsonDenominatedAmount);
+			return amount;
 		}
 		else{
-			amount.currency = CurrencyUnit.XRP;
-			amount.amount = amount.currency.fromString((String) jsonDenominatedAmount);
+			return new DenominatedIssuedCurrency(new BigDecimal((String) jsonDenominatedAmount));
 		}
-		return amount;
 	}
 
 }

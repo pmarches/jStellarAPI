@@ -1,7 +1,6 @@
 package jrippleapi.beans;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import jrippleapi.connection.JSONSerializable;
 
@@ -10,44 +9,42 @@ import org.json.simple.JSONObject;
 public class DenominatedIssuedCurrency implements JSONSerializable {
 	public BigDecimal amount;
 	public RippleAddress issuer;
-	public CurrencyUnit currency;
+	public String currency;
 	
-	public DenominatedIssuedCurrency(){
+	public DenominatedIssuedCurrency(){ //FIXME get rid of this
 	}
 	
-	public DenominatedIssuedCurrency(BigDecimal amount, RippleAddress issuer, CurrencyUnit currency){
+	public DenominatedIssuedCurrency(BigDecimal amount, RippleAddress issuer, String currencyStr){
 		this.amount = amount;
 		this.issuer = issuer;
-		this.currency = currency;
+		this.currency = currencyStr;
 	}
 	
 	public DenominatedIssuedCurrency(BigDecimal amount) {
 		this.amount=amount;
-		this.currency = CurrencyUnit.XRP;
 	}
 	
 	@Override
 	public String toString() {
-		if(issuer==null || currency==null || currency==CurrencyUnit.XRP){
-			return CurrencyUnit.XRP.toString(amount);
+		if(issuer==null || currency==null){
+			return amount+" XRP";
 		}
-		return currency.toString(amount)+"/"+issuer;
+		return amount+" "+currency+"/"+issuer;
 	}
 
 	@Override
 	public void copyFrom(JSONObject jsonDenomination) {
 		issuer = new RippleAddress(((String) jsonDenomination.get("issuer")));
 		String currencyStr = ((String) jsonDenomination.get("currency"));
-		currency = CurrencyUnit.parse(currencyStr);
+		currency = currencyStr;
 
 		String amountStr = (String) jsonDenomination.get("value");
-		amount=currency.fromString(amountStr);
+		amount=new BigDecimal(amountStr);
 	}
 
 	public void copyFrom(Object jsonObject) {
 		if(jsonObject instanceof String){
-			currency = CurrencyUnit.XRP;
-			amount=currency.fromString((String) jsonObject);
+			amount=new BigDecimal((String) jsonObject);
 		}
 		else{
 			copyFrom((JSONObject) jsonObject);
@@ -55,14 +52,14 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	}
 
 	public Object toJSON(){
-		if(currency==CurrencyUnit.XRP){
-			return currency.toString(amount);
+		if(currency==null){
+			return amount.toString();
 		}
 		else{
 			JSONObject jsonThis = new JSONObject();
-			jsonThis.put("value", currency.toString(amount));
+			jsonThis.put("value", amount.toString());
 			jsonThis.put("issuer", issuer.toString());
-			jsonThis.put("currency", currency.currencyCode);
+			jsonThis.put("currency", currency);
 			return jsonThis;
 		}
 	}

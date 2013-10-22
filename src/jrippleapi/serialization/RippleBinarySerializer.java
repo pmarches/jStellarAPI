@@ -3,10 +3,8 @@ package jrippleapi.serialization;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.BitSet;
 import java.util.List;
 
-import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.RippleAddress;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
@@ -92,6 +90,7 @@ public class RippleBinarySerializer {
 		byte[] accountBytes = readVariableLength();
 		return new RippleAddress(accountBytes);
 	}
+
 	//See https://ripple.com/wiki/Currency_Format
 	private DenominatedIssuedCurrency readAmount() {
 		long offsetNativeSignMagnitudeBytes = input.getLong();
@@ -108,15 +107,13 @@ public class RippleBinarySerializer {
 			return new DenominatedIssuedCurrency(magnitude);
 		}
 		else{
-			BigInteger biMagnitude = BigInteger.valueOf(longMagnitude);
-
 			String currencyStr = readCurrency();
-			CurrencyUnit currency = CurrencyUnit.parse(currencyStr);
 			RippleAddress issuer = readIssuer();
-			int decimalPosition = 97-offset; //FIXME This will change when we change to a BigInteger to store moneys
+			int decimalPosition = 97-offset;
 			
+			BigInteger biMagnitude = BigInteger.valueOf(longMagnitude);
 			BigDecimal fractionalValue=new BigDecimal(biMagnitude, decimalPosition).stripTrailingZeros();
-			return new DenominatedIssuedCurrency(fractionalValue, issuer, currency);
+			return new DenominatedIssuedCurrency(fractionalValue, issuer, currencyStr);
 		}
 	}
 
@@ -311,49 +308,27 @@ public class RippleBinarySerializer {
 		if(denominatedCurrency.amount.signum()>=0){
 			offsetNativeSignMagnitudeBytes|= 0x4000000000000000l;
 		}
-		if(denominatedCurrency.currency.equals(CurrencyUnit.XRP)){
+		if(denominatedCurrency.currency==null){
 			long drops = denominatedCurrency.amount.longValue(); //XRP does not have fractional portion
 			offsetNativeSignMagnitudeBytes|=drops;
 			output.putLong(offsetNativeSignMagnitudeBytes);
 		}
 		else{
 			offsetNativeSignMagnitudeBytes|= 0x8000000000000000l;
-			BigDecimal rescaledBD = denominatedCurrency.amount.setScale(14);
-			int scale = rescaledBD.scale();
+			int scale = denominatedCurrency.amount.scale();
 			long offset = 97-scale;
 			offsetNativeSignMagnitudeBytes|=(offset<<54);
-			BigInteger unscaledValue = rescaledBD.unscaledValue();
+			BigInteger unscaledValue = denominatedCurrency.amount.unscaledValue();
 			offsetNativeSignMagnitudeBytes|=unscaledValue.longValue();
 			output.putLong(offsetNativeSignMagnitudeBytes);
 			writeCurrency(output, denominatedCurrency.currency);
 			writeIssuer(output, denominatedCurrency.issuer);
 		}
 	}
-//	long offsetNativeSignMagnitudeBytes = input.getLong();
-//	//1 bit for Native
-//	boolean isXRPAmount =(0x8000000000000000l & offsetNativeSignMagnitudeBytes)==0; 
-//	//1 bit for sign
-//	int sign = (0x4000000000000000l & offsetNativeSignMagnitudeBytes)==0?-1:1;
-//	//8 bits of offset
-//	int offset = (int) ((offsetNativeSignMagnitudeBytes & 0x3FC0000000000000l)>>>54);
-//	//The remaining 54 bits are magnitude
-//	long longMagnitude = offsetNativeSignMagnitudeBytes&0x3FFFFFFFFFFFFFl;
-//	if(isXRPAmount){
-//		BigDecimal magnitude = BigDecimal.valueOf(sign*longMagnitude);
-//		return new DenominatedIssuedCurrency(magnitude);
-//	}
-//	else{
-//		String currencyStr = readCurrency();
-//		CurrencyUnit currency = CurrencyUnit.parse(currencyStr);
-//		RippleAddress issuer = readIssuer();
-//		int decimalPosition = 97-offset; //FIXME This will change when we change to a BigInteger to store moneys
-//		double fractionalValue= longMagnitude*Math.pow(10, -decimalPosition); //FIXME! Should not need to go thru a double
-//		return new DenominatedIssuedCurrency(BigDecimal.valueOf(fractionalValue), issuer, currency);
-//	}
 
-	private void writeCurrency(ByteBuffer output, CurrencyUnit currency) {
+	private void writeCurrency(ByteBuffer output, String currency) {
 		byte[] currencyBytes = new byte[20];
-		System.arraycopy(currency.currencyCode.getBytes(), 0, currencyBytes, 12, 3);
+		System.arraycopy(currency.getBytes(), 0, currencyBytes, 12, 3);
 		output.put(currencyBytes);
 		//TODO See https://ripple.com/wiki/Currency_Format for format
 	}

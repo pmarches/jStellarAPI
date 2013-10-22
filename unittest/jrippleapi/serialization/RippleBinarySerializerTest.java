@@ -18,7 +18,6 @@ import java.nio.file.StandardOpenOption;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.beans.CurrencyUnit;
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.RippleAddress;
 import jrippleapi.connection.RipplePaymentTransaction;
@@ -59,7 +58,7 @@ public class RippleBinarySerializerTest {
 		final DenominatedIssuedCurrency EXPECTED_FEE = new DenominatedIssuedCurrency(BigDecimal.TEN);
 		assertEquals(EXPECTED_FEE, serObj.getField(BinaryFormatField.Fee));
 
-		final DenominatedIssuedCurrency EXPECTED_TRUST_AMOUNT = new DenominatedIssuedCurrency(BigDecimal.valueOf(1), RippleAddress.RIPPLE_ADDRESS_PMARCHES, CurrencyUnit.BTC);
+		final DenominatedIssuedCurrency EXPECTED_TRUST_AMOUNT = new DenominatedIssuedCurrency(BigDecimal.valueOf(1), RippleAddress.RIPPLE_ADDRESS_PMARCHES, "BTC");
 		assertEquals(EXPECTED_TRUST_AMOUNT, serObj.getField(BinaryFormatField.LimitAmount));
 
 		assertNotNull(serObj.getField(BinaryFormatField.SigningPubKey));
@@ -88,8 +87,8 @@ public class RippleBinarySerializerTest {
 			byte[] txBytes = DatatypeConverter.parseHexBinary(line);
 			ByteBuffer buffer = ByteBuffer.wrap(txBytes);
 			RippleSerializedObject serObj = binSer.readSerializedObject(buffer);
-//			ByteBuffer readBuffer = binSer.writeSerializedObject(serObj);
-//			assertEquals(readBuffer, buffer);
+			ByteBuffer readBuffer = binSer.writeSerializedObject(serObj);
+			assertEquals(readBuffer, buffer);
 		}
 		reader.close();
 	}
