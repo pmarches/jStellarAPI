@@ -1,6 +1,7 @@
 bin
 testAccount.txt
 *.class
+testdata
 
 # Package Files #
 *.jar
