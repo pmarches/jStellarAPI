@@ -219,6 +219,7 @@ public class RippleBinarySerializer {
 		output.flip();
 		ByteBuffer compactBuffer = ByteBuffer.allocate(output.limit());
 		compactBuffer.put(output);
+		compactBuffer.flip();
 		return compactBuffer;
 	}
 
