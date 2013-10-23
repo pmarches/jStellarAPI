@@ -1,7 +1,6 @@
-package jrippleapi.connection;
+package jrippleapi.beans;
 
-import jrippleapi.beans.DenominatedIssuedCurrency;
-import jrippleapi.beans.RippleAddress;
+import jrippleapi.connection.JSONSerializable;
 import jrippleapi.serialization.RippleSerializedObject;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 

@@ -11,6 +11,7 @@ import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.ExchangeOffers;
 import jrippleapi.beans.OrderBook;
 import jrippleapi.beans.RippleAddress;
+import jrippleapi.beans.RipplePaymentTransaction;
 import jrippleapi.beans.RippleSeedAddress;
 import jrippleapi.beans.TrustLines;
 
