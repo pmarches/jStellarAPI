@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import jrippleapi.connection.RipplePaymentTransaction;
+import jrippleapi.beans.RipplePaymentTransaction;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;

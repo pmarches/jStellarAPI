@@ -20,7 +20,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import jrippleapi.beans.DenominatedIssuedCurrency;
 import jrippleapi.beans.RippleAddress;
-import jrippleapi.connection.RipplePaymentTransaction;
+import jrippleapi.beans.RipplePaymentTransaction;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 
