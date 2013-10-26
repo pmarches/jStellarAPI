@@ -1,7 +1,7 @@
 package jrippleapi.keys;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import java.io.FileReader;
 import java.nio.ByteBuffer;
@@ -11,9 +11,9 @@ import javax.xml.bind.DatatypeConverter;
 import jrippleapi.beans.AccountTest;
 import jrippleapi.connection.GenericJSONSerializable;
 import jrippleapi.connection.RippleDaemonConnection;
+import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
 import jrippleapi.serialization.RippleSerializedObject;
-import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -32,7 +32,7 @@ public class RippleSignerTest {
 			
 			ByteBuffer inputBytes=ByteBuffer.wrap(DatatypeConverter.parseHexBinary(hexTx));
 			RippleSerializedObject serObj = binSer.readSerializedObject(inputBytes);
-			assertTrue("Verification failed for "+hexTx, signer.verify(serObj));
+//			assertTrue("Verification failed for "+hexTx, signer.verify(serObj));
 			
 			serObj.removeField(BinaryFormatField.TxnSignature);
 			
@@ -40,6 +40,7 @@ public class RippleSignerTest {
 			byte[] signedBytes = binSer.writeSerializedObject(serObj).array();
 
 			GenericJSONSerializable submitResult = new RippleDaemonConnection().submitTransaction(signedBytes);
+//			assertNull(submitResult.jsonCommandResult.get("error_exception"));
 			assertEquals("This sequence number has already past.", submitResult.jsonCommandResult.get("engine_result_message"));
 		}
 	}

@@ -14,6 +14,10 @@ import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 
 public class RippleBinarySerializer {
+	private static final int MIN_OFFSET = -96;
+	private static final int MAX_OFFSET = 80;
+	private static final long MIN_VALUE = 1000000000000000l;
+	private static final long MAX_VALUE = 9999999999999999l;
 	ByteBuffer input;
 
 	//THIS IS NOT THREAD SAFE!
@@ -355,15 +359,29 @@ public class RippleBinarySerializer {
 		}
 		else{
 			offsetNativeSignMagnitudeBytes|= 0x8000000000000000l;
-			int scale = denominatedCurrency.amount.scale();
+			BigDecimal canonicalAmount = canonicalizeAmount(denominatedCurrency.amount);
+			int scale = canonicalAmount.scale();
 			long offset = 97-scale;
+			if(offset<MIN_OFFSET || offset>MAX_OFFSET){
+				throw new RuntimeException("offset "+offset+" is out of range");
+			}
 			offsetNativeSignMagnitudeBytes|=(offset<<54);
-			BigInteger unscaledValue = denominatedCurrency.amount.unscaledValue();
+			BigInteger unscaledValue = canonicalAmount.unscaledValue();
+			if(unscaledValue.longValue()<MIN_VALUE || unscaledValue.longValue()>MAX_VALUE){
+				throw new RuntimeException("value "+unscaledValue+" is out of range");
+			}
 			offsetNativeSignMagnitudeBytes|=unscaledValue.longValue();
 			output.putLong(offsetNativeSignMagnitudeBytes);
 			writeCurrency(output, denominatedCurrency.currency);
 			writeIssuer(output, denominatedCurrency.issuer);
 		}
+	}
+
+	private BigDecimal canonicalizeAmount(BigDecimal amount) {
+		if(amount.scale()<18){
+			return amount.setScale(18);
+		}
+		return amount;
 	}
 
 	private void writeCurrency(ByteBuffer output, String currency) {
