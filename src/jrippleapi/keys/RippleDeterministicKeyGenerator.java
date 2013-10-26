@@ -36,29 +36,33 @@ public class RippleDeterministicKeyGenerator {
 		this.seedBytes = bytesSeed;
 	}
 
-	public static byte[] halfSHA512(byte[] bytesToHash) throws Exception {
-		MessageDigest sha512Digest = MessageDigest.getInstance("SHA-512", "BC");
-		byte [] bytesHash = sha512Digest.digest(bytesToHash);
-		byte[] first256BitsOfHash = Arrays.copyOf(bytesHash, 32);
-		return first256BitsOfHash;
+	public static byte[] halfSHA512(byte[] bytesToHash) {
+		try {
+			MessageDigest sha512Digest = MessageDigest.getInstance("SHA-512", "BC");
+			byte [] bytesHash = sha512Digest.digest(bytesToHash);
+			byte[] first256BitsOfHash = Arrays.copyOf(bytesHash, 32);
+			return first256BitsOfHash;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public byte[] getPrivateGeneratorBytes() throws Exception{
+	public byte[] getPrivateRootKeyBytes() throws Exception{
 		for(int seq=0;; seq++){
 			byte[] seqBytes = ByteBuffer.allocate(4).putInt(seq).array();
 			byte[] seedAndSeqBytes = Arrays.concatenate(seedBytes, seqBytes);
 			byte[] privateGeneratorBytes = halfSHA512(seedAndSeqBytes);
-			BigInteger hashOfSeedAndSEQ = new BigInteger(1, privateGeneratorBytes);
+			BigInteger privateGeneratorBI = new BigInteger(1, privateGeneratorBytes);
 			
-	        if(hashOfSeedAndSEQ.compareTo(ecParams.getN()) ==-1){
+	        if(privateGeneratorBI.compareTo(ecParams.getN()) ==-1){
 	        	return privateGeneratorBytes; //We return the byte[] instead of the BigInteger because the toArray of BigInt allocates only the minimal number of bytes to represent the value.
 	        }
 		}
 	}
 
 	public ECPoint getPublicGeneratorPoint() throws Exception {
-		byte[] privateGeneratorBytes = getPrivateGeneratorBytes();
-        ECPoint publicGenerator = privateBigIntegerToPoint(new BigInteger(1, privateGeneratorBytes));
+		byte[] privateGeneratorBytes = getPrivateRootKeyBytes();
+        ECPoint publicGenerator = privateBigIntegerToPublicPoint(new BigInteger(1, privateGeneratorBytes));
 		return publicGenerator;
 	}
 
@@ -78,12 +82,33 @@ public class RippleDeterministicKeyGenerator {
 	        }
 		}
 		
-        ECPoint accountPublicKeyPoint = publicGeneratorPoint.add(privateBigIntegerToPoint(pubGenSeqSubSeqHashBI));
+        ECPoint accountPublicKeyPoint = publicGeneratorPoint.add(privateBigIntegerToPublicPoint(pubGenSeqSubSeqHashBI));
         return accountPublicKeyPoint;
 	}
 
-	private ECPoint privateBigIntegerToPoint(BigInteger pubGenSeqSubSeqHashBI) {
-		ECPoint uncompressed= ecParams.getG().multiply(pubGenSeqSubSeqHashBI);
+	public BigInteger getAccountPrivateKeyBI(int accountNumber) throws Exception {
+		BigInteger privateRootKeyBI = new BigInteger(1, getPrivateRootKeyBytes());
+		//TODO factor out the common part with the public key
+		ECPoint publicGeneratorPoint = getPublicGeneratorPoint();
+		byte[] publicGeneratorBytes = publicGeneratorPoint.getEncoded();
+		byte[] accountNumberBytes = ByteBuffer.allocate(4).putInt(accountNumber).array();
+		BigInteger pubGenSeqSubSeqHashBI;
+		for(int subSequence=0;; subSequence++){
+			byte[] subSequenceBytes = ByteBuffer.allocate(4).putInt(subSequence).array();
+			byte[] pubGenAccountSubSeqBytes = Arrays.concatenate(publicGeneratorBytes, accountNumberBytes, subSequenceBytes);
+			byte[] publicGeneratorAccountSeqHashBytes = halfSHA512(pubGenAccountSubSeqBytes);
+
+			pubGenSeqSubSeqHashBI = new BigInteger(1, publicGeneratorAccountSeqHashBytes);
+	        if(pubGenSeqSubSeqHashBI.compareTo(privateRootKeyBI) ==-1 && !pubGenSeqSubSeqHashBI.equals(BigInteger.ZERO)){
+	        	break;
+	        }
+		}
+		BigInteger privateKeyForAccount = privateRootKeyBI.add(pubGenSeqSubSeqHashBI).mod(ecParams.getN());
+        return privateKeyForAccount;
+	}
+
+	private ECPoint privateBigIntegerToPublicPoint(BigInteger privateBI) {
+		ECPoint uncompressed= ecParams.getG().multiply(privateBI);
         return new ECPoint.Fp(ecParams.getCurve(), uncompressed.getX(), uncompressed.getY(), true);
 	}
 

@@ -33,6 +33,10 @@ public class RippleSerializedObject {
 		}
 		return obj;
 	}
+	
+	public void putField(BinaryFormatField field, Object value){
+		fields.put(field, value);
+	}
 
 	public TransactionTypes getTransactionType() {
 		Object txTypeObj = getField(BinaryFormatField.TransactionType);
@@ -61,6 +65,10 @@ public class RippleSerializedObject {
 		ArrayList<BinaryFormatField> sortedFields = new ArrayList<BinaryFormatField>(fields.keySet());
 		Collections.sort(sortedFields);
 		return sortedFields;
+	}
+
+	public Object removeField(BinaryFormatField fieldToBeRemoved) {
+		return fields.remove(fieldToBeRemoved);
 	}
 
 }

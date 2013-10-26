@@ -36,7 +36,7 @@ public class RippleDeterministicKeyGeneratorTest {
 		final byte[] FIRST_HALF_HUNDEREDK_HASH = DatatypeConverter.parseHexBinary("8EEE2EA9E7F93AB0D9E66EE4CE696D6824922167784EC7F340B3567377B1CE64");
 		assertTrue(MessageDigest.isEqual(first256BitsOfHunderedKHash , FIRST_HALF_HUNDEREDK_HASH));
 		
-		assertEquals("7CFBA64F771E93E817E15039215430B53F7401C34931D111EAB3510B22DBB0D8", DatatypeConverter.printHexBinary(generator.getPrivateGeneratorBytes()));
+		assertEquals("7CFBA64F771E93E817E15039215430B53F7401C34931D111EAB3510B22DBB0D8", DatatypeConverter.printHexBinary(generator.getPrivateRootKeyBytes()));
 		assertEquals("fht5yrLWh3P8DrJgQuVNDPQVXGTMyPpgRHFKGQzFQ66o3ssesk3o", generator.getPublicGeneratorFamily().toString());
 		assertEquals("aBRoQibi2jpDofohooFuzZi9nEzKw9Zdfc4ExVNmuXHaJpSPh8uJ", generator.getAccountPublicKey(0).toString());
 		assertEquals("rhcfR9Cg98qCxHpCcPBmMonbDBXo84wyTn", generator.getAccountId(0).toString());

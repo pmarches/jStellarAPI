@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.xml.bind.DatatypeConverter;
+
 import jrippleapi.beans.Account;
 import jrippleapi.beans.AccountInformation;
 import jrippleapi.beans.DenominatedIssuedCurrency;
@@ -242,23 +244,19 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		}
 	}
 
-	public Future<RipplePaymentTransaction> submitTransactionFuture(RipplePaymentTransaction txToSign){
-		if(txToSign.getSignedTxBlob()==null){
-			throw new NullPointerException("Transaction must be signed before being submitted");
-		}
+	public Future<GenericJSONSerializable> submitTransactionFuture(byte[] signedTransactionBytes){
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
-		command.put("tx_blob", txToSign.getSignedTxBlob());
-		return sendCommand(command, txToSign);
+		command.put("tx_blob", DatatypeConverter.printHexBinary(signedTransactionBytes));
+		return sendCommand(command, new GenericJSONSerializable());
 	}
 	
-	public RipplePaymentTransaction submitTransaction(RipplePaymentTransaction txToSign) {
+	public GenericJSONSerializable submitTransaction(byte[] signedTransactionBytes) {
 		try {
-			return submitTransactionFuture(txToSign).get();
+			return submitTransactionFuture(signedTransactionBytes).get();
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-
 }
