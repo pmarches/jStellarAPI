@@ -119,7 +119,7 @@ public class RippleBinarySerializer {
 			int decimalPosition = 97-offset;
 			
 			BigInteger biMagnitude = BigInteger.valueOf(longMagnitude);
-			BigDecimal fractionalValue=new BigDecimal(biMagnitude, decimalPosition).stripTrailingZeros();
+			BigDecimal fractionalValue=new BigDecimal(biMagnitude, decimalPosition);
 			return new DenominatedIssuedCurrency(fractionalValue, issuer, currencyStr);
 		}
 	}
@@ -284,8 +284,11 @@ public class RippleBinarySerializer {
 	}
 
 	private void writePathSet(ByteBuffer output, RipplePathSet pathSet) {
-		for(RipplePath path : pathSet){
-			for(RipplePathElement pathElement : path){
+		loopPathSet:
+		for(int i=0; i<pathSet.size(); i++){
+			RipplePath path=pathSet.get(i);
+			for(int j=0; j<path.size(); j++){
+				RipplePathElement pathElement=path.get(j);
 				byte pathElementType=0;
 				if(pathElement.account!=null){
 					pathElementType|=0x01;
@@ -306,6 +309,9 @@ public class RippleBinarySerializer {
 				}
 				if(pathElement.issuer!=null){ //Issuer bit is set
 					writeIssuer(output, pathElement.issuer);
+				}
+				if(i+1==pathSet.size() && j+1==path.size()){
+					break loopPathSet;
 				}
 			}
 			
@@ -349,7 +355,7 @@ public class RippleBinarySerializer {
 
 	private void writeAmount(ByteBuffer output, DenominatedIssuedCurrency denominatedCurrency) {
 		long offsetNativeSignMagnitudeBytes=0;
-		if(denominatedCurrency.amount.signum()>=0){
+		if(denominatedCurrency.amount.signum()>0){
 			offsetNativeSignMagnitudeBytes|= 0x4000000000000000l;
 		}
 		if(denominatedCurrency.currency==null){
@@ -359,29 +365,23 @@ public class RippleBinarySerializer {
 		}
 		else{
 			offsetNativeSignMagnitudeBytes|= 0x8000000000000000l;
-			BigDecimal canonicalAmount = canonicalizeAmount(denominatedCurrency.amount);
-			int scale = canonicalAmount.scale();
-			long offset = 97-scale;
-			if(offset<MIN_OFFSET || offset>MAX_OFFSET){
-				throw new RuntimeException("offset "+offset+" is out of range");
+			BigInteger unscaledValue = denominatedCurrency.amount.unscaledValue();
+			if(unscaledValue.longValue()!=0){
+				int scale = denominatedCurrency.amount.scale();
+				long offset = 97-scale;
+//			if(offset<MIN_OFFSET || offset>MAX_OFFSET){
+//				throw new RuntimeException("offset "+offset+" is out of range");
+//			}
+				offsetNativeSignMagnitudeBytes|=(offset<<54);
+				if(unscaledValue.longValue()<MIN_VALUE || unscaledValue.longValue()>MAX_VALUE){
+					throw new RuntimeException("value "+unscaledValue+" is out of range");
+				}
+				offsetNativeSignMagnitudeBytes|=unscaledValue.longValue();
 			}
-			offsetNativeSignMagnitudeBytes|=(offset<<54);
-			BigInteger unscaledValue = canonicalAmount.unscaledValue();
-			if(unscaledValue.longValue()<MIN_VALUE || unscaledValue.longValue()>MAX_VALUE){
-				throw new RuntimeException("value "+unscaledValue+" is out of range");
-			}
-			offsetNativeSignMagnitudeBytes|=unscaledValue.longValue();
 			output.putLong(offsetNativeSignMagnitudeBytes);
 			writeCurrency(output, denominatedCurrency.currency);
 			writeIssuer(output, denominatedCurrency.issuer);
 		}
-	}
-
-	private BigDecimal canonicalizeAmount(BigDecimal amount) {
-		if(amount.scale()<18){
-			return amount.setScale(18);
-		}
-		return amount;
 	}
 
 	private void writeCurrency(ByteBuffer output, String currency) {

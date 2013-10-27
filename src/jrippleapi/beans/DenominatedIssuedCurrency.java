@@ -28,9 +28,9 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	@Override
 	public String toString() {
 		if(issuer==null || currency==null){
-			return amount.movePointLeft(6)+" XRP";
+			return amount.movePointLeft(6).stripTrailingZeros().toPlainString()+" XRP";
 		}
-		return amount+" "+currency+"/"+issuer;
+		return amount.stripTrailingZeros().toPlainString()+" "+currency+"/"+issuer;
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		if (amount == null) {
 			if (other.amount != null)
 				return false;
-		} else if (!amount.equals(other.amount))
+		} else if (amount.compareTo(other.amount)!=0)
 			return false;
 		if (currency == null) {
 			if (other.currency != null)

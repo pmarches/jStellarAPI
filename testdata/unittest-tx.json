@@ -10,7 +10,7 @@
 	"payer" : "r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
 	"payee" : "rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS",
 	"amount": "0.001 BTC/r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
-	"fee": "0.000010 XRP",
+	"fee": "0.00001 XRP",
 
 	"Sequence": 91,
 	"SigningPubKey": "023FA9ED580CD3208BBB380DF3A0CAF142D3A240AF28A2F8E2F372FC635C244177",
@@ -26,8 +26,8 @@
 	"txtype": "Payment",
 	"payer": "r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
 	"payee": "rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS",
-	"amount": "1000000",
-	"fee": "0.000015 XRP",
+	"amount": "1 XRP",
+	"fee": "0.00001 XRP",
 
 	"Sequence": 90,
 	"SigningPubKey": "023FA9ED580CD3208BBB380DF3A0CAF142D3A240AF28A2F8E2F372FC635C244177",
@@ -90,7 +90,7 @@
 	"txtype": "Payment",
 	"payer": "rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS",
 	"payee": "r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
-	"amount": "100.000000 XRP",
+	"amount": "100 XRP",
 	"fee": "0.000015 XRP",
 	"ledger": 2349278
 }

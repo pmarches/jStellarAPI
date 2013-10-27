@@ -41,8 +41,9 @@ public class RippleBinarySerializerTest {
 		assertEquals(TransactionTypes.PAYMENT, serObj.getTransactionType());
 		assertEquals("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT", serObj.getField(BinaryFormatField.Account).toString());
 		assertEquals("rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS", serObj.getField(BinaryFormatField.Destination).toString());
-		assertEquals("1.000000 XRP", serObj.getField(BinaryFormatField.Amount).toString());
+		assertEquals("1 XRP", serObj.getField(BinaryFormatField.Amount).toString());
 		ByteBuffer readBuffer = binSer.writeSerializedObject(serObj);
+		payment1ByteBuffer.rewind();
 		assertEquals(payment1ByteBuffer, readBuffer);
 	}
 
@@ -88,7 +89,7 @@ public class RippleBinarySerializerTest {
 			ByteBuffer buffer = ByteBuffer.wrap(txBytes);
 			RippleSerializedObject serObj = binSer.readSerializedObject(buffer);
 			ByteBuffer readBuffer = binSer.writeSerializedObject(serObj);
-			assertEquals(readBuffer, buffer);
+			assertEquals(line, DatatypeConverter.printHexBinary(readBuffer.array()));
 		}
 		reader.close();
 	}
@@ -106,9 +107,9 @@ public class RippleBinarySerializerTest {
 			assertEquals(tx.get("payee"), txRead.getField(BinaryFormatField.Destination).toString());
 			assertEquals(tx.get("payer"), txRead.getField(BinaryFormatField.Account).toString());
 			assertEquals(tx.get("amount"), txRead.getField(BinaryFormatField.Amount).toString());
-			assertEquals(tx.get("fee"), txRead.getField(BinaryFormatField.Fee).toString());
+			assertEquals(tx.get("inLedger").toString(), tx.get("fee"), txRead.getField(BinaryFormatField.Fee).toString());
 			ByteBuffer writtenBytes = binSer.writeSerializedObject(txRead);
-			assertEquals(buffer, writtenBytes);
+			assertEquals(hexTx, DatatypeConverter.printHexBinary(writtenBytes.array()));
 		}
 	}
 	
