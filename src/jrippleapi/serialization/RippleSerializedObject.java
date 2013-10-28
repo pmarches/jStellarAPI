@@ -20,7 +20,7 @@ public class RippleSerializedObject {
 	}
 	
 	public RippleSerializedObject(RipplePaymentTransaction payment){
-		fields.put(BinaryFormatField.TransactionType, (short) TransactionTypes.PAYMENT.byteValue);
+		fields.put(BinaryFormatField.TransactionType, (int) TransactionTypes.PAYMENT.byteValue);
 		fields.put(BinaryFormatField.Account, payment.payer);
 		fields.put(BinaryFormatField.Destination, payment.payee);
 		fields.put(BinaryFormatField.Amount, payment.amount);
@@ -43,7 +43,7 @@ public class RippleSerializedObject {
 		if(txTypeObj==null){
 			throw new NullPointerException("No transaction type field found");
 		}
-		return TransactionTypes.fromType((short) txTypeObj);
+		return TransactionTypes.fromType((int) txTypeObj);
 	}
 
 	public String toJSONString() {

@@ -1,8 +1,8 @@
 package jrippleapi.beans;
 
 import jrippleapi.connection.JSONSerializable;
-import jrippleapi.serialization.RippleSerializedObject;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
+import jrippleapi.serialization.RippleSerializedObject;
 
 import org.json.simple.JSONObject;
 

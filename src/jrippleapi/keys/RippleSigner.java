@@ -3,7 +3,6 @@ package jrippleapi.keys;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.Security;
 
 import javax.xml.bind.DatatypeConverter;

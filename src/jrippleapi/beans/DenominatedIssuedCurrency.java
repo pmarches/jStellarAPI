@@ -1,7 +1,6 @@
 package jrippleapi.beans;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 import jrippleapi.connection.JSONSerializable;
 
