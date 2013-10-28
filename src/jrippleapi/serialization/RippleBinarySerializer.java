@@ -18,11 +18,8 @@ public class RippleBinarySerializer {
 	private static final int MAX_OFFSET = 80;
 	private static final long MIN_VALUE = 1000000000000000l;
 	private static final long MAX_VALUE = 9999999999999999l;
-	ByteBuffer input;
 
-	//THIS IS NOT THREAD SAFE!
-	public RippleSerializedObject readSerializedObject(ByteBuffer inputBytes) {
-		this.input = inputBytes;
+	public RippleSerializedObject readSerializedObject(ByteBuffer input) {
 		RippleSerializedObject serializedObject = new RippleSerializedObject();
 		while(input.hasRemaining()){
 			byte firstByte = input.get();
@@ -37,13 +34,13 @@ public class RippleBinarySerializer {
 			}
 
 			BinaryFormatField serializedField = BinaryFormatField.lookup(type, field);
-			Object value = readPrimitive(serializedField.primitive);
+			Object value = readPrimitive(input, serializedField.primitive);
 			serializedObject.fields.put(serializedField, value );
 		}
 		return serializedObject;
 	}
 
-	private Object readPrimitive(PrimitiveTypes primitive) {
+	private Object readPrimitive(ByteBuffer input, PrimitiveTypes primitive) {
 		if(primitive==PrimitiveTypes.UINT16){
 			return input.getShort();//FIXME SIGNED Always return BigInt? Long? Different types? Custom Unsigned Int of various length?
 		}
@@ -64,13 +61,13 @@ public class RippleBinarySerializer {
 			return thirtyTwoBytes;
 		}
 		else if(primitive==PrimitiveTypes.AMOUNT){
-			return readAmount();
+			return readAmount(input);
 		}
 		else if(primitive==PrimitiveTypes.VARIABLE_LENGTH){
-			return readVariableLength();
+			return readVariableLength(input);
 		}
 		else if(primitive==PrimitiveTypes.ACCOUNT){
-			return readAccount();
+			return readAccount(input);
 		}
 		else if(primitive==PrimitiveTypes.OBJECT){
 			throw new RuntimeException("Object type, not yet supported");
@@ -82,10 +79,10 @@ public class RippleBinarySerializer {
 			return input.get();
 		}
 		else if(primitive==PrimitiveTypes.HASH160){
-			return readIssuer();
+			return readIssuer(input);
 		}
 		else if(primitive==PrimitiveTypes.PATHSET){
-			return readPathSet();
+			return readPathSet(input);
 		}
 		else if(primitive==PrimitiveTypes.VECTOR256){
 			throw new RuntimeException("Vector");
@@ -93,13 +90,13 @@ public class RippleBinarySerializer {
 		throw new RuntimeException("Unsupported primitive "+primitive);
 	}
 
-	private RippleAddress readAccount() {
-		byte[] accountBytes = readVariableLength();
+	private RippleAddress readAccount(ByteBuffer input) {
+		byte[] accountBytes = readVariableLength(input);
 		return new RippleAddress(accountBytes);
 	}
 
 	//See https://ripple.com/wiki/Currency_Format
-	private DenominatedIssuedCurrency readAmount() {
+	private DenominatedIssuedCurrency readAmount(ByteBuffer input) {
 		long offsetNativeSignMagnitudeBytes = input.getLong();
 		//1 bit for Native
 		boolean isXRPAmount =(0x8000000000000000l & offsetNativeSignMagnitudeBytes)==0; 
@@ -114,8 +111,8 @@ public class RippleBinarySerializer {
 			return new DenominatedIssuedCurrency(magnitude);
 		}
 		else{
-			String currencyStr = readCurrency();
-			RippleAddress issuer = readIssuer();
+			String currencyStr = readCurrency(input);
+			RippleAddress issuer = readIssuer(input);
 			int decimalPosition = 97-offset;
 			
 			BigInteger biMagnitude = BigInteger.valueOf(longMagnitude);
@@ -124,14 +121,14 @@ public class RippleBinarySerializer {
 		}
 	}
 
-	private RippleAddress readIssuer() {
+	private RippleAddress readIssuer(ByteBuffer input) {
 		byte[] issuerBytes = new byte[20];
 		input.get(issuerBytes);
 		//TODO If issuer is all 0, this means any issuer
 		return new RippleAddress(issuerBytes);
 	}
 
-	private String readCurrency() {
+	private String readCurrency(ByteBuffer input) {
 		byte[] unknown = new byte[12];
 		input.get(unknown);
 		byte[] currency = new byte[8];
@@ -140,7 +137,7 @@ public class RippleBinarySerializer {
 		//TODO See https://ripple.com/wiki/Currency_Format for format
 	}
 
-	private byte[] readVariableLength() {
+	private byte[] readVariableLength(ByteBuffer input) {
 		int byteLen=0;
 		int firstByte = input.get();
 		int secondByte=0;
@@ -165,7 +162,7 @@ public class RippleBinarySerializer {
 		return variableBytes;
 	}
 
-	private RipplePathSet readPathSet() {
+	private RipplePathSet readPathSet(ByteBuffer input) {
 		RipplePathSet pathSet = new RipplePathSet();
 		RipplePath path = null;
 		while(true){
@@ -185,13 +182,13 @@ public class RippleBinarySerializer {
 			RipplePathElement pathElement = new RipplePathElement();
 			path.add(pathElement);
 			if((pathElementType&0x01)!=0){ //Account bit is set
-				pathElement.account = readIssuer();
+				pathElement.account = readIssuer(input);
 			}
 			if((pathElementType&0x10)!=0){ //Currency bit is set
-				pathElement.currency = readCurrency();
+				pathElement.currency = readCurrency(input);
 			}
 			if((pathElementType&0x20)!=0){ //Issuer bit is set
-				pathElement.issuer = readIssuer();
+				pathElement.issuer = readIssuer(input);
 			}
 		}
 		

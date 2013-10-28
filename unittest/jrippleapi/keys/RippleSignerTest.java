@@ -1,7 +1,6 @@
 package jrippleapi.keys;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.io.FileReader;
 import java.nio.ByteBuffer;
@@ -22,7 +21,7 @@ import org.junit.Test;
 
 public class RippleSignerTest {
 	@Test
-	public void testDataSign() throws Exception{
+	public void testSubmitSignedTransaction() throws Exception{
 		RippleBinarySerializer binSer=new RippleBinarySerializer();
 		RippleSigner signer = new RippleSigner(AccountTest.getTestAccount().secret);
 		JSONArray allTx = (JSONArray) new JSONParser().parse(new FileReader("testdata/unittest-tx.json"));
