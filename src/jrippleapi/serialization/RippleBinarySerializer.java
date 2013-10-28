@@ -42,13 +42,15 @@ public class RippleBinarySerializer {
 
 	private Object readPrimitive(ByteBuffer input, PrimitiveTypes primitive) {
 		if(primitive==PrimitiveTypes.UINT16){
-			return input.getShort();//FIXME SIGNED Always return BigInt? Long? Different types? Custom Unsigned Int of various length?
+			return 0xFFFFFFFF & input.getShort();
 		}
 		else if(primitive==PrimitiveTypes.UINT32){
-			return input.getInt();//FIXME SIGNED
+			return 0xFFFFFFFFFFFFFFFFl & input.getInt();
 		}
 		else if(primitive==PrimitiveTypes.UINT64){
-			return input.getLong(); //FIXME SIGNED
+			byte[] eightBytes = new byte[8];
+			input.get(eightBytes);
+			return new BigInteger(1, eightBytes);
 		}
 		else if(primitive==PrimitiveTypes.HASH128){
 			byte[] sixteenBytes = new byte[16];
@@ -76,7 +78,7 @@ public class RippleBinarySerializer {
 			throw new RuntimeException("Array type, not yet supported");
 		}
 		else if(primitive==PrimitiveTypes.UINT8){
-			return input.get();
+			return 0xFFFF & input.get();
 		}
 		else if(primitive==PrimitiveTypes.HASH160){
 			return readIssuer(input);
@@ -226,13 +228,30 @@ public class RippleBinarySerializer {
 
 	private void writePrimitive(ByteBuffer output, PrimitiveTypes primitive, Object value) {
 		if(primitive==PrimitiveTypes.UINT16){
-			output.putShort((short) value);//FIXME SIGNED Always return BigInt? Long? Different types? Custom Unsigned Int of various length?
+			int intValue = (int) value;
+			if(intValue>0xFFFF){
+				throw new RuntimeException("UINT16 overflow for value "+value);
+			}
+			output.put((byte) (intValue>>8&0xFF));
+			output.put((byte) (intValue&0xFF));
 		}
 		else if(primitive==PrimitiveTypes.UINT32){
-			output.putInt((int) value);//FIXME SIGNED
+			long longValue = (long) value;
+			if(longValue>0xFFFFFFFFl){
+				throw new RuntimeException("UINT32 overflow for value "+value);
+			}
+			output.put((byte) (longValue>>24&0xFF));
+			output.put((byte) (longValue>>16&0xFF));
+			output.put((byte) (longValue>>8&0xFF));
+			output.put((byte) (longValue&0xFF));
 		}
 		else if(primitive==PrimitiveTypes.UINT64){
-			output.putLong((long) value); //FIXME SIGNED
+			byte[] biBytes = ((BigInteger) value).toByteArray();
+			if(biBytes.length>8){
+				throw new RuntimeException("UINT64 overflow for value "+value);
+			}
+			output.position(output.position()+(8-biBytes.length));
+			output.put(biBytes);
 		}
 		else if(primitive==PrimitiveTypes.HASH128){
 			byte[] sixteenBytes = (byte[]) value;
@@ -264,7 +283,11 @@ public class RippleBinarySerializer {
 			throw new RuntimeException("Array type, not yet supported");
 		}
 		else if(primitive==PrimitiveTypes.UINT8){
-			output.put((byte) value); //FIXME Signed
+			int intValue = (int) value;
+			if(intValue>0xFF){
+				throw new RuntimeException("UINT8 overflow for value "+value);
+			}
+			output.put((byte) value);
 		}
 		else if(primitive==PrimitiveTypes.HASH160){
 			writeIssuer(output, (RippleAddress) value);
