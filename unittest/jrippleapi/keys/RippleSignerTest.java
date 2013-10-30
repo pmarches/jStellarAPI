@@ -10,6 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 import jrippleapi.connection.GenericJSONSerializable;
 import jrippleapi.connection.RippleDaemonConnection;
 import jrippleapi.core.AccountTest;
+import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
 import jrippleapi.serialization.RippleSerializedObject;
@@ -23,7 +24,8 @@ public class RippleSignerTest {
 	@Test
 	public void testSubmitSignedTransaction() throws Exception{
 		RippleBinarySerializer binSer=new RippleBinarySerializer();
-		RippleSigner signer = new RippleSigner(AccountTest.getTestAccount().secret);
+		RipplePrivateKey privateKey = AccountTest.getTestAccount().secret.getPrivateKey(0);
+		RippleSigner signer = new RippleSigner(privateKey);
 		JSONArray allTx = (JSONArray) new JSONParser().parse(new FileReader("testdata/unittest-tx.json"));
 		for(Object obj : allTx){
 			JSONObject jsonTx = (JSONObject) obj;

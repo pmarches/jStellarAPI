@@ -3,11 +3,10 @@ package jrippleapi.keys;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.Security;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.core.RippleSeedAddress;
+import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
 import jrippleapi.serialization.RippleSerializedObject;
@@ -16,28 +15,17 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequenceGenerator;
 import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.math.ec.ECPoint;
 
 public class RippleSigner {
-	private static ECDomainParameters ecParams;
-	RippleSeedAddress secret;
+	RipplePrivateKey privateKey;
 	RippleBinarySerializer binSer=new RippleBinarySerializer();
 
-	static{
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-//		ECGenParameterSpec ecSpec = new ECGenParameterSpec("SECp256k1");
-        X9ECParameters params = SECNamedCurves.getByName("secp256k1");
-        ecParams = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
-	}
-
-	public RippleSigner(RippleSeedAddress secret) {
-		this.secret=secret;
+	public RippleSigner(RipplePrivateKey privateKey) {
+		this.privateKey=privateKey;
 	}
 
 	//see https://ripple.com/forum/viewtopic.php?f=2&t=3206&p=13277&hilit=json+rpc#p13277
@@ -93,19 +81,12 @@ public class RippleSigner {
 		if(hashOfBytes.length!=32){
 			throw new RuntimeException("can sign only a hash of 32 bytes");
 		}
-
-        RippleDeterministicKeyGenerator generator = new RippleDeterministicKeyGenerator(secret);
-        int accountNumber=0;
-		BigInteger signingPrivateBI = generator.getAccountPrivateKeyBI(accountNumber);
-		ECPoint publicSigningKey = generator.getAccountPublicPoint(accountNumber);
-		String pubKeyStr=DatatypeConverter.printHexBinary(publicSigningKey.getEncoded());
-		System.out.println("pubkey "+pubKeyStr);
         
         ECDSASigner signer = new ECDSASigner();
-		ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(signingPrivateBI, ecParams);
+		ECPrivateKeyParameters privKey = privateKey.getECPrivateKey();
         signer.init(true, privKey);
         BigInteger[] RandS = signer.generateSignature(hashOfBytes);
-        return new ECDSASignature(RandS[0], RandS[1], publicSigningKey);
+        return new ECDSASignature(RandS[0], RandS[1], privateKey.getPublicKey().getPublicPoint());
 	}
 
     public static class ECDSASignature {
@@ -146,7 +127,7 @@ public class RippleSigner {
 			byte[] signingPubKey = (byte[]) serObj.getField(BinaryFormatField.SigningPubKey);
 
 			ECDSASigner signer = new ECDSASigner();
-			ECPublicKeyParameters publicKey = new ECPublicKeyParameters(ecParams.getCurve().decodePoint(signingPubKey), ecParams);
+			ECPublicKeyParameters publicKey = new ECPublicKeyParameters(RippleDeterministicKeyGenerator.SECP256K1_PARAMS.getCurve().decodePoint(signingPubKey), RippleDeterministicKeyGenerator.SECP256K1_PARAMS);
 			signer.init(false, publicKey);
 			
 			ASN1InputStream decoder = new ASN1InputStream(signatureBytes);

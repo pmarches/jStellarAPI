@@ -11,7 +11,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import jrippleapi.core.Account;
 import jrippleapi.core.AccountTest;
-import jrippleapi.keys.RippleDeterministicKeyGenerator;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
@@ -39,14 +38,14 @@ public class RippleDeterministicKeyGeneratorTest {
 		assertEquals("7CFBA64F771E93E817E15039215430B53F7401C34931D111EAB3510B22DBB0D8", DatatypeConverter.printHexBinary(generator.getPrivateRootKeyBytes()));
 		assertEquals("fht5yrLWh3P8DrJgQuVNDPQVXGTMyPpgRHFKGQzFQ66o3ssesk3o", generator.getPublicGeneratorFamily().toString());
 		assertEquals("aBRoQibi2jpDofohooFuzZi9nEzKw9Zdfc4ExVNmuXHaJpSPh8uJ", generator.getAccountPublicKey(0).toString());
-		assertEquals("rhcfR9Cg98qCxHpCcPBmMonbDBXo84wyTn", generator.getAccountId(0).toString());
+		assertEquals("rhcfR9Cg98qCxHpCcPBmMonbDBXo84wyTn", generator.getAccountPublicKey(0).getAddress().toString());
 	}
 	
 	@Test
 	public void testOurAccount() throws Exception{
 		Account testAccount = AccountTest.getTestAccount();
 		RippleDeterministicKeyGenerator generator = new RippleDeterministicKeyGenerator(testAccount.secret);
-		assertEquals(testAccount.address, generator.getAccountId(0));
+		assertEquals(testAccount.address, generator.getAccountPublicKey(0).getAddress());
 	}
 
 }

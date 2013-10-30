@@ -10,38 +10,42 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class RippleIdentifier {
 	String humanReadableIdentifier;
-	byte[] addressBytes;
+	byte[] payloadBytes;
 	int identifierType;
 	
 	static {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 	
+	/**
+	 * @param payloadBytes
+	 * @param identifierType : See https://ripple.com/wiki/Encodings
+	 */
 	public RippleIdentifier(byte[] payloadBytes, int identifierType){
-		addressBytes = payloadBytes;
+		this.payloadBytes = payloadBytes;
 		this.identifierType = identifierType;
 	}
 	
 	public RippleIdentifier(String stringID) {
 		this.humanReadableIdentifier = stringID;
 		byte[] stridBytes = RippleBase58.decode(stringID);
-		addressBytes = Arrays.copyOfRange(stridBytes, 1, stridBytes.length-4);
+		payloadBytes = Arrays.copyOfRange(stridBytes, 1, stridBytes.length-4);
 		identifierType = stridBytes[0]; //TODO check the checksum 
 	}
 
 	@Override
 	public String toString() {
 		if(humanReadableIdentifier==null){
-			byte[] versionPayloadChecksumBytes=new byte[1+addressBytes.length+4];
+			byte[] versionPayloadChecksumBytes=new byte[1+payloadBytes.length+4];
 			versionPayloadChecksumBytes[0]=(byte) identifierType;
-			System.arraycopy(addressBytes, 0, versionPayloadChecksumBytes, 1, addressBytes.length);
+			System.arraycopy(payloadBytes, 0, versionPayloadChecksumBytes, 1, payloadBytes.length);
 
 			try {
 				MessageDigest mda = MessageDigest.getInstance("SHA-256", "BC");
-				mda.update(versionPayloadChecksumBytes, 0, 1+addressBytes.length);
+				mda.update(versionPayloadChecksumBytes, 0, 1+payloadBytes.length);
 				byte[] firstHash = mda.digest();
 				mda.reset();
-				System.arraycopy(mda.digest(firstHash ), 0, versionPayloadChecksumBytes, 1+addressBytes.length, 4);
+				System.arraycopy(mda.digest(firstHash ), 0, versionPayloadChecksumBytes, 1+payloadBytes.length, 4);
 				humanReadableIdentifier=RippleBase58.encode(versionPayloadChecksumBytes);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -51,14 +55,14 @@ public class RippleIdentifier {
 	}
 
 	public byte[] getBytes() {
-		return addressBytes;
+		return payloadBytes;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(addressBytes);
+		result = prime * result + Arrays.hashCode(payloadBytes);
 		return result;
 	}
 
@@ -71,7 +75,7 @@ public class RippleIdentifier {
 		if (getClass() != obj.getClass())
 			return false;
 		RippleIdentifier other = (RippleIdentifier) obj;
-		if (!Arrays.equals(addressBytes, other.addressBytes))
+		if (!Arrays.equals(payloadBytes, other.payloadBytes))
 			return false;
 		return true;
 	}
