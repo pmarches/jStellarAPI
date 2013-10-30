@@ -1,8 +1,10 @@
-package jrippleapi.beans;
+package jrippleapi.core;
 
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
+
+import jrippleapi.core.DenominatedIssuedCurrency;
 
 import org.junit.Test;
 

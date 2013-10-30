@@ -1,4 +1,4 @@
-package jrippleapi.beans;
+package jrippleapi.core;
 
 public class RippleSeedAddress extends RippleIdentifier {
 

@@ -7,9 +7,9 @@ import java.nio.ByteBuffer;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.beans.AccountTest;
 import jrippleapi.connection.GenericJSONSerializable;
 import jrippleapi.connection.RippleDaemonConnection;
+import jrippleapi.core.AccountTest;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
 import jrippleapi.serialization.RippleSerializedObject;

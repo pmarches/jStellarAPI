@@ -5,11 +5,11 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import jrippleapi.beans.DenominatedIssuedCurrency;
-import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.RipplePath;
-import jrippleapi.beans.RipplePathElement;
-import jrippleapi.beans.RipplePathSet;
+import jrippleapi.core.DenominatedIssuedCurrency;
+import jrippleapi.core.RippleAddress;
+import jrippleapi.core.RipplePath;
+import jrippleapi.core.RipplePathElement;
+import jrippleapi.core.RipplePathSet;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 
@@ -198,7 +198,7 @@ public class RippleBinarySerializer {
 	}
 
 	public ByteBuffer writeSerializedObject(RippleSerializedObject serializedObj) {
-		ByteBuffer output = ByteBuffer.allocate(2000); //FIXME Hum..
+		ByteBuffer output = ByteBuffer.allocate(2000); //FIXME Hum.. CReate GRowable ByteBuffer class or use ByteArrayOutputStream?
 		List<BinaryFormatField> sortedFields = serializedObj.getSortedField();
 		for(BinaryFormatField field: sortedFields){
 			byte typeHalfByte=0;

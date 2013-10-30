@@ -1,6 +1,6 @@
-package jrippleapi.beans;
+package jrippleapi.connection;
 
-import jrippleapi.connection.JSONSerializable;
+import jrippleapi.core.DenominatedIssuedCurrency;
 
 import org.json.simple.JSONObject;
 

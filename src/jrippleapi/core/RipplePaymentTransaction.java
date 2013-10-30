@@ -1,4 +1,4 @@
-package jrippleapi.beans;
+package jrippleapi.core;
 
 import jrippleapi.connection.JSONSerializable;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;

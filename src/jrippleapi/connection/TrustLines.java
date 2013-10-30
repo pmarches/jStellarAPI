@@ -1,8 +1,6 @@
-package jrippleapi.beans;
+package jrippleapi.connection;
 
 import java.util.ArrayList;
-
-import jrippleapi.connection.JSONSerializable;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

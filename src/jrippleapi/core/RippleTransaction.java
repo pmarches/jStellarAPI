@@ -1,4 +1,4 @@
-package jrippleapi.beans;
+package jrippleapi.core;
 
 
 public abstract class RippleTransaction {

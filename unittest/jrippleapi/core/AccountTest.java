@@ -1,9 +1,11 @@
-package jrippleapi.beans;
+package jrippleapi.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.FileReader;
+
+import jrippleapi.core.Account;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

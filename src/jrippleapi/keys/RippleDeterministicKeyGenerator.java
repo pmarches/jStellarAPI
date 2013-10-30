@@ -4,10 +4,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.RipplePublicGeneratorAddress;
-import jrippleapi.beans.RipplePublickKeyAddress;
-import jrippleapi.beans.RippleSeedAddress;
+import jrippleapi.core.RippleAddress;
+import jrippleapi.core.RipplePublicGeneratorAddress;
+import jrippleapi.core.RipplePublickKeyAddress;
+import jrippleapi.core.RippleSeedAddress;
 
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;

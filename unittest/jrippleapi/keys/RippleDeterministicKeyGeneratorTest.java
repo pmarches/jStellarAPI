@@ -9,8 +9,8 @@ import java.security.Security;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.beans.Account;
-import jrippleapi.beans.AccountTest;
+import jrippleapi.core.Account;
+import jrippleapi.core.AccountTest;
 import jrippleapi.keys.RippleDeterministicKeyGenerator;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

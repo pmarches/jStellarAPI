@@ -9,15 +9,11 @@ import java.math.BigDecimal;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.beans.Account;
-import jrippleapi.beans.AccountInformation;
-import jrippleapi.beans.AccountTest;
-import jrippleapi.beans.DenominatedIssuedCurrency;
-import jrippleapi.beans.ExchangeOffers;
-import jrippleapi.beans.OrderBook;
-import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.RipplePaymentTransaction;
-import jrippleapi.beans.TrustLines;
+import jrippleapi.core.Account;
+import jrippleapi.core.AccountTest;
+import jrippleapi.core.DenominatedIssuedCurrency;
+import jrippleapi.core.RippleAddress;
+import jrippleapi.core.RipplePaymentTransaction;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

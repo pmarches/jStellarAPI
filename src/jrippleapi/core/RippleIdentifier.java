@@ -1,4 +1,4 @@
-package jrippleapi.beans;
+package jrippleapi.core;
 
 import java.security.MessageDigest;
 import java.security.Security;

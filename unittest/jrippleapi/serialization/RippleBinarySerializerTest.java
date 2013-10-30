@@ -18,9 +18,9 @@ import java.nio.file.StandardOpenOption;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.beans.DenominatedIssuedCurrency;
-import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.RipplePaymentTransaction;
+import jrippleapi.core.DenominatedIssuedCurrency;
+import jrippleapi.core.RippleAddress;
+import jrippleapi.core.RipplePaymentTransaction;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 

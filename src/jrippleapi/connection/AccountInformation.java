@@ -1,8 +1,6 @@
-package jrippleapi.beans;
+package jrippleapi.connection;
 
 import java.math.BigDecimal;
-
-import jrippleapi.connection.JSONSerializable;
 
 import org.json.simple.JSONObject;
 

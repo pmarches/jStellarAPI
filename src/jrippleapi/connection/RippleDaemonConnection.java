@@ -7,15 +7,11 @@ import java.util.concurrent.Future;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.beans.Account;
-import jrippleapi.beans.AccountInformation;
-import jrippleapi.beans.DenominatedIssuedCurrency;
-import jrippleapi.beans.ExchangeOffers;
-import jrippleapi.beans.OrderBook;
-import jrippleapi.beans.RippleAddress;
-import jrippleapi.beans.RipplePaymentTransaction;
-import jrippleapi.beans.RippleSeedAddress;
-import jrippleapi.beans.TrustLines;
+import jrippleapi.core.Account;
+import jrippleapi.core.DenominatedIssuedCurrency;
+import jrippleapi.core.RippleAddress;
+import jrippleapi.core.RipplePaymentTransaction;
+import jrippleapi.core.RippleSeedAddress;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;

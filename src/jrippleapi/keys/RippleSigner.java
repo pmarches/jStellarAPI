@@ -7,7 +7,7 @@ import java.security.Security;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.beans.RippleSeedAddress;
+import jrippleapi.core.RippleSeedAddress;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
 import jrippleapi.serialization.RippleSerializedObject;
