@@ -4,12 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import javax.xml.bind.DatatypeConverter;
-
 import jrippleapi.core.RipplePrivateKey;
-import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
-import jrippleapi.serialization.RippleBinarySerializer;
 import jrippleapi.serialization.RippleBinaryObject;
+import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERInteger;
@@ -22,59 +19,31 @@ import org.bouncycastle.math.ec.ECPoint;
 
 public class RippleSigner {
 	RipplePrivateKey privateKey;
-	RippleBinarySerializer binSer=new RippleBinarySerializer();
 
 	public RippleSigner(RipplePrivateKey privateKey) {
 		this.privateKey=privateKey;
 	}
 
-	//see https://ripple.com/forum/viewtopic.php?f=2&t=3206&p=13277&hilit=json+rpc#p13277
-	//    https://ripple.com/wiki/User:Singpolyma/Transaction_Signing
-	//
-	//TODO return a signed RippleSerializedObject instead
-	//TODO do not modify the input RippleSerializedObject
-	public byte[] sign(RippleBinaryObject serObjToSign) throws Exception {
+	/**
+	 * see https://ripple.com/forum/viewtopic.php?f=2&t=3206&p=13277&hilit=json+rpc#p13277
+	 * see https://ripple.com/wiki/User:Singpolyma/Transaction_Signing
+	 * @param serObjToSign
+	 * @return
+	 * @throws Exception
+	 */
+	public RippleBinaryObject sign(RippleBinaryObject serObjToSign) throws Exception {
 		if(serObjToSign.getField(BinaryFormatField.TxnSignature)!=null){
 			throw new Exception("Object already signed");
 		}
-		byte[] hashOfBytes = generateHashFromSerializedObject(serObjToSign);
+		byte[] hashOfRBOBytes = serObjToSign.generateHashFromBinaryObject();
 
-		//Sign the hash
-		ECDSASignature signature = signHash(hashOfBytes);
+		ECDSASignature signature = signHash(hashOfRBOBytes);
 
+		RippleBinaryObject signedRBO = new RippleBinaryObject(serObjToSign);
 		//Add the Signature to the serializedObject as a field
-		serObjToSign.putField(BinaryFormatField.TxnSignature, signature.encodeToDER());
-		serObjToSign.putField(BinaryFormatField.SigningPubKey, signature.publicSigningKey.getEncoded());
-
-		//Convert to bytes again
-		byte[] signedBytes = binSer.writeSerializedObject(serObjToSign).array();
-		//Prefix bytesToSign with the magic sigining prefix (32bit) 'TXN\0'
-		byte[] prefixedSignedBytes = new byte[signedBytes.length+4];
-		prefixedSignedBytes[0]=(byte) 'T';
-		prefixedSignedBytes[1]=(byte) 'X';
-		prefixedSignedBytes[2]=(byte) 'N';
-		prefixedSignedBytes[3]=(byte) 0;
-		System.arraycopy(signedBytes, 0, prefixedSignedBytes, 4, signedBytes.length);
-
-		//Hash again, this wields the TransactionID
-		byte[] hashOfTransaction = RippleDeterministicKeyGenerator.halfSHA512(prefixedSignedBytes);
-		System.out.println("hashOfTX "+DatatypeConverter.printHexBinary(hashOfTransaction));
-		return hashOfTransaction;
-	}
-
-	private byte[] generateHashFromSerializedObject(RippleBinaryObject serObjToSign) {
-		byte[] bytesToSign = binSer.writeSerializedObject(serObjToSign).array();
-
-		//Prefix bytesToSign with the magic hashing prefix (32bit) 'STX\0'
-		byte[] prefixedBytesToHash = new byte[bytesToSign.length+4];
-		prefixedBytesToHash[0]=(byte) 'S';
-		prefixedBytesToHash[1]=(byte) 'T';
-		prefixedBytesToHash[2]=(byte) 'X';
-		prefixedBytesToHash[3]=(byte) 0;
-		System.arraycopy(bytesToSign, 0, prefixedBytesToHash, 4, bytesToSign.length);
-		//Hash256
-		byte[] hashOfBytes = RippleDeterministicKeyGenerator.halfSHA512(prefixedBytesToHash);
-		return hashOfBytes;
+		signedRBO.putField(BinaryFormatField.TxnSignature, signature.encodeToDER());
+		signedRBO.putField(BinaryFormatField.SigningPubKey, signature.publicSigningKey.getEncoded());
+		return signedRBO;
 	}
 
 	private ECDSASignature signHash(byte[] hashOfBytes) throws Exception {
@@ -89,7 +58,30 @@ public class RippleSigner {
         return new ECDSASignature(RandS[0], RandS[1], privateKey.getPublicKey().getPublicPoint());
 	}
 
-    public static class ECDSASignature {
+	public boolean isSignatureVerified(RippleBinaryObject serObj) {
+		try {
+			byte[] signatureBytes= (byte[]) serObj.getField(BinaryFormatField.TxnSignature);
+			if(signatureBytes==null){
+				throw new RuntimeException("The specified  has no signature");
+			}
+			byte[] signingPubKeyBytes = (byte[]) serObj.getField(BinaryFormatField.SigningPubKey);
+			if(signingPubKeyBytes==null){
+				throw new RuntimeException("The specified  has no public key associated to the signature");
+			}
+
+			RippleBinaryObject unsignedRBO = serObj.getUnsignedCopy();
+			byte[] hashToVerify = unsignedRBO.generateHashFromBinaryObject();
+
+			ECDSASigner signer = new ECDSASigner();
+			ECDSASignature signature = new ECDSASignature(signatureBytes, signingPubKeyBytes);
+			signer.init(false, new ECPublicKeyParameters(signature.publicSigningKey, RippleDeterministicKeyGenerator.SECP256K1_PARAMS));
+			return signer.verifySignature(hashToVerify, signature.r, signature.s);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static class ECDSASignature {
         public BigInteger r, s;
 		private ECPoint publicSigningKey;
 
@@ -99,7 +91,23 @@ public class RippleSigner {
             this.publicSigningKey= publicSigningKey;
         }
 
-        /**
+        public ECDSASignature(byte[] signatureDEREncodedBytes, byte[] signingPubKey) throws IOException {
+        	publicSigningKey = RippleDeterministicKeyGenerator.SECP256K1_PARAMS.getCurve().decodePoint(signingPubKey);
+			
+			ASN1InputStream decoder = new ASN1InputStream(signatureDEREncodedBytes);
+			DLSequence seq = (DLSequence) decoder.readObject();
+			DERInteger r = (DERInteger) seq.getObjectAt(0);
+			DERInteger s = (DERInteger) seq.getObjectAt(1);
+
+			// OpenSSL deviates from the DER spec by interpreting these values as unsigned, though they should not be
+			// Thus, we always use the positive versions.
+			// See: http://r6.ca/blog/20111119T211504Z.html
+			this.r = r.getPositiveValue();
+			this.s = s.getPositiveValue();
+			decoder.close();
+		}
+
+		/**
          * What we get back from the signer are the two components of a signature, r and s. To get a flat byte stream
          * of the type used by Bitcoin we have to encode them using DER encoding, which is just a way to pack the two
          * components into a structure.
@@ -118,30 +126,5 @@ public class RippleSigner {
             }
         }
     }
-
-    //TODO do not modify serObj
-	public boolean verify(RippleBinaryObject serObj) {
-		try {
-			byte[] signatureBytes= (byte[]) serObj.removeField(BinaryFormatField.TxnSignature);
-			byte[] hashToVerify = generateHashFromSerializedObject(serObj);
-			byte[] signingPubKey = (byte[]) serObj.getField(BinaryFormatField.SigningPubKey);
-
-			ECDSASigner signer = new ECDSASigner();
-			ECPublicKeyParameters publicKey = new ECPublicKeyParameters(RippleDeterministicKeyGenerator.SECP256K1_PARAMS.getCurve().decodePoint(signingPubKey), RippleDeterministicKeyGenerator.SECP256K1_PARAMS);
-			signer.init(false, publicKey);
-			
-			ASN1InputStream decoder = new ASN1InputStream(signatureBytes);
-			DLSequence seq = (DLSequence) decoder.readObject();
-			DERInteger r = (DERInteger) seq.getObjectAt(0);
-			DERInteger s = (DERInteger) seq.getObjectAt(1);
-			decoder.close();
-			// OpenSSL deviates from the DER spec by interpreting these values as unsigned, though they should not be
-			// Thus, we always use the positive versions.
-			// See: http://r6.ca/blog/20111119T211504Z.html
-			return signer.verifySignature(hashToVerify, r.getPositiveValue(), s.getPositiveValue());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 }

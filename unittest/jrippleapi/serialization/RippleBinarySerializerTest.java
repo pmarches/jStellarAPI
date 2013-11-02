@@ -37,12 +37,12 @@ public class RippleBinarySerializerTest {
 		MappedByteBuffer payment1ByteBuffer = fileToBuffer("testdata/r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT-to-rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS-amt-1000000XRP.bin");
 		
 		RippleBinarySerializer binSer = new RippleBinarySerializer();
-		RippleBinaryObject serObj = binSer.readSerializedObject(payment1ByteBuffer);
+		RippleBinaryObject serObj = binSer.readBinaryObject(payment1ByteBuffer);
 		assertEquals(TransactionTypes.PAYMENT, serObj.getTransactionType());
 		assertEquals("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT", serObj.getField(BinaryFormatField.Account).toString());
 		assertEquals("rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS", serObj.getField(BinaryFormatField.Destination).toString());
 		assertEquals("1 XRP", serObj.getField(BinaryFormatField.Amount).toString());
-		ByteBuffer readBuffer = binSer.writeSerializedObject(serObj);
+		ByteBuffer readBuffer = binSer.writeBinaryObject(serObj);
 		payment1ByteBuffer.rewind();
 		assertEquals(payment1ByteBuffer, readBuffer);
 	}
@@ -52,7 +52,7 @@ public class RippleBinarySerializerTest {
 		MappedByteBuffer trustet1ByteBuffer = fileToBuffer("testdata/trustset1.bin");
 		
 		RippleBinarySerializer binSer = new RippleBinarySerializer();
-		RippleBinaryObject serObj = binSer.readSerializedObject(trustet1ByteBuffer);
+		RippleBinaryObject serObj = binSer.readBinaryObject(trustet1ByteBuffer);
 		assertEquals(TransactionTypes.TRUST_SET, serObj.getTransactionType());
 		assertEquals(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI, serObj.getField(BinaryFormatField.Account));
 
@@ -87,8 +87,8 @@ public class RippleBinarySerializerTest {
 			}
 			byte[] txBytes = DatatypeConverter.parseHexBinary(line);
 			ByteBuffer buffer = ByteBuffer.wrap(txBytes);
-			RippleBinaryObject serObj = binSer.readSerializedObject(buffer);
-			ByteBuffer readBuffer = binSer.writeSerializedObject(serObj);
+			RippleBinaryObject serObj = binSer.readBinaryObject(buffer);
+			ByteBuffer readBuffer = binSer.writeBinaryObject(serObj);
 			assertEquals(line, DatatypeConverter.printHexBinary(readBuffer.array()));
 		}
 		reader.close();
@@ -103,12 +103,12 @@ public class RippleBinarySerializerTest {
 			String hexTx = (String) tx.get("tx");
 			byte[] txBytes = DatatypeConverter.parseHexBinary(hexTx);
 			ByteBuffer buffer = ByteBuffer.wrap(txBytes);
-			RippleBinaryObject txRead = binSer.readSerializedObject(buffer);
+			RippleBinaryObject txRead = binSer.readBinaryObject(buffer);
 			assertEquals(tx.get("payee"), txRead.getField(BinaryFormatField.Destination).toString());
 			assertEquals(tx.get("payer"), txRead.getField(BinaryFormatField.Account).toString());
 			assertEquals(tx.get("amount"), txRead.getField(BinaryFormatField.Amount).toString());
 			assertEquals(tx.get("inLedger").toString(), tx.get("fee"), txRead.getField(BinaryFormatField.Fee).toString());
-			ByteBuffer writtenBytes = binSer.writeSerializedObject(txRead);
+			ByteBuffer writtenBytes = binSer.writeBinaryObject(txRead);
 			assertEquals(hexTx, DatatypeConverter.printHexBinary(writtenBytes.array()));
 		}
 	}
@@ -118,10 +118,10 @@ public class RippleBinarySerializerTest {
 		RippleBinarySerializer binSer = new RippleBinarySerializer();
 		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(BigDecimal.valueOf(1));
 		RipplePaymentTransaction payment = new RipplePaymentTransaction(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI, RippleAddress.RIPPLE_ADDRESS_PMARCHES, amount);
-		ByteBuffer byteBuffer = binSer.writeSerializedObject(payment.getBinaryObject());
-		RippleBinaryObject serObjRead = binSer.readSerializedObject(byteBuffer);
+		ByteBuffer byteBuffer = binSer.writeBinaryObject(payment.getBinaryObject());
+		RippleBinaryObject serObjRead = binSer.readBinaryObject(byteBuffer);
 		assertEquals(payment, new RipplePaymentTransaction(serObjRead));
-		ByteBuffer writtenObj = binSer.writeSerializedObject(serObjRead);
+		ByteBuffer writtenObj = binSer.writeBinaryObject(serObjRead);
 		byteBuffer.rewind();
 		assertEquals(byteBuffer, writtenObj);
 	}
