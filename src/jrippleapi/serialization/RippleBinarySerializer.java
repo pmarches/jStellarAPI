@@ -19,8 +19,8 @@ public class RippleBinarySerializer {
 	private static final long MIN_VALUE = 1000000000000000l;
 	private static final long MAX_VALUE = 9999999999999999l;
 
-	public RippleSerializedObject readSerializedObject(ByteBuffer input) {
-		RippleSerializedObject serializedObject = new RippleSerializedObject();
+	public RippleBinaryObject readSerializedObject(ByteBuffer input) {
+		RippleBinaryObject serializedObject = new RippleBinaryObject();
 		while(input.hasRemaining()){
 			byte firstByte = input.get();
 			int type=(0xF0 & firstByte)>>4;
@@ -197,7 +197,7 @@ public class RippleBinarySerializer {
 		return pathSet;
 	}
 
-	public ByteBuffer writeSerializedObject(RippleSerializedObject serializedObj) {
+	public ByteBuffer writeSerializedObject(RippleBinaryObject serializedObj) {
 		ByteBuffer output = ByteBuffer.allocate(2000); //FIXME Hum.. CReate GRowable ByteBuffer class or use ByteArrayOutputStream?
 		List<BinaryFormatField> sortedFields = serializedObj.getSortedField();
 		for(BinaryFormatField field: sortedFields){

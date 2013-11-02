@@ -9,7 +9,7 @@ import javax.xml.bind.DatatypeConverter;
 import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
-import jrippleapi.serialization.RippleSerializedObject;
+import jrippleapi.serialization.RippleBinaryObject;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERInteger;
@@ -33,7 +33,7 @@ public class RippleSigner {
 	//
 	//TODO return a signed RippleSerializedObject instead
 	//TODO do not modify the input RippleSerializedObject
-	public byte[] sign(RippleSerializedObject serObjToSign) throws Exception {
+	public byte[] sign(RippleBinaryObject serObjToSign) throws Exception {
 		if(serObjToSign.getField(BinaryFormatField.TxnSignature)!=null){
 			throw new Exception("Object already signed");
 		}
@@ -62,7 +62,7 @@ public class RippleSigner {
 		return hashOfTransaction;
 	}
 
-	private byte[] generateHashFromSerializedObject(RippleSerializedObject serObjToSign) {
+	private byte[] generateHashFromSerializedObject(RippleBinaryObject serObjToSign) {
 		byte[] bytesToSign = binSer.writeSerializedObject(serObjToSign).array();
 
 		//Prefix bytesToSign with the magic hashing prefix (32bit) 'STX\0'
@@ -120,7 +120,7 @@ public class RippleSigner {
     }
 
     //TODO do not modify serObj
-	public boolean verify(RippleSerializedObject serObj) {
+	public boolean verify(RippleBinaryObject serObj) {
 		try {
 			byte[] signatureBytes= (byte[]) serObj.removeField(BinaryFormatField.TxnSignature);
 			byte[] hashToVerify = generateHashFromSerializedObject(serObj);

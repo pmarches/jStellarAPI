@@ -2,7 +2,7 @@ package jrippleapi.core;
 
 import jrippleapi.connection.JSONSerializable;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
-import jrippleapi.serialization.RippleSerializedObject;
+import jrippleapi.serialization.RippleBinaryObject;
 
 import org.json.simple.JSONObject;
 
@@ -22,7 +22,7 @@ public class RipplePaymentTransaction implements JSONSerializable {
 		this.amount = amount;
 	}
 	
-	public RipplePaymentTransaction(RippleSerializedObject serObj){
+	public RipplePaymentTransaction(RippleBinaryObject serObj){
 		payer = (RippleAddress) serObj.getField(BinaryFormatField.Account);
 		payee = (RippleAddress) serObj.getField(BinaryFormatField.Destination);
 		amount = (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Amount);

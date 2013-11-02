@@ -13,7 +13,7 @@ import jrippleapi.connection.RippleDaemonConnection;
 import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
-import jrippleapi.serialization.RippleSerializedObject;
+import jrippleapi.serialization.RippleBinaryObject;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -32,7 +32,7 @@ public class RippleSignerTest {
 			String hexTx = (String) jsonTx.get("tx");
 			
 			ByteBuffer inputBytes=ByteBuffer.wrap(DatatypeConverter.parseHexBinary(hexTx));
-			RippleSerializedObject serObj = binSer.readSerializedObject(inputBytes);
+			RippleBinaryObject serObj = binSer.readSerializedObject(inputBytes);
 //			assertTrue("Verification failed for "+hexTx, signer.verify(serObj));
 			
 			serObj.removeField(BinaryFormatField.TxnSignature);

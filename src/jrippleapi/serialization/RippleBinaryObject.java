@@ -13,13 +13,13 @@ import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 
 import org.json.simple.JSONObject;
 
-public class RippleSerializedObject {
+public class RippleBinaryObject {
 	HashMap<BinaryFormatField, Object> fields = new HashMap<BinaryFormatField, Object>();
 
-	public RippleSerializedObject(){
+	public RippleBinaryObject(){
 	}
 	
-	public RippleSerializedObject(RipplePaymentTransaction payment){
+	public RippleBinaryObject(RipplePaymentTransaction payment){
 		fields.put(BinaryFormatField.TransactionType, (int) TransactionTypes.PAYMENT.byteValue);
 		fields.put(BinaryFormatField.Account, payment.payer);
 		fields.put(BinaryFormatField.Destination, payment.payee);
