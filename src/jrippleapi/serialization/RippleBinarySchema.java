@@ -233,7 +233,7 @@ public class RippleBinarySchema {
 			}
 		}
 		
-		byte byteValue;
+		public byte byteValue;
 		TransactionTypes(int txTypeByteValue){
 			this.byteValue = (byte) txTypeByteValue;
 		}

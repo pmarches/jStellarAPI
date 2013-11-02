@@ -118,7 +118,7 @@ public class RippleBinarySerializerTest {
 		RippleBinarySerializer binSer = new RippleBinarySerializer();
 		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(BigDecimal.valueOf(1));
 		RipplePaymentTransaction payment = new RipplePaymentTransaction(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI, RippleAddress.RIPPLE_ADDRESS_PMARCHES, amount);
-		ByteBuffer byteBuffer = binSer.writeSerializedObject(new RippleBinaryObject(payment));
+		ByteBuffer byteBuffer = binSer.writeSerializedObject(payment.getBinaryObject());
 		RippleBinaryObject serObjRead = binSer.readSerializedObject(byteBuffer);
 		assertEquals(payment, new RipplePaymentTransaction(serObjRead));
 		ByteBuffer writtenObj = binSer.writeSerializedObject(serObjRead);

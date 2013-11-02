@@ -2,6 +2,7 @@ package jrippleapi.core;
 
 import jrippleapi.connection.JSONSerializable;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
+import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
 import jrippleapi.serialization.RippleBinaryObject;
 
 import org.json.simple.JSONObject;
@@ -23,9 +24,22 @@ public class RipplePaymentTransaction implements JSONSerializable {
 	}
 	
 	public RipplePaymentTransaction(RippleBinaryObject serObj){
+		if(serObj.getTransactionType()!=TransactionTypes.PAYMENT){
+			throw new RuntimeException("The RippleBinaryObject is not a payment transaction, but a "+serObj.getTransactionType());
+		}
 		payer = (RippleAddress) serObj.getField(BinaryFormatField.Account);
 		payee = (RippleAddress) serObj.getField(BinaryFormatField.Destination);
 		amount = (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Amount);
+	}
+
+	public RippleBinaryObject getBinaryObject() {
+		RippleBinaryObject rbo = new RippleBinaryObject();
+		rbo.putField(BinaryFormatField.TransactionType, (int) TransactionTypes.PAYMENT.byteValue);
+		rbo.putField(BinaryFormatField.Account, this.payer);
+		rbo.putField(BinaryFormatField.Destination, this.payee);
+		rbo.putField(BinaryFormatField.Amount, this.amount);
+
+		return rbo;
 	}
 
 	public JSONObject getTxJSON() {
@@ -130,7 +144,6 @@ public class RipplePaymentTransaction implements JSONSerializable {
 		} else if (!txHash.equals(other.txHash))
 			return false;
 		return true;
-	}
-	
+	}	
 	
 }

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import jrippleapi.core.RipplePaymentTransaction;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
@@ -18,14 +17,7 @@ public class RippleBinaryObject {
 
 	public RippleBinaryObject(){
 	}
-	
-	public RippleBinaryObject(RipplePaymentTransaction payment){
-		fields.put(BinaryFormatField.TransactionType, (int) TransactionTypes.PAYMENT.byteValue);
-		fields.put(BinaryFormatField.Account, payment.payer);
-		fields.put(BinaryFormatField.Destination, payment.payee);
-		fields.put(BinaryFormatField.Amount, payment.amount);
-	}
-	
+		
 	public Object getField(BinaryFormatField transactiontype) {
 		Object obj = fields.get(transactiontype);
 		if(obj==null){
