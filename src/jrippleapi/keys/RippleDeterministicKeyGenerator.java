@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.Security;
 
-import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.core.RipplePublicGeneratorAddress;
 import jrippleapi.core.RipplePublicKey;
@@ -13,7 +12,6 @@ import jrippleapi.core.RippleSeedAddress;
 
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
@@ -30,7 +28,7 @@ public class RippleDeterministicKeyGenerator {
 	}
 
 	public RippleDeterministicKeyGenerator(RippleSeedAddress secret) {
-		seedBytes = secret.getBytes();
+		this(secret.getBytes());
 	}
 
 	public RippleDeterministicKeyGenerator(byte[] bytesSeed) {
@@ -51,7 +49,7 @@ public class RippleDeterministicKeyGenerator {
 		}
 	}
 
-	public byte[] getPrivateRootKeyBytes() {
+	protected byte[] getPrivateRootKeyBytes() {
 		for(int seq=0;; seq++){
 			byte[] seqBytes = ByteBuffer.allocate(4).putInt(seq).array();
 			byte[] seedAndSeqBytes = Arrays.concatenate(seedBytes, seqBytes);
@@ -65,31 +63,10 @@ public class RippleDeterministicKeyGenerator {
 	}
 
 	//PublicGenerator is also known as PublicRootKey
-	public ECPoint getPublicGeneratorPoint() {
+	protected ECPoint getPublicGeneratorPoint() {
 		byte[] privateGeneratorBytes = getPrivateRootKeyBytes();
         ECPoint publicGenerator = new RipplePrivateKey(privateGeneratorBytes).getPublicKey().getPublicPoint();
 		return publicGenerator;
-	}
-
-	public ECPoint getAccountPublicPoint(int accountNumber) {
-		//FIXME This method should be able to generate public addresses from the publicGenerator only (Deterministic watch only addresses)
-		ECPoint publicGeneratorPoint = getPublicGeneratorPoint();
-		byte[] publicGeneratorBytes = publicGeneratorPoint.getEncoded();
-		byte[] accountNumberBytes = ByteBuffer.allocate(4).putInt(accountNumber).array();
-		byte[] publicGeneratorAccountSeqHashBytes;
-		for(int subSequence=0;; subSequence++){
-			byte[] subSequenceBytes = ByteBuffer.allocate(4).putInt(subSequence).array();
-			byte[] pubGenAccountSubSeqBytes = Arrays.concatenate(publicGeneratorBytes, accountNumberBytes, subSequenceBytes);
-			publicGeneratorAccountSeqHashBytes = halfSHA512(pubGenAccountSubSeqBytes);
-
-			BigInteger pubGenSeqSubSeqHashBI = new BigInteger(1, publicGeneratorAccountSeqHashBytes);
-	        if(pubGenSeqSubSeqHashBI.compareTo(SECP256K1_PARAMS.getN()) ==-1){
-	        	break;
-	        }
-		}
-		ECPoint temporaryPublicPoint = new RipplePrivateKey(publicGeneratorAccountSeqHashBytes).getPublicKey().getPublicPoint();
-        ECPoint accountPublicKeyPoint = publicGeneratorPoint.add(temporaryPublicPoint);
-        return accountPublicKeyPoint;
 	}
 
 	public RipplePrivateKey getAccountPrivateKey(int accountNumber) {
@@ -114,18 +91,30 @@ public class RippleDeterministicKeyGenerator {
 	}
 
 	public RipplePublicKey getAccountPublicKey(int accountNumber) {
-		return new RipplePublicKey(getAccountPublicBytes(accountNumber));
-	}
+		//FIXME This method should be able to generate public addresses from the publicGenerator only (Deterministic watch only addresses)
+		ECPoint publicGeneratorPoint = getPublicGeneratorPoint();
+		byte[] publicGeneratorBytes = publicGeneratorPoint.getEncoded();
+		byte[] accountNumberBytes = ByteBuffer.allocate(4).putInt(accountNumber).array();
+		byte[] publicGeneratorAccountSeqHashBytes;
+		for(int subSequence=0;; subSequence++){
+			byte[] subSequenceBytes = ByteBuffer.allocate(4).putInt(subSequence).array();
+			byte[] pubGenAccountSubSeqBytes = Arrays.concatenate(publicGeneratorBytes, accountNumberBytes, subSequenceBytes);
+			publicGeneratorAccountSeqHashBytes = halfSHA512(pubGenAccountSubSeqBytes);
 
-	private byte[] getAccountPublicBytes(int accountNumber) {
-		ECPoint publicKey = getAccountPublicPoint(accountNumber);
-		return publicKey.getEncoded();
+			BigInteger pubGenSeqSubSeqHashBI = new BigInteger(1, publicGeneratorAccountSeqHashBytes);
+	        if(pubGenSeqSubSeqHashBI.compareTo(SECP256K1_PARAMS.getN()) ==-1){
+	        	break;
+	        }
+		}
+		ECPoint temporaryPublicPoint = new RipplePrivateKey(publicGeneratorAccountSeqHashBytes).getPublicKey().getPublicPoint();
+        ECPoint accountPublicKeyPoint = publicGeneratorPoint.add(temporaryPublicPoint);
+		byte[] publicKeyBytes = accountPublicKeyPoint.getEncoded();
+		return new RipplePublicKey(publicKeyBytes);
 	}
 
 	public RipplePublicGeneratorAddress getPublicGeneratorFamily() throws Exception {
 		byte[] publicGeneratorBytes = getPublicGeneratorPoint().getEncoded();
 		return new RipplePublicGeneratorAddress(publicGeneratorBytes);
 	}
-
 	
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jrippleapi.core.Account;
+import jrippleapi.core.RippleSeedAddress;
 
 import org.jboss.jreadline.complete.CompleteOperation;
 import org.jboss.jreadline.complete.Completion;
@@ -113,7 +113,7 @@ public class JRippleCliMain {
 			return null;
 		}
 	};
-	private Account rippleAccount;
+	private RippleSeedAddress rippleAccount;
 
 	public JRippleCliMain() throws Exception {
 		// Settings.getInstance().setAnsiConsole(false);
@@ -123,7 +123,8 @@ public class JRippleCliMain {
 		console.addCompletion(completer);
 		
 		JSONObject jsonWallet = (JSONObject) new JSONParser().parse(new FileReader("jrippleapi-wallet.json"));
-		rippleAccount = new Account(jsonWallet);
+		String seedStr = (String)jsonWallet.get("master_seed");
+		rippleAccount = new RippleSeedAddress(seedStr);
 	}
 
 	private void execute() throws IOException {
@@ -137,7 +138,7 @@ public class JRippleCliMain {
 				line = line.trim();
 				//Maybe we should parse the command line here?
 				if (line.equalsIgnoreCase("lsaddr")) {
-					console.pushToConsole(this.rippleAccount.address.toString()+"\n");
+					console.pushToConsole(this.rippleAccount.getPublicRippleAddress().toString()+"\n");
 				}
 				else if (line.equalsIgnoreCase("mkpayment")) {
 					executeMkPayment(line);

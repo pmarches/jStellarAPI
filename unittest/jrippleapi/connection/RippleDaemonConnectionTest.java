@@ -9,11 +9,11 @@ import java.math.BigDecimal;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.core.Account;
-import jrippleapi.core.AccountTest;
+import jrippleapi.TestUtilities;
 import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePaymentTransaction;
+import jrippleapi.core.RippleSeedAddress;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -24,7 +24,7 @@ public class RippleDaemonConnectionTest {
 	
 	@BeforeClass
 	public static void setupConnection() throws Exception{
-		conn = new RippleDaemonConnection();
+		conn = new RippleDaemonConnection(RippleDaemonConnection.RIPPLE_SERVER_URL);
 	}
 	
 	@AfterClass
@@ -75,16 +75,17 @@ public class RippleDaemonConnectionTest {
 	@Test
 //	@Ignore
 	public void testPayment() throws Exception{
+		RippleSeedAddress secret = TestUtilities.getTestSeed();
 		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
 		oneXRP.issuer=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
 		oneXRP.amount=new BigDecimal("1000000");
-		conn.sendPayment(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP);
+		conn.sendPayment(secret, RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP);
 
 		DenominatedIssuedCurrency oneMiliBTC = new DenominatedIssuedCurrency();
 		oneMiliBTC.issuer=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
 		oneMiliBTC.currency="BTC";
 		oneMiliBTC.amount=new BigDecimal("0.001");
-		conn.sendPayment(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneMiliBTC);
+		conn.sendPayment(TestUtilities.getTestSeed(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneMiliBTC);
 	}
 	
 	@Test
@@ -93,7 +94,7 @@ public class RippleDaemonConnectionTest {
 		trustAmount.currency="BTC";
 		trustAmount.issuer=RippleAddress.RIPPLE_ADDRESS_PMARCHES;
 		trustAmount.amount=new BigDecimal("1");
-		conn.setTrustLine(AccountTest.getTestAccount(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, trustAmount);
+		conn.setTrustLine(TestUtilities.getTestSeed(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, trustAmount);
 	}
 	
 	@Test
@@ -107,9 +108,9 @@ public class RippleDaemonConnectionTest {
 		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
 		oneXRP.issuer=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
 		oneXRP.amount=new BigDecimal("1000000");
-		Account testAccount=AccountTest.getTestAccount();
-		RipplePaymentTransaction tx = new RipplePaymentTransaction(testAccount.address, RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP);
-		RipplePaymentTransaction signedTx = conn.signTransaction(testAccount.secret, tx);
+		RippleSeedAddress testAccount=TestUtilities.getTestSeed();
+		RipplePaymentTransaction tx = new RipplePaymentTransaction(testAccount.getPublicRippleAddress(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP);
+		RipplePaymentTransaction signedTx = conn.signTransaction(testAccount, tx);
 		assertNotNull(signedTx.publicKeyUsedToSign);
 		assertNotNull(signedTx.signature);
 	}

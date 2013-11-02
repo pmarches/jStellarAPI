@@ -21,7 +21,7 @@ public class RipplePrivateKey extends RippleIdentifier {
 	public RipplePrivateKey(BigInteger privateKeyForAccount) {
 		super(new byte[32], 34); //new byte[] will be stored in payloadBytes
 		//toArray will return the minimum number of bytes required to encode the biginteger. Could be less than 32bytes
-		//in addition, toArray will have the first byte for the sign (should always be 0)
+		//in addition, toArray seems to have the first byte for the sign (should always be 0)
 		byte[] bigIntegerBytes = privateKeyForAccount.toByteArray(); 
 		int nbBytesMissing=33-bigIntegerBytes.length;
 		System.arraycopy(bigIntegerBytes, nbBytesMissing+1, payloadBytes, 0, bigIntegerBytes.length-1);

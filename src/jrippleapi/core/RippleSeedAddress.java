@@ -20,4 +20,8 @@ public class RippleSeedAddress extends RippleIdentifier {
 //		System.out.println("pubkey "+pubKeyStr);
 		return signingPrivateKey;
 	}
+
+	public RippleAddress getPublicRippleAddress() {
+		return getPrivateKey(0).getPublicKey().getAddress();
+	}
 }

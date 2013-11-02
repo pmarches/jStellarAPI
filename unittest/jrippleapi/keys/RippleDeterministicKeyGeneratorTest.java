@@ -9,9 +9,6 @@ import java.security.Security;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.core.Account;
-import jrippleapi.core.AccountTest;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
 
@@ -40,12 +37,4 @@ public class RippleDeterministicKeyGeneratorTest {
 		assertEquals("aBRoQibi2jpDofohooFuzZi9nEzKw9Zdfc4ExVNmuXHaJpSPh8uJ", generator.getAccountPublicKey(0).toString());
 		assertEquals("rhcfR9Cg98qCxHpCcPBmMonbDBXo84wyTn", generator.getAccountPublicKey(0).getAddress().toString());
 	}
-	
-	@Test
-	public void testOurAccount() throws Exception{
-		Account testAccount = AccountTest.getTestAccount();
-		RippleDeterministicKeyGenerator generator = new RippleDeterministicKeyGenerator(testAccount.secret);
-		assertEquals(testAccount.address, generator.getAccountPublicKey(0).getAddress());
-	}
-
 }

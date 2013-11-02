@@ -7,9 +7,9 @@ import java.nio.ByteBuffer;
 
 import javax.xml.bind.DatatypeConverter;
 
+import jrippleapi.TestUtilities;
 import jrippleapi.connection.GenericJSONSerializable;
 import jrippleapi.connection.RippleDaemonConnection;
-import jrippleapi.core.AccountTest;
 import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySerializer;
@@ -24,7 +24,7 @@ public class RippleSignerTest {
 	@Test
 	public void testSubmitSignedTransaction() throws Exception{
 		RippleBinarySerializer binSer=new RippleBinarySerializer();
-		RipplePrivateKey privateKey = AccountTest.getTestAccount().secret.getPrivateKey(0);
+		RipplePrivateKey privateKey = TestUtilities.getTestSeed().getPrivateKey(0);
 		RippleSigner signer = new RippleSigner(privateKey);
 		JSONArray allTx = (JSONArray) new JSONParser().parse(new FileReader("testdata/unittest-tx.json"));
 		for(Object obj : allTx){
@@ -40,7 +40,7 @@ public class RippleSignerTest {
 			byte[] hashOfTXBytes = signer.sign(serObj);
 			byte[] signedBytes = binSer.writeSerializedObject(serObj).array();
 
-			GenericJSONSerializable submitResult = new RippleDaemonConnection().submitTransaction(signedBytes);
+			GenericJSONSerializable submitResult = new RippleDaemonConnection(RippleDaemonConnection.RIPPLE_SERVER_URL).submitTransaction(signedBytes);
 //			assertNull(submitResult.jsonCommandResult.get("error_exception"));
 			assertEquals("This sequence number has already past.", submitResult.jsonCommandResult.get("engine_result_message"));
 		}

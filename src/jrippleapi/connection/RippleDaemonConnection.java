@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 
 import javax.xml.bind.DatatypeConverter;
 
-import jrippleapi.core.Account;
 import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePaymentTransaction;
@@ -26,8 +25,8 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 	public final static URI LOCALHOST_SERVER_URL=URI.create("ws://localhost:5006");
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
     
-    public RippleDaemonConnection() throws Exception {
-    	super(RIPPLE_SERVER_URL);
+    public RippleDaemonConnection(URI rippledURI) throws Exception {
+    	super(rippledURI);
 	}
     
 	@OnWebSocketMessage
@@ -167,16 +166,16 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 //		sendCommand(command, new );
 //	}
 	
-	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(Account payer, RippleAddress payee, DenominatedIssuedCurrency amount){	
-		JSONObject jsonTx = new RipplePaymentTransaction(payer.address, payee, amount).getTxJSON();
+	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(RippleSeedAddress payer, RippleAddress payee, DenominatedIssuedCurrency amount){	
+		JSONObject jsonTx = new RipplePaymentTransaction(payer.getPublicRippleAddress(), payee, amount).getTxJSON();
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	command.put("tx_json", jsonTx);
-    	command.put("secret", payer.secret.toString());
+    	command.put("secret", payer.toString());
 		return sendCommand(command, new GenericJSONSerializable());
 	}
 	
-	public GenericJSONSerializable sendPayment(Account payer, RippleAddress payee, DenominatedIssuedCurrency amount){
+	public GenericJSONSerializable sendPayment(RippleSeedAddress payer, RippleAddress payee, DenominatedIssuedCurrency amount){
 		try {
 			return sendPaymentFuture(payer, payee, amount).get();
 		} catch (InterruptedException | ExecutionException e) {
@@ -185,20 +184,20 @@ public class RippleDaemonConnection extends AbstractRippleMessageHandler {
 		}
 	}
 	
-	public Future<GenericJSONSerializable> setCreditLineFuture(Account creditorAccount, RippleAddress debtorAccount, DenominatedIssuedCurrency creditAmount){
+	public Future<GenericJSONSerializable> setCreditLineFuture(RippleSeedAddress creditorAccount, RippleAddress debtorAccount, DenominatedIssuedCurrency creditAmount){
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	JSONObject jsonTx = new JSONObject();
     	jsonTx.put("TransactionType", "TrustSet");
-    	jsonTx.put("Account", creditorAccount.address.toString());
+    	jsonTx.put("Account", creditorAccount.getPublicRippleAddress().toString());
     	jsonTx.put("LimitAmount", creditAmount.toJSON());
     	
 		command.put("tx_json", jsonTx);
-    	command.put("secret", creditorAccount.secret.toString());
+    	command.put("secret", creditorAccount.toString());
 		return sendCommand(command, new GenericJSONSerializable());
 	}
 
-	public GenericJSONSerializable setTrustLine(Account creditorAccount, RippleAddress debtorAccount, DenominatedIssuedCurrency creditAmount){
+	public GenericJSONSerializable setTrustLine(RippleSeedAddress creditorAccount, RippleAddress debtorAccount, DenominatedIssuedCurrency creditAmount){
 		try {
 			return setCreditLineFuture(creditorAccount, debtorAccount, creditAmount).get();
 		} catch (Exception e) {
