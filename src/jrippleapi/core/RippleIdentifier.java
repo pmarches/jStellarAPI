@@ -1,22 +1,16 @@
 package jrippleapi.core;
 
-import java.security.MessageDigest;
-import java.security.Security;
 import java.util.Arrays;
 
 import jrippleapi.keys.RippleBase58;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 
 public class RippleIdentifier {
 	String humanReadableIdentifier;
 	byte[] payloadBytes;
 	int identifierType;
-	
-	static {
-		Security.addProvider(new BouncyCastleProvider());
-	}
-	
+		
 	/**
 	 * @param payloadBytes
 	 * @param identifierType : See https://ripple.com/wiki/Encodings
@@ -40,16 +34,15 @@ public class RippleIdentifier {
 			versionPayloadChecksumBytes[0]=(byte) identifierType;
 			System.arraycopy(payloadBytes, 0, versionPayloadChecksumBytes, 1, payloadBytes.length);
 
-			try {
-				MessageDigest mda = MessageDigest.getInstance("SHA-256", "BC");
-				mda.update(versionPayloadChecksumBytes, 0, 1+payloadBytes.length);
-				byte[] firstHash = mda.digest();
-				mda.reset();
-				System.arraycopy(mda.digest(firstHash ), 0, versionPayloadChecksumBytes, 1+payloadBytes.length, 4);
-				humanReadableIdentifier=RippleBase58.encode(versionPayloadChecksumBytes);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+			SHA256Digest mda = new SHA256Digest();
+			mda.update(versionPayloadChecksumBytes, 0, 1+payloadBytes.length);
+			byte[] hashBytes = new byte[32];
+			mda.doFinal(hashBytes, 0);
+			mda.reset();
+			mda.update(hashBytes, 0, hashBytes.length);
+			mda.doFinal(hashBytes, 0);
+			System.arraycopy(hashBytes, 0, versionPayloadChecksumBytes, 1+payloadBytes.length, 4);
+			humanReadableIdentifier=RippleBase58.encode(versionPayloadChecksumBytes);
 		}
 		return humanReadableIdentifier;
 	}
