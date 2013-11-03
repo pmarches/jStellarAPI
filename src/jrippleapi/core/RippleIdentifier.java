@@ -1,12 +1,14 @@
 package jrippleapi.core;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import jrippleapi.keys.RippleBase58;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
-public class RippleIdentifier {
+public class RippleIdentifier implements Serializable {
+	private static final long serialVersionUID = -6009723401818144454L;
 	String humanReadableIdentifier;
 	byte[] payloadBytes;
 	int identifierType;

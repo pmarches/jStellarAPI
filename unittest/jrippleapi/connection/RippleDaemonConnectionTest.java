@@ -20,11 +20,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RippleDaemonConnectionTest {
-	static RippleDaemonConnection conn;
+	static RippleDaemonWebsocketConnection conn;
 	
 	@BeforeClass
 	public static void setupConnection() throws Exception{
-		conn = new RippleDaemonConnection(RippleDaemonConnection.RIPPLE_SERVER_URL);
+		conn = new RippleDaemonWebsocketConnection(RippleDaemonWebsocketConnection.RIPPLE_SERVER_URL);
 	}
 	
 	@AfterClass
@@ -109,7 +109,7 @@ public class RippleDaemonConnectionTest {
 		oneXRP.issuer=RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI;
 		oneXRP.amount=new BigDecimal("1000000");
 		RippleSeedAddress testAccount=TestUtilities.getTestSeed();
-		RipplePaymentTransaction tx = new RipplePaymentTransaction(testAccount.getPublicRippleAddress(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP);
+		RipplePaymentTransaction tx = new RipplePaymentTransaction(testAccount.getPublicRippleAddress(), RippleAddress.RIPPLE_ADDRESS_PMARCHES, oneXRP, 1);
 		RipplePaymentTransaction signedTx = conn.signTransaction(testAccount, tx);
 		assertNotNull(signedTx.publicKeyUsedToSign);
 		assertNotNull(signedTx.signature);

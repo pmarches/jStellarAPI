@@ -9,7 +9,7 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 public class WebSocketConnection {
 	WebSocketClient wsclient = new WebSocketClient(new SslContextFactory());
 	
-    public WebSocketConnection(URI serverURI, AbstractRippleMessageHandler msgHandler) throws Exception {
+    public WebSocketConnection(URI serverURI, RippleDaemonWebsocketConnection msgHandler) throws Exception {
     	wsclient.start();
     	msgHandler.session=wsclient.connect(msgHandler, serverURI, new ClientUpgradeRequest()).get();
 	}

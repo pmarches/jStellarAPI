@@ -12,15 +12,19 @@ public class RipplePaymentTransaction implements JSONSerializable {
 	public RippleAddress payee;
 	public DenominatedIssuedCurrency amount;
 	public String signedTransactionBlob;
-	public Long sequenceNumber;
+	public long sequenceNumber;
 	public String txHash;
 	public String signature;
 	public String publicKeyUsedToSign;
+	public DenominatedIssuedCurrency fee;
+	public long flags;
 	
-	public RipplePaymentTransaction(RippleAddress payer, RippleAddress payee, DenominatedIssuedCurrency amount){
+	public RipplePaymentTransaction(RippleAddress payer, RippleAddress payee, DenominatedIssuedCurrency amount, int sequenceNumber){
 		this.payer=payer;
 		this.payee=payee;
 		this.amount = amount;
+		this.sequenceNumber = sequenceNumber;
+		this.fee = new DenominatedIssuedCurrency(10);
 	}
 	
 	public RipplePaymentTransaction(RippleBinaryObject serObj){
@@ -30,6 +34,9 @@ public class RipplePaymentTransaction implements JSONSerializable {
 		payer = (RippleAddress) serObj.getField(BinaryFormatField.Account);
 		payee = (RippleAddress) serObj.getField(BinaryFormatField.Destination);
 		amount = (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Amount);
+		sequenceNumber = (long) serObj.getField(BinaryFormatField.Sequence);
+		fee= (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Fee);
+		flags= (long) serObj.getField(BinaryFormatField.Flags);
 	}
 
 	public RippleBinaryObject getBinaryObject() {
@@ -38,6 +45,9 @@ public class RipplePaymentTransaction implements JSONSerializable {
 		rbo.putField(BinaryFormatField.Account, this.payer);
 		rbo.putField(BinaryFormatField.Destination, this.payee);
 		rbo.putField(BinaryFormatField.Amount, this.amount);
+		rbo.putField(BinaryFormatField.Sequence, this.sequenceNumber);
+		rbo.putField(BinaryFormatField.Fee, this.fee);
+		rbo.putField(BinaryFormatField.Flags, this.flags);
 
 		return rbo;
 	}
@@ -69,81 +79,5 @@ public class RipplePaymentTransaction implements JSONSerializable {
 
 	public String getSignedTxBlob() {
 		return signedTransactionBlob;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((amount == null) ? 0 : amount.hashCode());
-		result = prime * result + ((payee == null) ? 0 : payee.hashCode());
-		result = prime * result + ((payer == null) ? 0 : payer.hashCode());
-		result = prime
-				* result
-				+ ((publicKeyUsedToSign == null) ? 0 : publicKeyUsedToSign
-						.hashCode());
-		result = prime * result
-				+ ((sequenceNumber == null) ? 0 : sequenceNumber.hashCode());
-		result = prime * result
-				+ ((signature == null) ? 0 : signature.hashCode());
-		result = prime
-				* result
-				+ ((signedTransactionBlob == null) ? 0 : signedTransactionBlob
-						.hashCode());
-		result = prime * result + ((txHash == null) ? 0 : txHash.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		RipplePaymentTransaction other = (RipplePaymentTransaction) obj;
-		if (amount == null) {
-			if (other.amount != null)
-				return false;
-		} else if (!amount.equals(other.amount))
-			return false;
-		if (payee == null) {
-			if (other.payee != null)
-				return false;
-		} else if (!payee.equals(other.payee))
-			return false;
-		if (payer == null) {
-			if (other.payer != null)
-				return false;
-		} else if (!payer.equals(other.payer))
-			return false;
-		if (publicKeyUsedToSign == null) {
-			if (other.publicKeyUsedToSign != null)
-				return false;
-		} else if (!publicKeyUsedToSign.equals(other.publicKeyUsedToSign))
-			return false;
-		if (sequenceNumber == null) {
-			if (other.sequenceNumber != null)
-				return false;
-		} else if (!sequenceNumber.equals(other.sequenceNumber))
-			return false;
-		if (signature == null) {
-			if (other.signature != null)
-				return false;
-		} else if (!signature.equals(other.signature))
-			return false;
-		if (signedTransactionBlob == null) {
-			if (other.signedTransactionBlob != null)
-				return false;
-		} else if (!signedTransactionBlob.equals(other.signedTransactionBlob))
-			return false;
-		if (txHash == null) {
-			if (other.txHash != null)
-				return false;
-		} else if (!txHash.equals(other.txHash))
-			return false;
-		return true;
 	}	
-	
 }

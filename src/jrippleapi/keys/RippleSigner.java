@@ -35,14 +35,13 @@ public class RippleSigner {
 		if(serObjToSign.getField(BinaryFormatField.TxnSignature)!=null){
 			throw new Exception("Object already signed");
 		}
-		byte[] hashOfRBOBytes = serObjToSign.generateHashFromBinaryObject();
-
-		ECDSASignature signature = signHash(hashOfRBOBytes);
-
 		RippleBinaryObject signedRBO = new RippleBinaryObject(serObjToSign);
+		signedRBO.putField(BinaryFormatField.SigningPubKey, privateKey.getPublicKey().getPublicPoint().getEncoded());
+
+		byte[] hashOfRBOBytes = signedRBO.generateHashFromBinaryObject();
+		ECDSASignature signature = signHash(hashOfRBOBytes);
 		//Add the Signature to the serializedObject as a field
 		signedRBO.putField(BinaryFormatField.TxnSignature, signature.encodeToDER());
-		signedRBO.putField(BinaryFormatField.SigningPubKey, signature.publicSigningKey.getEncoded());
 		return signedRBO;
 	}
 

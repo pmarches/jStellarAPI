@@ -13,7 +13,6 @@ public class TestUtilities {
 	
 	public static RippleSeedAddress getTestSeed() throws Exception {
 		if(rippleAccount==null){
-			JSONParser parser = new JSONParser();
 			JSONObject jsonWallet = (JSONObject) new JSONParser().parse(new FileReader("jrippleapi-wallet.json"));
 			String seedStr = (String)jsonWallet.get("master_seed");
 			rippleAccount = new RippleSeedAddress(seedStr);

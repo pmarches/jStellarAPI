@@ -20,10 +20,14 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		this.currency = currencyStr;
 	}
 	
-	public DenominatedIssuedCurrency(BigDecimal amount) {
-		this.amount=amount;
+	public DenominatedIssuedCurrency(BigDecimal xrpAmount) {
+		this.amount=xrpAmount;
 	}
 	
+	public DenominatedIssuedCurrency(int xrpAmount) {
+		this(BigDecimal.valueOf(xrpAmount));
+	}
+
 	@Override
 	public String toString() {
 		if(issuer==null || currency==null){

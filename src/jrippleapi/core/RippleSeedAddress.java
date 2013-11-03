@@ -3,6 +3,7 @@ package jrippleapi.core;
 import jrippleapi.keys.RippleDeterministicKeyGenerator;
 
 public class RippleSeedAddress extends RippleIdentifier {
+	private static final long serialVersionUID = 1845189349528742766L;
 
 	public RippleSeedAddress(byte[] payloadBytes) {
 		super(payloadBytes, 33);

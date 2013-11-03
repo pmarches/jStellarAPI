@@ -106,4 +106,9 @@ public class RippleBinaryObject {
 		return fields.remove(fieldToBeRemoved);
 	}
 
+	@Override
+	public String toString() {
+		return "RippleBinaryObject [fields=" + fields + "]";
+	}
+
 }

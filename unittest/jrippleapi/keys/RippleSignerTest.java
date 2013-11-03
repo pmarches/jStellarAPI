@@ -10,7 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import jrippleapi.TestUtilities;
 import jrippleapi.connection.GenericJSONSerializable;
-import jrippleapi.connection.RippleDaemonConnection;
+import jrippleapi.connection.RippleDaemonWebsocketConnection;
 import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.serialization.RippleBinaryObject;
 import jrippleapi.serialization.RippleBinarySerializer;
@@ -37,7 +37,7 @@ public class RippleSignerTest {
 			
 			RippleBinaryObject reSignedRBO = signer.sign(originalSignedRBO.getUnsignedCopy());
 			byte[] signedBytes = binSer.writeBinaryObject(reSignedRBO).array();
-			GenericJSONSerializable submitResult = new RippleDaemonConnection(RippleDaemonConnection.RIPPLE_SERVER_URL).submitTransaction(signedBytes);
+			GenericJSONSerializable submitResult = new RippleDaemonWebsocketConnection(RippleDaemonWebsocketConnection.RIPPLE_SERVER_URL).submitTransaction(signedBytes);
 //			assertNull(submitResult.jsonCommandResult.get("error_exception"));
 			assertEquals("This sequence number has already past.", submitResult.jsonCommandResult.get("engine_result_message"));
 			assertTrue(signer.isSignatureVerified(reSignedRBO));
