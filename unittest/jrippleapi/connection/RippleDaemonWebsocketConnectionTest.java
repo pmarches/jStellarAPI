@@ -19,7 +19,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class RippleDaemonConnectionTest {
+public class RippleDaemonWebsocketConnectionTest {
 	static RippleDaemonWebsocketConnection conn;
 	
 	@BeforeClass
@@ -34,7 +34,7 @@ public class RippleDaemonConnectionTest {
 	
 	@Test
 	public void testAccountInfo() throws Exception {
-		AccountInformation jRippleAccount = conn.getAccountInfo(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString());
+		RippleAddressPublicInformation jRippleAccount = conn.getAccountInfo(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString());
 		assertEquals(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString(), jRippleAccount.account);
 		assertEquals(1, jRippleAccount.xrpBalance.compareTo(BigDecimal.valueOf(200)));
 	}

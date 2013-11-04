@@ -4,10 +4,19 @@ import static org.junit.Assert.*;
 
 import javax.xml.bind.DatatypeConverter;
 
+import jrippleapi.core.RippleAddress;
+
 import org.junit.Test;
 
 public class RippleDaemonRPCConnectionTest {
 
+	@Test
+	public void testAccountPublicInfo() throws Exception{
+		RippleDaemonRPCConnection rpcConnection = new RippleDaemonRPCConnection();
+		RippleAddressPublicInformation publicInfo = rpcConnection.getPublicInformation(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI);
+		assertTrue(publicInfo.lastTransactionSequence>159);
+	}
+	
 	@Test
 	public void testSubmitTransaction() throws Exception {
 		RippleDaemonRPCConnection rpcConnection = new RippleDaemonRPCConnection();

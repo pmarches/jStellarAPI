@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import jrippleapi.connection.RippleAddressPublicInformation;
 import jrippleapi.connection.RippleDaemonRPCConnection;
 import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
@@ -25,11 +26,26 @@ public class RippleWallet implements Serializable {
 	RippleSeedAddress seed;
 	int lastTransactionSequenceNumber;
 	byte[] pendingTransaction;
-	
+
+	public RippleWallet(RippleSeedAddress seed, File walletFile) throws IOException{
+		this(seed, -1, walletFile);
+	}
+
 	public RippleWallet(RippleSeedAddress seed, int lastTransactionSequenceNumber, File walletFile) throws IOException{
 		this.seed = seed;
 		this.lastTransactionSequenceNumber = lastTransactionSequenceNumber;
 		this.walletFile=walletFile;
+
+		if(lastTransactionSequenceNumber<0){
+			try {
+				RippleDaemonRPCConnection conn = new RippleDaemonRPCConnection();
+				RippleAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicRippleAddress());
+				this.lastTransactionSequenceNumber=(int) publicInfo.lastTransactionSequence;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		//TODO recover any pending transactions
 		saveWallet(walletFile);
 	}
 	

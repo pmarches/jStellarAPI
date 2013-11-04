@@ -83,14 +83,14 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 		}
 	}
 	
-	public Future<AccountInformation> getAccountInfoFuture(String account){
+	public Future<RippleAddressPublicInformation> getAccountInfoFuture(String account){
 		JSONObject accountInfoComand = new JSONObject();
 		accountInfoComand.put("command", "account_info");
 		accountInfoComand.put("account", account);
-		return sendCommand(accountInfoComand, new AccountInformation());
+		return sendCommand(accountInfoComand, new RippleAddressPublicInformation());
 	}
 	
-	public AccountInformation getAccountInfo(String account){
+	public RippleAddressPublicInformation getAccountInfo(String account){
 		try {
 			return getAccountInfoFuture(account).get();
 		} catch (InterruptedException | ExecutionException e) {
