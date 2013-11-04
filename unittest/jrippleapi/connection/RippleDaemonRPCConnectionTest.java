@@ -14,7 +14,7 @@ public class RippleDaemonRPCConnectionTest {
 	public void testAccountPublicInfo() throws Exception{
 		RippleDaemonRPCConnection rpcConnection = new RippleDaemonRPCConnection();
 		RippleAddressPublicInformation publicInfo = rpcConnection.getPublicInformation(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI);
-		assertTrue(publicInfo.lastTransactionSequence>159);
+		assertTrue(publicInfo.nextTransactionSequence>159);
 	}
 	
 	@Test

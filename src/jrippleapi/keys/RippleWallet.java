@@ -24,29 +24,26 @@ public class RippleWallet implements Serializable {
 
 	transient File walletFile;
 	RippleSeedAddress seed;
-	int lastTransactionSequenceNumber;
+	int nextTransactionSequenceNumber;
 	byte[] pendingTransaction;
 
-	public RippleWallet(RippleSeedAddress seed, File walletFile) throws IOException{
-		this(seed, -1, walletFile);
+	protected RippleWallet(RippleSeedAddress seed, int nextTransactionSequenceNumber, File walletFile) throws IOException{
+		this.seed = seed;
+		this.nextTransactionSequenceNumber = nextTransactionSequenceNumber;
+		this.walletFile=walletFile;
 	}
 
-	public RippleWallet(RippleSeedAddress seed, int lastTransactionSequenceNumber, File walletFile) throws IOException{
-		this.seed = seed;
-		this.lastTransactionSequenceNumber = lastTransactionSequenceNumber;
-		this.walletFile=walletFile;
+	static public RippleWallet createWallet(RippleSeedAddress seed, File walletFile) {
+		try {
+			RippleDaemonRPCConnection conn = new RippleDaemonRPCConnection();
+			RippleAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicRippleAddress());
 
-		if(lastTransactionSequenceNumber<0){
-			try {
-				RippleDaemonRPCConnection conn = new RippleDaemonRPCConnection();
-				RippleAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicRippleAddress());
-				this.lastTransactionSequenceNumber=(int) publicInfo.lastTransactionSequence;
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+			RippleWallet wallet = new RippleWallet(seed, (int) publicInfo.nextTransactionSequence, walletFile);
+			wallet.saveWallet(walletFile);
+			return wallet;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-		//TODO recover any pending transactions
-		saveWallet(walletFile);
 	}
 	
 	public RippleWallet(File walletFile) throws Exception {
@@ -57,7 +54,7 @@ public class RippleWallet implements Serializable {
 		if(walletFile.canRead()){
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(walletFile));
 			seed = (RippleSeedAddress) ois.readObject();
-			lastTransactionSequenceNumber = ois.readInt();
+			nextTransactionSequenceNumber = ois.readInt();
 			pendingTransaction=(byte[]) ois.readObject();
 			ois.close();
 		}
@@ -72,14 +69,14 @@ public class RippleWallet implements Serializable {
 	 */
 	public void sendXRP(BigInteger xrpAmount, RippleAddress payee) throws Exception{
 		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(new BigDecimal(xrpAmount));
-		lastTransactionSequenceNumber++;
-		RipplePaymentTransaction tx = new RipplePaymentTransaction(seed.getPublicRippleAddress(), payee, amount, this.lastTransactionSequenceNumber);
+		RipplePaymentTransaction tx = new RipplePaymentTransaction(seed.getPublicRippleAddress(), payee, amount, this.nextTransactionSequenceNumber);
 		RippleBinaryObject rbo = tx.getBinaryObject();
 		rbo = new RippleSigner(seed.getPrivateKey(0)).sign(rbo);
 
 		RippleDaemonRPCConnection conn = new RippleDaemonRPCConnection();
 		byte[] signedTXBytes = new RippleBinarySerializer().writeBinaryObject(rbo).array();
 		pendingTransaction = signedTXBytes;
+		nextTransactionSequenceNumber++;
 		saveWallet(walletFile);
 		conn.submitTransaction(signedTXBytes);
 		pendingTransaction = null;
@@ -90,7 +87,7 @@ public class RippleWallet implements Serializable {
 		File tempWalletFile = new File(saveToFile.getAbsolutePath()+".tmp");
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempWalletFile));
 		oos.writeObject(seed);
-		oos.writeInt(lastTransactionSequenceNumber);
+		oos.writeInt(nextTransactionSequenceNumber);
 		oos.writeObject(pendingTransaction);
 		oos.close();
 
