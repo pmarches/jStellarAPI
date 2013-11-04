@@ -249,7 +249,7 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 
 	public Future<GenericJSONSerializable> submitTransactionFuture(byte[] signedTransactionBytes){
 		JSONObject command = new JSONObject();
-		command.put("method", "submit");
+		command.put("command", "submit");
 		command.put("tx_blob", DatatypeConverter.printHexBinary(signedTransactionBytes));
 		return sendCommand(command, new GenericJSONSerializable());
 	}
