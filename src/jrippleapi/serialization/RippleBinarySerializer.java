@@ -10,6 +10,7 @@ import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePath;
 import jrippleapi.core.RipplePathElement;
 import jrippleapi.core.RipplePathSet;
+import jrippleapi.core.RipplePrivateKey;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 
@@ -246,11 +247,10 @@ public class RippleBinarySerializer {
 			output.put((byte) (longValue&0xFF));
 		}
 		else if(primitive==PrimitiveTypes.UINT64){
-			byte[] biBytes = ((BigInteger) value).toByteArray();
-			if(biBytes.length>8){
+			byte[] biBytes = RipplePrivateKey.bigIntegerToBytes((BigInteger) value, 8);
+			if(biBytes.length!=8){
 				throw new RuntimeException("UINT64 overflow for value "+value);
 			}
-			output.position(output.position()+(8-biBytes.length));
 			output.put(biBytes);
 		}
 		else if(primitive==PrimitiveTypes.HASH128){

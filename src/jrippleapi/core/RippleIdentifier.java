@@ -25,8 +25,16 @@ public class RippleIdentifier implements Serializable {
 	public RippleIdentifier(String stringID) {
 		this.humanReadableIdentifier = stringID;
 		byte[] stridBytes = RippleBase58.decode(stringID);
+		byte[] checksumArray = doubleSha256(stridBytes, 0, stridBytes.length-4);
+		if(    checksumArray[0]!=stridBytes[stridBytes.length-4] 
+			|| checksumArray[1]!=stridBytes[stridBytes.length-3] 
+			|| checksumArray[2]!=stridBytes[stridBytes.length-2]
+			|| checksumArray[3]!=stridBytes[stridBytes.length-1]){
+			throw new RuntimeException("Checksum failed on identifier "+stringID);
+		}
+
 		payloadBytes = Arrays.copyOfRange(stridBytes, 1, stridBytes.length-4);
-		identifierType = stridBytes[0]; //TODO check the checksum 
+		identifierType = stridBytes[0];
 	}
 
 	@Override
@@ -36,17 +44,22 @@ public class RippleIdentifier implements Serializable {
 			versionPayloadChecksumBytes[0]=(byte) identifierType;
 			System.arraycopy(payloadBytes, 0, versionPayloadChecksumBytes, 1, payloadBytes.length);
 
-			SHA256Digest mda = new SHA256Digest();
-			mda.update(versionPayloadChecksumBytes, 0, 1+payloadBytes.length);
-			byte[] hashBytes = new byte[32];
-			mda.doFinal(hashBytes, 0);
-			mda.reset();
-			mda.update(hashBytes, 0, hashBytes.length);
-			mda.doFinal(hashBytes, 0);
+			byte[] hashBytes = doubleSha256(versionPayloadChecksumBytes, 0, 1+payloadBytes.length);
 			System.arraycopy(hashBytes, 0, versionPayloadChecksumBytes, 1+payloadBytes.length, 4);
 			humanReadableIdentifier=RippleBase58.encode(versionPayloadChecksumBytes);
 		}
 		return humanReadableIdentifier;
+	}
+
+	protected byte[] doubleSha256(byte[] bytesToDoubleHash, int offset, int length) {
+		SHA256Digest mda = new SHA256Digest();
+		mda.update(bytesToDoubleHash, offset, length);
+		byte[] hashBytes = new byte[32];
+		mda.doFinal(hashBytes, 0);
+		mda.reset();
+		mda.update(hashBytes, 0, hashBytes.length);
+		mda.doFinal(hashBytes, 0);
+		return hashBytes;
 	}
 
 	public byte[] getBytes() {
