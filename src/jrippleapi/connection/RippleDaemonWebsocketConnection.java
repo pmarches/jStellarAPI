@@ -25,7 +25,8 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 	public Session session;
 		
 	private int requestCounter=1;
-	public final static URI RIPPLE_SERVER_URL=URI.create("wss://s1.ripple.com");
+	//s_west.ripple.com is not a valid URI for certain JVMs because of the underscore character. Use the IP :-(  
+	public final static URI RIPPLE_SERVER_URL=URI.create("ws://54.213.166.225:443");
 	public final static URI LOCALHOST_SERVER_URL=URI.create("ws://localhost:5006");
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
     
@@ -37,11 +38,11 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
     public void onMessage(String msg) {
     	try {
 			JSONObject jsonMessage = (JSONObject) new JSONParser().parse(msg);
-			System.out.println("response:"+jsonMessage.toJSONString());
+//			System.out.println("response:"+jsonMessage.toJSONString());
 			if("response".equals(jsonMessage.get("type"))){
 				responseHolder.setResponseContent(jsonMessage);
 			}
-			else if(jsonMessage.get("error")!=null){
+			else{//FIXME Can we remove this? Errors are responses also?
 				responseHolder.setResponseError(jsonMessage);
 			}
 		} catch (ParseException e) {
@@ -54,7 +55,6 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 	}
 
 	public void sendString(String jsonString) throws IOException {
-		System.out.println(jsonString);
 		session.getRemote().sendString(jsonString);
 	}
 

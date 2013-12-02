@@ -19,18 +19,12 @@ public class RipplePrivateKey extends RippleIdentifier {
 	}
 
 	public static byte[] bigIntegerToBytes(BigInteger biToConvert, int nbBytesToReturn){
-//		System.out.println("biToConvert="+biToConvert);
-//		System.out.println("bitLen="+biToConvert.bitLength());
-//		System.out.println("bitCount="+biToConvert.bitCount());
-//		System.out.println("lowestBit="+biToConvert.getLowestSetBit());
-//		System.out.println("signum="+biToConvert.signum());
-
 		//toArray will return the minimum number of bytes required to encode the biginteger in two's complement.
 		//Could be less than the expected number of bytes
 		byte[] twosComplement = biToConvert.toByteArray();
 		byte[] bytesToReturn=new byte[nbBytesToReturn];
 
-		if(biToConvert.bitLength()!=twosComplement.length*8){
+		if((biToConvert.bitLength()+7)/8!=twosComplement.length){
 			//Two's complement representation has a sign bit set on the most significant byte
 			byte[] twosComplementWithoutSign = new byte[twosComplement.length-1];
 			System.arraycopy(twosComplement, 1, twosComplementWithoutSign, 0, twosComplementWithoutSign.length);

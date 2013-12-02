@@ -62,16 +62,16 @@ public class RippleDaemonWebsocketConnectionTest {
 	@Test
 	public void testAccountOffers() throws Exception {
 		ExchangeOffers offers = conn.getAccountOffers(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString());
-		assertEquals(2, offers.size());
+		assertEquals(1, offers.size());
 		DenominatedIssuedCurrency takerGets0 = offers.get(0).takerGets;
 		DenominatedIssuedCurrency takerPays0 = offers.get(0).takerPays;
 		assertNull(takerGets0.currency);
 		assertEquals("BTC", takerPays0.currency);
 
-		DenominatedIssuedCurrency takerGets1 = offers.get(1).takerGets;
-		DenominatedIssuedCurrency takerPays1 = offers.get(1).takerPays;
-		assertNull(takerGets1.currency);
-		assertEquals("USD", takerPays1.currency);
+//		DenominatedIssuedCurrency takerGets1 = offers.get(1).takerGets;
+//		DenominatedIssuedCurrency takerPays1 = offers.get(1).takerPays;
+//		assertNull(takerGets1.currency);
+//		assertEquals("USD", takerPays1.currency);
 	}
 
 	@Test
@@ -102,7 +102,7 @@ public class RippleDaemonWebsocketConnectionTest {
 	@Test
 	public void testGetCreditLines() throws Exception {
 		TrustLines creditLines = conn.getCreditLines(RippleAddress.RIPPLE_ADDRESS_JRIPPLEAPI.toString());
-		assertEquals(2, creditLines.size());
+		assertEquals(3, creditLines.size());
 	}
 	
 	@Test

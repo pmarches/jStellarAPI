@@ -82,7 +82,7 @@ public class RippleDeterministicKeyGenerator {
 			byte[] publicGeneratorAccountSeqHashBytes = halfSHA512(pubGenAccountSubSeqBytes);
 
 			pubGenSeqSubSeqHashBI = new BigInteger(1, publicGeneratorAccountSeqHashBytes);
-	        if(pubGenSeqSubSeqHashBI.compareTo(privateRootKeyBI) ==-1 && !pubGenSeqSubSeqHashBI.equals(BigInteger.ZERO)){
+	        if(pubGenSeqSubSeqHashBI.compareTo(SECP256K1_PARAMS.getN()) ==-1 && !pubGenSeqSubSeqHashBI.equals(BigInteger.ZERO)){
 	        	break;
 	        }
 		}

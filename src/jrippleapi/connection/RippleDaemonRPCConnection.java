@@ -24,7 +24,7 @@ import org.json.simple.parser.JSONParser;
  */
 public class RippleDaemonRPCConnection extends RippleDaemonConnection {
 	protected URI rippleDaemonURI;
-	public static URI RIPPLE_RPC_URI=URI.create("http://s1.ripple.com:51234");
+	public static URI RIPPLE_RPC_URI=URI.create("http://s_west.ripple.com:51234");
 
 	public RippleDaemonRPCConnection(URI rippleDaemonURI) throws Exception {
 		this.rippleDaemonURI = rippleDaemonURI;
