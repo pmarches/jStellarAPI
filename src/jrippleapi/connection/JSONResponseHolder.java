@@ -46,6 +46,7 @@ public class JSONResponseHolder {
 		}
 		else{
 			response.cancel(true);
+			response.set(jsonMessage);
 		}
 	}
 }

@@ -29,7 +29,9 @@ public class RippleDaemonWebsocketConnectionTest {
 	
 	@AfterClass
 	public static void closeConnection() throws Exception{
-		conn.close();
+		if(conn!=null){
+			conn.close();
+		}
 	}
 	
 	@Test

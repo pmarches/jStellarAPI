@@ -17,25 +17,37 @@ public class RipplePrivateKey extends RippleIdentifier {
 			throw new RuntimeException("The private key must be of length 32 bytes");
 		}
 	}
+
+	public static byte[] bigIntegerToBytes(BigInteger biToConvert, int nbBytesToReturn){
+//		System.out.println("biToConvert="+biToConvert);
+//		System.out.println("bitLen="+biToConvert.bitLength());
+//		System.out.println("bitCount="+biToConvert.bitCount());
+//		System.out.println("lowestBit="+biToConvert.getLowestSetBit());
+//		System.out.println("signum="+biToConvert.signum());
+
+		//toArray will return the minimum number of bytes required to encode the biginteger in two's complement.
+		//Could be less than the expected number of bytes
+		byte[] twosComplement = biToConvert.toByteArray();
+		byte[] bytesToReturn=new byte[nbBytesToReturn];
+
+		if(biToConvert.bitLength()!=twosComplement.length*8){
+			//Two's complement representation has a sign bit set on the most significant byte
+			byte[] twosComplementWithoutSign = new byte[twosComplement.length-1];
+			System.arraycopy(twosComplement, 1, twosComplementWithoutSign, 0, twosComplementWithoutSign.length);
+			twosComplement=twosComplementWithoutSign;
+		}
+
+		int nbBytesOfPaddingRequired=nbBytesToReturn-twosComplement.length;
+		if(nbBytesOfPaddingRequired<0){
+			throw new RuntimeException("nbBytesToReturn "+nbBytesToReturn+" is too small");
+		}
+		System.arraycopy(twosComplement, 0, bytesToReturn, nbBytesOfPaddingRequired, twosComplement.length);
+
+		return bytesToReturn;
+	}
 	
 	public RipplePrivateKey(BigInteger privateKeyForAccount) {
-		super(new byte[32], 34); //new byte[] will be stored in payloadBytes
-		//toArray will return the minimum number of bytes required to encode the biginteger. Could be less than 32bytes
-		//in addition, toArray seems to have the first byte for the sign (should always be 0)
-//		System.out.println(privateKeyForAccount.bitLength());
-//		System.out.println(privateKeyForAccount.bitCount());
-//		System.out.println(privateKeyForAccount.getLowestSetBit());
-//		System.out.println(privateKeyForAccount.signum());
-		if(privateKeyForAccount.bitLength()>255){
-			byte[] bigIntegerBytes = privateKeyForAccount.toByteArray(); 
-			int nbBytesMissing=33-bigIntegerBytes.length;
-			System.arraycopy(bigIntegerBytes, nbBytesMissing+1, payloadBytes, 0, bigIntegerBytes.length-1);
-		}
-		else{
-			byte[] bigIntegerBytes = privateKeyForAccount.toByteArray(); 
-			int nbBytesMissing=32-bigIntegerBytes.length;
-			System.arraycopy(bigIntegerBytes, nbBytesMissing, payloadBytes, 0, bigIntegerBytes.length);
-		}
+		super(bigIntegerToBytes(privateKeyForAccount, 32), 34);
 	}
 
 	public RipplePublicKey getPublicKey(){

@@ -39,6 +39,9 @@ public class FutureJSONResponse<T extends JSONSerializable> implements Future<T>
 			if(response==null){
 				wait();
 			}
+			if(response.get("error")!=null){
+				throw new RuntimeException("failed because "+response);
+			}
 			return response;
 		}
 	}
