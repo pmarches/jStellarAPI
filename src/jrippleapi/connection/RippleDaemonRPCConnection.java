@@ -69,12 +69,16 @@ public class RippleDaemonRPCConnection extends RippleDaemonConnection {
 		os.write(jsonString.getBytes());
 		os.close();
 
-		//TODO The response handling is probably common between the websocket and the RPC
-		InputStream is = connection.getInputStream();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-		JSONObject response = (JSONObject) new JSONParser().parse(rd);
-		rd.close();
-		return response;
+		try {
+			//TODO The response handling is probably common between the websocket and the RPC
+			InputStream is = connection.getInputStream();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			JSONObject response = (JSONObject) new JSONParser().parse(rd);
+			rd.close();
+			return response;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public RippleAddressPublicInformation getPublicInformation(RippleAddress rippleAddress) throws Exception {

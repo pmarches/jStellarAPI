@@ -9,7 +9,7 @@
 	"txtype": "Payment",
 	"payer" : "r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
 	"payee" : "rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS",
-	"amount": "0.001 BTC/r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
+	"amount": "0.001/BTC/r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT",
 	"fee": "0.00001 XRP",
 
 	"Sequence": 91,

@@ -1,7 +1,9 @@
 package jrippleapi.serialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -124,5 +126,22 @@ public class RippleBinarySerializerTest {
 		ByteBuffer writtenObj = binSer.writeBinaryObject(serObjRead);
 		byteBuffer.rewind();
 		assertEquals(byteBuffer, writtenObj);
+	}
+	
+	@Test
+	public void testNegativeAmounts(){
+        DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency("-99.2643419677474", RippleAddress.RIPPLE_ADDRESS_NEUTRAL, "USD");
+
+        assertEquals(13, amount.amount.scale());
+        assertTrue(amount.isNegative());
+        assertFalse(amount.isNative());
+        assertEquals("-99.2643419677474/USD/rrrrrrrrrrrrrrrrrrrrBZbvji", amount.toString());
+        
+		ByteBuffer output=ByteBuffer.allocate(48);
+		new RippleBinarySerializer().writeAmount(output, amount);
+		String hex = DatatypeConverter.printHexBinary(output.array());
+        String scale14expectedHex = "94E3440A102F5F5400000000000000000000000055534400000000000000000000000000000000000000000000000001";
+        String scale13ExpectedHex="950386CDCE6B232200000000000000000000000055534400000000000000000000000000000000000000000000000001";
+        assertEquals(scale13ExpectedHex, hex);
 	}
 }

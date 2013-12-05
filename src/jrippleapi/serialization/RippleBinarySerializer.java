@@ -5,6 +5,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import javax.xml.bind.DatatypeConverter;
+
+import org.bouncycastle.jcajce.provider.symmetric.DES;
+
 import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePath;
@@ -15,10 +19,8 @@ import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.PrimitiveTypes;
 
 public class RippleBinarySerializer {
-	private static final int MIN_OFFSET = -96;
-	private static final int MAX_OFFSET = 80;
-	private static final long MIN_VALUE = 1000000000000000l;
-	private static final long MAX_VALUE = 9999999999999999l;
+	protected static final long MIN_VALUE = 1000000000000000l;
+	protected static final long MAX_VALUE = 9999999999999999l;
 
 	public RippleBinaryObject readBinaryObject(ByteBuffer input) {
 		RippleBinaryObject serializedObject = new RippleBinaryObject();
@@ -41,7 +43,7 @@ public class RippleBinarySerializer {
 		return serializedObject;
 	}
 
-	private Object readPrimitive(ByteBuffer input, PrimitiveTypes primitive) {
+	protected Object readPrimitive(ByteBuffer input, PrimitiveTypes primitive) {
 		if(primitive==PrimitiveTypes.UINT16){
 			return 0xFFFFFFFF & input.getShort();
 		}
@@ -93,13 +95,13 @@ public class RippleBinarySerializer {
 		throw new RuntimeException("Unsupported primitive "+primitive);
 	}
 
-	private RippleAddress readAccount(ByteBuffer input) {
+	protected RippleAddress readAccount(ByteBuffer input) {
 		byte[] accountBytes = readVariableLength(input);
 		return new RippleAddress(accountBytes);
 	}
 
 	//See https://ripple.com/wiki/Currency_Format
-	private DenominatedIssuedCurrency readAmount(ByteBuffer input) {
+	protected DenominatedIssuedCurrency readAmount(ByteBuffer input) {
 		long offsetNativeSignMagnitudeBytes = input.getLong();
 		//1 bit for Native
 		boolean isXRPAmount =(0x8000000000000000l & offsetNativeSignMagnitudeBytes)==0; 
@@ -116,22 +118,28 @@ public class RippleBinarySerializer {
 		else{
 			String currencyStr = readCurrency(input);
 			RippleAddress issuer = readIssuer(input);
+			if(offset==0 || longMagnitude==0){
+				return new DenominatedIssuedCurrency(BigDecimal.ZERO, issuer, currencyStr);
+			}
+
 			int decimalPosition = 97-offset;
-			
+			if(decimalPosition<DenominatedIssuedCurrency.MIN_SCALE || decimalPosition>DenominatedIssuedCurrency.MAX_SCALE){
+				throw new RuntimeException("invalid scale "+decimalPosition);
+			}
 			BigInteger biMagnitude = BigInteger.valueOf(longMagnitude);
 			BigDecimal fractionalValue=new BigDecimal(biMagnitude, decimalPosition);
 			return new DenominatedIssuedCurrency(fractionalValue, issuer, currencyStr);
 		}
 	}
 
-	private RippleAddress readIssuer(ByteBuffer input) {
+	protected RippleAddress readIssuer(ByteBuffer input) {
 		byte[] issuerBytes = new byte[20];
 		input.get(issuerBytes);
 		//TODO If issuer is all 0, this means any issuer
 		return new RippleAddress(issuerBytes);
 	}
 
-	private String readCurrency(ByteBuffer input) {
+	protected String readCurrency(ByteBuffer input) {
 		byte[] unknown = new byte[12];
 		input.get(unknown);
 		byte[] currency = new byte[8];
@@ -140,7 +148,7 @@ public class RippleBinarySerializer {
 		//TODO See https://ripple.com/wiki/Currency_Format for format
 	}
 
-	private byte[] readVariableLength(ByteBuffer input) {
+	protected byte[] readVariableLength(ByteBuffer input) {
 		int byteLen=0;
 		int firstByte = input.get();
 		int secondByte=0;
@@ -165,7 +173,7 @@ public class RippleBinarySerializer {
 		return variableBytes;
 	}
 
-	private RipplePathSet readPathSet(ByteBuffer input) {
+	protected RipplePathSet readPathSet(ByteBuffer input) {
 		RipplePathSet pathSet = new RipplePathSet();
 		RipplePath path = null;
 		while(true){
@@ -227,7 +235,7 @@ public class RippleBinarySerializer {
 		return compactBuffer;
 	}
 
-	private void writePrimitive(ByteBuffer output, PrimitiveTypes primitive, Object value) {
+	protected void writePrimitive(ByteBuffer output, PrimitiveTypes primitive, Object value) {
 		if(primitive==PrimitiveTypes.UINT16){
 			int intValue = (int) value;
 			if(intValue>0xFFFF){
@@ -303,7 +311,7 @@ public class RippleBinarySerializer {
 		}
 	}
 
-	private void writePathSet(ByteBuffer output, RipplePathSet pathSet) {
+	protected void writePathSet(ByteBuffer output, RipplePathSet pathSet) {
 		loopPathSet:
 		for(int i=0; i<pathSet.size(); i++){
 			RipplePath path=pathSet.get(i);
@@ -340,17 +348,17 @@ public class RippleBinarySerializer {
 		output.put((byte) 0); //End of path set
 	}
 
-	private void writeIssuer(ByteBuffer output, RippleAddress value) {
+	protected void writeIssuer(ByteBuffer output, RippleAddress value) {
 		byte[] issuerBytes = value.getBytes();
 		output.put(issuerBytes);
 	}
 
-	private void writeAccount(ByteBuffer output, RippleAddress address) {
+	protected void writeAccount(ByteBuffer output, RippleAddress address) {
 		writeVariableLength(output, address.getBytes());
 	}
 
 	//TODO Unit test this function
-	private void writeVariableLength(ByteBuffer output, byte[] value) {
+	protected void writeVariableLength(ByteBuffer output, byte[] value) {
 		if(value.length<192){
 			output.put((byte) value.length);
 		}
@@ -373,7 +381,8 @@ public class RippleBinarySerializer {
 		output.put(value);
 	}
 
-	private void writeAmount(ByteBuffer output, DenominatedIssuedCurrency denominatedCurrency) {
+	protected void writeAmount(ByteBuffer output, DenominatedIssuedCurrency denominatedCurrency) {
+//		System.out.println(DatatypeConverter.printHexBinary(output.array()));
 		long offsetNativeSignMagnitudeBytes=0;
 		if(denominatedCurrency.amount.signum()>0){
 			offsetNativeSignMagnitudeBytes|= 0x4000000000000000l;
@@ -389,14 +398,11 @@ public class RippleBinarySerializer {
 			if(unscaledValue.longValue()!=0){
 				int scale = denominatedCurrency.amount.scale();
 				long offset = 97-scale;
-//			if(offset<MIN_OFFSET || offset>MAX_OFFSET){
-//				throw new RuntimeException("offset "+offset+" is out of range");
-//			}
 				offsetNativeSignMagnitudeBytes|=(offset<<54);
-				if(unscaledValue.longValue()<MIN_VALUE || unscaledValue.longValue()>MAX_VALUE){
-					throw new RuntimeException("value "+unscaledValue+" is out of range");
-				}
-				offsetNativeSignMagnitudeBytes|=unscaledValue.longValue();
+//				if(unscaledValue.longValue()<MIN_VALUE || unscaledValue.longValue()>MAX_VALUE){
+//					throw new RuntimeException("value "+unscaledValue+" is out of range");
+//				}
+				offsetNativeSignMagnitudeBytes|=unscaledValue.abs().longValue();
 			}
 			output.putLong(offsetNativeSignMagnitudeBytes);
 			writeCurrency(output, denominatedCurrency.currency);
@@ -404,7 +410,7 @@ public class RippleBinarySerializer {
 		}
 	}
 
-	private void writeCurrency(ByteBuffer output, String currency) {
+	protected void writeCurrency(ByteBuffer output, String currency) {
 		byte[] currencyBytes = new byte[20];
 		System.arraycopy(currency.getBytes(), 0, currencyBytes, 12, 3);
 		output.put(currencyBytes);

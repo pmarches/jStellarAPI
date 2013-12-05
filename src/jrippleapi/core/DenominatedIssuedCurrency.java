@@ -10,11 +10,25 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	public BigDecimal amount;
 	public RippleAddress issuer;
 	public String currency;
-	
+	public static final int MIN_SCALE = -96;
+	public static final int MAX_SCALE = 80;
+
 	public DenominatedIssuedCurrency(){ //FIXME get rid of this
+	}
+
+	public DenominatedIssuedCurrency(String amountStr, RippleAddress issuer, String currencyStr){
+		this(new BigDecimal(amountStr).stripTrailingZeros(), issuer, currencyStr);
 	}
 	
 	public DenominatedIssuedCurrency(BigDecimal amount, RippleAddress issuer, String currencyStr){
+		int oldScale=amount.scale();
+		if(oldScale<MIN_SCALE || oldScale>MAX_SCALE){
+			int newScale=MAX_SCALE-(amount.precision()-amount.scale());
+			if(newScale<MIN_SCALE || newScale>MAX_SCALE){
+				throw new RuntimeException("newScale "+newScale+" is out of range");
+			}
+			amount=amount.setScale(newScale);
+		}
 		this.amount = amount;
 		this.issuer = issuer;
 		this.currency = currencyStr;
@@ -28,12 +42,20 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		this(BigDecimal.valueOf(xrpAmount));
 	}
 
+	public boolean isNative() {
+		return issuer==null;
+	}
+
+	public boolean isNegative() {
+		return amount.signum()==-1;
+	}
+
 	@Override
 	public String toString() {
 		if(issuer==null || currency==null){
 			return amount.movePointLeft(6).stripTrailingZeros().toPlainString()+" XRP";
 		}
-		return amount.stripTrailingZeros().toPlainString()+" "+currency+"/"+issuer;
+		return amount.stripTrailingZeros().toPlainString()+"/"+currency+"/"+issuer;
 	}
 
 	@Override
@@ -106,6 +128,5 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 			return false;
 		return true;
 	}
-
 	
 }
