@@ -126,7 +126,7 @@ public class RippleBinarySerializer {
 			if(decimalPosition<DenominatedIssuedCurrency.MIN_SCALE || decimalPosition>DenominatedIssuedCurrency.MAX_SCALE){
 				throw new RuntimeException("invalid scale "+decimalPosition);
 			}
-			BigInteger biMagnitude = BigInteger.valueOf(longMagnitude);
+			BigInteger biMagnitude = BigInteger.valueOf(sign*longMagnitude);
 			BigDecimal fractionalValue=new BigDecimal(biMagnitude, decimalPosition);
 			return new DenominatedIssuedCurrency(fractionalValue, issuer, currencyStr);
 		}
