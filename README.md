@@ -3,7 +3,17 @@ jRippleAPI
 
 This library is an API for the [Ripple](http://ripple.com/)  network. It uses websocket to provide synchronous and asynchronous access. Currently requires eclipse to build.
 
-This very much a work in progress, contributions welcomed.
+This is very much a work in progress, contributions are welcomed.
+
+Features
+==
+* Pure Java implementation, from scratch
+* Websocket
+* Full binary read/write of the ripple wire format
+* Offline signing
+* HTTP REST support
+* Address generation
+
 
 Quick start
 ==
