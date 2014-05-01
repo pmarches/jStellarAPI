@@ -8,11 +8,12 @@ This is very much a work in progress, contributions are welcomed.
 Features
 ==
 * Pure Java implementation, from scratch
-* Websocket
+* Websocket support, can subscribe to rippled events
 * Full binary read/write of the ripple wire format
 * Offline signing
 * HTTP REST support
 * Address generation
+* Uses Java futures for multi-threading ease
 
 
 Quick start
