@@ -7,8 +7,6 @@ import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.bouncycastle.jcajce.provider.symmetric.DES;
-
 import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePath;
@@ -415,6 +413,11 @@ public class RippleBinarySerializer {
 		System.arraycopy(currency.getBytes(), 0, currencyBytes, 12, 3);
 		output.put(currencyBytes);
 		//TODO See https://ripple.com/wiki/Currency_Format for format
+	}
+
+	public RippleBinaryObject readBinaryObject(String hexBytes) {
+		byte[] binaryBytes=DatatypeConverter.parseHexBinary(hexBytes);
+		return readBinaryObject(ByteBuffer.wrap(binaryBytes));
 	}
 
 }
