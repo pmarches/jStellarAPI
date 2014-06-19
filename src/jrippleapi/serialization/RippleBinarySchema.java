@@ -136,6 +136,8 @@ public class RippleBinarySchema {
 		RemoveCode(PrimitiveTypes.VARIABLE_LENGTH, 9),
 		ExpireCode(PrimitiveTypes.VARIABLE_LENGTH, 10),
 		CreateCode(PrimitiveTypes.VARIABLE_LENGTH, 11),
+		MemoType(PrimitiveTypes.VARIABLE_LENGTH, 12),
+		MemoData(PrimitiveTypes.VARIABLE_LENGTH, 13),
 
 		Account(PrimitiveTypes.ACCOUNT, 1),
 		Owner(PrimitiveTypes.ACCOUNT, 2),
@@ -150,6 +152,7 @@ public class RippleBinarySchema {
 		Hashes(PrimitiveTypes.VECTOR256, 2),
 		Features(PrimitiveTypes.VECTOR256, 3),
 
+		EndOfObject(PrimitiveTypes.OBJECT, 1), //Not a real object, but a marker for end of object
 		TransactionMetaData(PrimitiveTypes.OBJECT, 2),
 		CreatedNode(PrimitiveTypes.OBJECT, 3),
 		DeletedNode(PrimitiveTypes.OBJECT, 4),
@@ -158,14 +161,18 @@ public class RippleBinarySchema {
 		FinalFields(PrimitiveTypes.OBJECT, 7),
 		NewFields(PrimitiveTypes.OBJECT, 8),
 		TemplateEntry(PrimitiveTypes.OBJECT, 9),
+		Memo(PrimitiveTypes.OBJECT, 10),
 
+		EndOfArray(PrimitiveTypes.ARRAY, 1), //Not a real object, but a marker for end of Array
 		SigningAccounts(PrimitiveTypes.ARRAY, 2),
 		TxnSignatures(PrimitiveTypes.ARRAY, 3),
 		Signatures(PrimitiveTypes.ARRAY, 4),
 		Template(PrimitiveTypes.ARRAY, 5),
 		Necessary(PrimitiveTypes.ARRAY, 6),
 		Sufficient(PrimitiveTypes.ARRAY, 7),
-		AffectedNodes(PrimitiveTypes.ARRAY, 8);
+		AffectedNodes(PrimitiveTypes.ARRAY, 8),
+		Memos(PrimitiveTypes.ARRAY, 9),
+		;
 
 		PrimitiveTypes primitive;
 		int fieldId;

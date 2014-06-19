@@ -151,5 +151,8 @@ public class RippleBinarySerializerTest {
 		RippleBinarySerializer binSer = new RippleBinarySerializer();
 		RippleBinaryObject memoObj = binSer.readBinaryObject(memoHex);
 		assertNotNull(memoObj);
+		RippleBinaryObject[] memos = (RippleBinaryObject[]) memoObj.getField(BinaryFormatField.Memos);
+		assertEquals(1, memos.length);
+		assertEquals("danny.jpg", new String((byte[]) memos[0].getField(BinaryFormatField.MemoType)));
 	}
 }

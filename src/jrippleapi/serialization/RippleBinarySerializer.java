@@ -3,6 +3,7 @@ package jrippleapi.serialization;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
@@ -20,21 +21,32 @@ public class RippleBinarySerializer {
 	protected static final long MIN_VALUE = 1000000000000000l;
 	protected static final long MAX_VALUE = 9999999999999999l;
 
+	public BinaryFormatField readField(ByteBuffer input) {
+		if(input.hasRemaining()==false){
+			return null; //FIXME find better way like the end of array thing..
+		}
+		byte firstByte = input.get();
+		int type=(0xF0 & firstByte)>>4;
+		if(type==0){
+			type = input.get();
+		}
+		int field=0x0F & firstByte;
+		if(field==0){
+			field = input.get();
+			firstByte=(byte)field;
+		}
+
+		BinaryFormatField serializedField = BinaryFormatField.lookup(type, field);
+		return serializedField;
+	}
+	
 	public RippleBinaryObject readBinaryObject(ByteBuffer input) {
 		RippleBinaryObject serializedObject = new RippleBinaryObject();
-		while(input.hasRemaining()){
-			byte firstByte = input.get();
-			int type=(0xF0 & firstByte)>>4;
-			if(type==0){
-				type = input.get();
+		while(true){
+			BinaryFormatField serializedField = readField(input);
+			if(serializedField==null || serializedField==BinaryFormatField.EndOfObject){
+				break;
 			}
-			int field=0x0F & firstByte;
-			if(field==0){
-				field = input.get();
-				firstByte=(byte)field;
-			}
-
-			BinaryFormatField serializedField = BinaryFormatField.lookup(type, field);
 			Object value = readPrimitive(input, serializedField.primitive);
 			serializedObject.fields.put(serializedField, value );
 		}
@@ -73,10 +85,10 @@ public class RippleBinarySerializer {
 			return readAccount(input);
 		}
 		else if(primitive==PrimitiveTypes.OBJECT){
-			throw new RuntimeException("Object type, not yet supported");
+			return readArray(input);
 		}
 		else if(primitive==PrimitiveTypes.ARRAY){
-			throw new RuntimeException("Array type, not yet supported");
+			return readArray(input);
 		}
 		else if(primitive==PrimitiveTypes.UINT8){
 			return 0xFFFF & input.get();
@@ -91,6 +103,21 @@ public class RippleBinarySerializer {
 			throw new RuntimeException("Vector");
 		}
 		throw new RuntimeException("Unsupported primitive "+primitive);
+	}
+
+	protected RippleBinaryObject[] readArray(ByteBuffer input) {
+		ArrayList<RippleBinaryObject> arrayOfObj=new ArrayList<>();
+		while(true){
+			BinaryFormatField serializedField=readField(input);
+			if(serializedField==null || serializedField==BinaryFormatField.EndOfArray){
+				break;
+			}
+
+			RippleBinaryObject bo = readBinaryObject(input);
+			arrayOfObj.add(bo);
+		}
+		RippleBinaryObject[] array=new RippleBinaryObject[arrayOfObj.size()];
+		return arrayOfObj.toArray(array);
 	}
 
 	protected RippleAddress readAccount(ByteBuffer input) {
@@ -148,18 +175,18 @@ public class RippleBinarySerializer {
 
 	protected byte[] readVariableLength(ByteBuffer input) {
 		int byteLen=0;
-		int firstByte = input.get();
+		int firstByte = 0xFF&input.get();
 		int secondByte=0;
 		if(firstByte<192){
 			byteLen=firstByte;
 		}
 		else if(firstByte<240){
-			secondByte = input.get();
+			secondByte = 0xFF&input.get();
 			byteLen=193+(firstByte-193)*256 + secondByte;
 		}
 		else if(firstByte<254){
-			secondByte = input.get();
-			int thirdByte = input.get();
+			secondByte = 0xFF&input.get();
+			int thirdByte = 0xFF&input.get();
 			byteLen=12481 + (firstByte-241)*65536 + secondByte*256 + thirdByte;
 		}
 		else {
