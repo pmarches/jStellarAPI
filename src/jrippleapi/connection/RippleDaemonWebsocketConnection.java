@@ -11,10 +11,12 @@ import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePaymentTransaction;
 import jrippleapi.core.RippleSeedAddress;
+import jrippleapi.core.RippleTransactionHistory;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -25,10 +27,11 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 	public Session session;
 		
 	private int requestCounter=1;
-	//s_west.ripple.com is not a valid URI for certain JVMs because of the underscore character. Use the IP :-(  
-	public final static URI RIPPLE_SERVER_URL=URI.create("ws://54.213.166.225:443");
+	public final static URI RIPPLE_SERVER_URL=URI.create("ws://s1.ripple.com:443");
 	public final static URI LOCALHOST_SERVER_URL=URI.create("ws://localhost:5006");
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
+	JSONSubscribtionFeed ledgerFeed=new JSONSubscribtionFeed();
+	JSONSubscribtionFeed transactionFeed=new JSONSubscribtionFeed();
     
     public RippleDaemonWebsocketConnection(URI rippledURI) throws Exception {
 		this.connection = new WebSocketConnection(rippledURI, this);
@@ -38,12 +41,22 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
     public void onMessage(String msg) {
     	try {
 			JSONObject jsonMessage = (JSONObject) new JSONParser().parse(msg);
-//			System.out.println("response:"+jsonMessage.toJSONString());
-			if("response".equals(jsonMessage.get("type"))){
+			Object messageType=jsonMessage.get("type");
+			if("response".equals(messageType)){
 				responseHolder.setResponseContent(jsonMessage);
 			}
-			else{//FIXME Can we remove this? Errors are responses also?
+			else if("error".equals(messageType)){ //FIXME Can we remove this? Errors are responses also?
 				responseHolder.setResponseError(jsonMessage);
+			}
+			else if("ledgerClosed".equals(messageType)){
+				ledgerFeed.add(jsonMessage);
+			}
+			else if("transaction".equals(messageType)){
+				transactionFeed.add((JSONObject) jsonMessage.get("transaction"));
+			}
+			else{
+				//TODO Notify the subscribtions
+				System.out.println("subscription of type "+messageType+" "+jsonMessage);
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -73,11 +86,11 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 	}
 
 	public boolean ping(){
-		JSONObject accountInfoComand = new JSONObject();
-		accountInfoComand.put("command", "ping");
-		Future<GenericJSONSerializable> accountInfoResponse = sendCommand(accountInfoComand, new GenericJSONSerializable());
+		JSONObject pingComand = new JSONObject();
+		pingComand.put("command", "ping");
+		Future<GenericJSONSerializable> pingResponse = sendCommand(pingComand, new GenericJSONSerializable());
 		try {
-			return accountInfoResponse.get()!=null;
+			return pingResponse.get()!=null;
 		} catch (InterruptedException | ExecutionException e) {
 			return false;
 		}
@@ -165,17 +178,69 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 		}
 	}
 	
-//	public void subscribeToLedgers(){
-//		JSONObject command = new JSONObject();
-//    	command.put("command", "subscribe");
+	public GenericJSONSerializable subscribeToLedgers(boolean doSubscribe){
+		try {
+			return subscribeToLedgersFuture(doSubscribe).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public FutureJSONResponse<GenericJSONSerializable> subscribeToLedgersFuture(boolean doSubscribe){
+		JSONObject command = new JSONObject();
+		if(doSubscribe){
+	    	command.put("command", "subscribe");
+		}
+		else{
+	    	command.put("command", "unsubscribe");
+		}
+    	JSONArray streams = new JSONArray();
+    	streams.add("ledger");
+    	command.put("streams", streams);
+		return sendCommand(command, new GenericJSONSerializable());
+	}
+
+	public GenericJSONSerializable subscribeToTransactionOfAddress(String rippleAddressToMonitor) {
+		try {
+			return subscribeToTransactionOfAddressFuture(rippleAddressToMonitor).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public FutureJSONResponse<GenericJSONSerializable> subscribeToTransactionOfAddressFuture(String rippleAddressToMonitor) {
+		JSONObject command = new JSONObject();
+    	command.put("command", "subscribe");
+
+//Only if you want to see all transactions
 //    	JSONArray streams = new JSONArray();
-//    	streams.add("ledger");
+//    	streams.add("transactions");
 //    	command.put("streams", streams);
-//		sendCommand(command, new );
-//	}
+
+    	JSONArray accounts = new JSONArray();
+    	accounts.add(rippleAddressToMonitor);
+    	command.put("accounts", accounts);
+		return sendCommand(command, new GenericJSONSerializable());
+	}
+
+	public GenericJSONSerializable unsubscribeToTransactionOfAddress(String rippleAddressToMonitor) {
+		JSONObject command = new JSONObject();
+    	command.put("command", "unsubscribe");
+    	JSONArray accounts = new JSONArray();
+    	accounts.add(rippleAddressToMonitor);
+    	command.put("accounts", accounts);
+		try {
+			return sendCommand(command, new GenericJSONSerializable()).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	
 	public FutureJSONResponse<GenericJSONSerializable> sendPaymentFuture(RippleSeedAddress payer, RippleAddress payee, DenominatedIssuedCurrency amount){	
-		JSONObject jsonTx = new RipplePaymentTransaction(payer.getPublicRippleAddress(), payee, amount, 1).getTxJSON();
+		JSONObject jsonTx = new RipplePaymentTransaction(payer.getPublicRippleAddress(), payee, amount, 1).toTxJSON();
 		JSONObject command = new JSONObject();
     	command.put("command", "submit");
     	command.put("tx_json", jsonTx);
@@ -234,7 +299,7 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 		JSONObject command = new JSONObject();
     	command.put("command", "sign");
     	command.put("secret", secret.toString());
-		command.put("tx_json", txToSign.getTxJSON());
+		command.put("tx_json", txToSign.toTxJSON());
 		return sendCommand(command, txToSign);
 	}
 	
@@ -257,6 +322,45 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 	public GenericJSONSerializable submitTransaction(byte[] signedTransactionBytes) {
 		try {
 			return submitTransactionFuture(signedTransactionBytes).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public JSONSubscribtionFeed getLedgerFeed() {
+		return ledgerFeed;
+	}
+
+	public JSONSubscribtionFeed getTransactionFeed() {
+		return transactionFeed;
+	}
+
+	public void getTransactionsForAccount(String rippleAddress, RippleTransactionHistory txHistory) {
+		while(true){
+			int oldSize=txHistory.size();
+			getTransactionsForAccount(rippleAddress, txHistory, oldSize);
+			if(txHistory.size()==oldSize){
+				break;
+			}
+		}
+	}
+	
+	public RippleTransactionHistory getTransactionsForAccount(String rippleAddress, RippleTransactionHistory txHistory, int offset) {
+		try {
+			JSONObject command = new JSONObject();
+			command.put("command", "account_tx");
+			command.put("account", rippleAddress);
+			command.put("ledger_index_min", -1);
+			command.put("ledger_index_max", -1);
+			command.put("binary", true); //Default to false
+
+			command.put("count", false);
+			command.put("descending", false);
+			command.put("offset", offset);
+//			command.put("limit", 30); //Let the server choose it's own limits
+			command.put("forward", false);
+			return sendCommand(command, txHistory).get();
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			return null;

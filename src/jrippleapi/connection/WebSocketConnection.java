@@ -12,6 +12,8 @@ public class WebSocketConnection {
     public WebSocketConnection(URI serverURI, RippleDaemonWebsocketConnection msgHandler) throws Exception {
     	wsclient.start();
     	msgHandler.session=wsclient.connect(msgHandler, serverURI, new ClientUpgradeRequest()).get();
+    	msgHandler.session.getPolicy().setMaxTextMessageSize(10_000_000);
+//		msgHandler.session.getPolicy().setMaxTextMessageBufferSize(Integer.MAX_VALUE);
 	}
 
     public void close() throws Exception{

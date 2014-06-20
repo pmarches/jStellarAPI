@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -14,7 +16,10 @@ import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePaymentTransaction;
 import jrippleapi.core.RippleSeedAddress;
+import jrippleapi.core.RippleTransaction;
+import jrippleapi.core.RippleTransactionHistory;
 
+import org.json.simple.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,7 +58,7 @@ public class RippleDaemonWebsocketConnectionTest {
 	
 	@Test
 	public void testOrderBook() throws Exception {
-		final int NB_ENTRIES=12;
+		final int NB_ENTRIES=9;
 		OrderBook book = conn.getOrderBook(RippleAddress.RIPPLE_ADDRESS_BITSTAMP.toString(), "BTC", "XRP", NB_ENTRIES);
 		assertEquals(NB_ENTRIES, book.size());
 		
@@ -121,5 +126,37 @@ public class RippleDaemonWebsocketConnectionTest {
 	public void testSubmitTransaction() throws Exception {
 		byte[] signedTXBytes =DatatypeConverter.parseHexBinary("1200002200000000240000005B61D3C38D7EA4C680000000000000000000000000004254430000000000530BE6CE7A1812CA1E21C0E11431784E246330ED68400000000000000A7321023FA9ED580CD3208BBB380DF3A0CAF142D3A240AF28A2F8E2F372FC635C24417774483046022100EBA01512524B32ABD03EA736110AC3326FFE2707C115B0904EBDECBB74088B1F022100B6BC3A277BAD105D5FFA151640D9161589649C4E76027BEA07375B65E1B7C2168114530BE6CE7A1812CA1E21C0E11431784E246330ED83149DFEBA50DE0C0BE1AA11A7509762FC2374080E2C");
 		GenericJSONSerializable result = conn.submitTransaction(signedTXBytes);
+	}
+	
+	@Test
+	public void testSubscribeToLedgers() throws InterruptedException, ExecutionException{
+		conn.subscribeToLedgers(true);
+		JSONSubscribtionFeed ledgerFeed=conn.getLedgerFeed();
+		Thread.sleep(15000);
+		assertEquals(3, ledgerFeed.size());
+		conn.subscribeToLedgers(false);
+		Thread.sleep(15000);
+		assertEquals(3, ledgerFeed.size());
+	}
+	
+	@Test
+	public void testSubscribeToTransaction() throws Exception{
+		conn.subscribeToTransactionOfAddress(RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString());
+		JSONSubscribtionFeed txFeed=conn.getTransactionFeed();
+
+		RippleSeedAddress secret = TestUtilities.getTestSeed();
+		conn.sendPayment(secret, RippleAddress.RIPPLE_ADDRESS_PMARCHES, DenominatedIssuedCurrency.ONE_XRP);
+		RipplePaymentTransaction tx=new RipplePaymentTransaction(txFeed.take());
+		assertEquals(RippleAddress.RIPPLE_ADDRESS_PMARCHES, tx.payee);
+		assertEquals(secret.getPublicRippleAddress(), tx.payer);
+		assertTrue(txFeed.isEmpty());
+		conn.unsubscribeToTransactionOfAddress(RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString());
+	}
+
+	@Test
+	public void testGetTransactionOfAccount(){
+		RippleTransactionHistory txHistory=new RippleTransactionHistory();
+		conn.getTransactionsForAccount(RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), txHistory);
+		assertEquals(322, txHistory.size());
 	}
 }
