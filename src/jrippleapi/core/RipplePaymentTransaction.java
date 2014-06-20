@@ -7,7 +7,7 @@ import jrippleapi.serialization.RippleBinaryObject;
 
 import org.json.simple.JSONObject;
 
-public class RipplePaymentTransaction implements JSONSerializable {
+public class RipplePaymentTransaction extends RippleTransaction implements JSONSerializable {
 	public RippleAddress payer;
 	public RippleAddress payee;
 	public DenominatedIssuedCurrency amount;
@@ -28,6 +28,7 @@ public class RipplePaymentTransaction implements JSONSerializable {
 	}
 	
 	public RipplePaymentTransaction(RippleBinaryObject serObj){
+		super(serObj);
 		if(serObj.getTransactionType()!=TransactionTypes.PAYMENT){
 			throw new RuntimeException("The RippleBinaryObject is not a payment transaction, but a "+serObj.getTransactionType());
 		}
@@ -37,6 +38,10 @@ public class RipplePaymentTransaction implements JSONSerializable {
 		sequenceNumber = (long) serObj.getField(BinaryFormatField.Sequence);
 		fee= (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Fee);
 		flags= (long) serObj.getField(BinaryFormatField.Flags);
+	}
+
+	public RipplePaymentTransaction(JSONObject jsonTx) {
+		fromTxJSON(jsonTx);
 	}
 
 	public RippleBinaryObject getBinaryObject() {
@@ -52,7 +57,7 @@ public class RipplePaymentTransaction implements JSONSerializable {
 		return rbo;
 	}
 
-	public JSONObject getTxJSON() {
+	public JSONObject toTxJSON() {
 		JSONObject jsonTx = new JSONObject();
 		jsonTx.put("Account", payer.toString());
 		jsonTx.put("Destination", payee.toString());
@@ -66,15 +71,19 @@ public class RipplePaymentTransaction implements JSONSerializable {
 		signedTransactionBlob=(String) jsonCommandResult.get("tx_blob");
 		JSONObject tx_json = (JSONObject) jsonCommandResult.get("tx_json");
 		if(tx_json!=null){
-			payer=new RippleAddress((String) tx_json.get("Account"));
-			payee=new RippleAddress((String) tx_json.get("Destination"));
-//			amount = (String) tx_json.get("Amount");
-			sequenceNumber=(Long) tx_json.get("Sequence");
-			txHash = (String) tx_json.get("hash");
-			signature = (String) tx_json.get("TxnSignature");
-			publicKeyUsedToSign = (String) tx_json.get("SigningPubKey");
-//			flags = (Long) tx_json.get("Flags");
+			fromTxJSON(tx_json);
 		}
+	}
+
+	protected void fromTxJSON(JSONObject tx_json) {
+		payer=new RippleAddress((String) tx_json.get("Account"));
+		payee=new RippleAddress((String) tx_json.get("Destination"));
+//			amount = (String) tx_json.get("Amount");
+		sequenceNumber=(Long) tx_json.get("Sequence");
+		txHash = (String) tx_json.get("hash");
+		signature = (String) tx_json.get("TxnSignature");
+		publicKeyUsedToSign = (String) tx_json.get("SigningPubKey");
+//			flags = (Long) tx_json.get("Flags");
 	}
 
 	public String getSignedTxBlob() {

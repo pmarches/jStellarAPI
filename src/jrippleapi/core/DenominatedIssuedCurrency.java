@@ -12,6 +12,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	public String currency;
 	public static final int MIN_SCALE = -96;
 	public static final int MAX_SCALE = 80;
+	public static final DenominatedIssuedCurrency ONE_XRP=new DenominatedIssuedCurrency(1000000);
 
 	public DenominatedIssuedCurrency(){ //FIXME get rid of this
 	}
