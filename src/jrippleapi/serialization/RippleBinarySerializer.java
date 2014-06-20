@@ -28,12 +28,11 @@ public class RippleBinarySerializer {
 		byte firstByte = input.get();
 		int type=(0xF0 & firstByte)>>4;
 		if(type==0){
-			type = input.get();
+			type = 0xFF&input.get();
 		}
 		int field=0x0F & firstByte;
 		if(field==0){
-			field = input.get();
-			firstByte=(byte)field;
+			field = 0xFF & input.get();
 		}
 
 		BinaryFormatField serializedField = BinaryFormatField.lookup(type, field);
