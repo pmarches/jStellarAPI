@@ -84,7 +84,7 @@ public class RippleBinarySerializer {
 			return readAccount(input);
 		}
 		else if(primitive==PrimitiveTypes.OBJECT){
-			return readArray(input);
+			return readBinaryObject(input);
 		}
 		else if(primitive==PrimitiveTypes.ARRAY){
 			return readArray(input);
