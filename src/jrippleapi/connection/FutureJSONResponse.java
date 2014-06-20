@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.json.simple.JSONObject;
 
+//Checkout jetty's FuturePromise class.
 public class FutureJSONResponse<T extends JSONSerializable> implements Future<T> {
 	public final int responseCounter;
 
