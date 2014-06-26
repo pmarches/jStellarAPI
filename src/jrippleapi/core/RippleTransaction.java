@@ -4,6 +4,8 @@ import jrippleapi.serialization.RippleBinaryObject;
 
 public class RippleTransaction {
 
+	long ledgerIndex;
+
 	public RippleTransaction() {
 	}
 	
@@ -16,6 +18,13 @@ public class RippleTransaction {
 			//TODO Add other TX types here
 			default: return new RippleTransaction(rbo);
 		}
+	}
+
+	public void setLedgerIndex(long ledgerIndex) {
+		this.ledgerIndex=ledgerIndex;
+	}
+	public long getLedgerIndex() {
+		return ledgerIndex;
 	}
 
 }

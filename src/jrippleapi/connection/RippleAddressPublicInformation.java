@@ -13,9 +13,11 @@ public class RippleAddressPublicInformation implements JSONSerializable {
 	@Override
 	public void copyFrom(JSONObject jsonCommandResult) {
 		JSONObject jsonAccountData = (JSONObject) jsonCommandResult.get("account_data");
-		xrpBalance=new BigDecimal((String) jsonAccountData.get("Balance"));
-		account=(String) jsonAccountData.get("Account");
-		urlgravatar=(String) jsonAccountData.get("urlgravatar");
-		nextTransactionSequence = (long) jsonAccountData.get("Sequence");
+		if(jsonAccountData!=null){
+			xrpBalance=new BigDecimal((String) jsonAccountData.get("Balance"));
+			account=(String) jsonAccountData.get("Account");
+			urlgravatar=(String) jsonAccountData.get("urlgravatar");
+			nextTransactionSequence = (long) jsonAccountData.get("Sequence");
+		}
 	}
 }

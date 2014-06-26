@@ -12,7 +12,8 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	public String currency;
 	public static final int MIN_SCALE = -96;
 	public static final int MAX_SCALE = 80;
-	public static final DenominatedIssuedCurrency ONE_XRP=new DenominatedIssuedCurrency(1000000);
+	public static final int DROPS_PER_XRP = 1_000_000;
+	public static final DenominatedIssuedCurrency ONE_XRP=new DenominatedIssuedCurrency(DROPS_PER_XRP);
 
 	public DenominatedIssuedCurrency(){ //FIXME get rid of this
 	}
@@ -39,8 +40,8 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		this.amount=xrpAmount;
 	}
 	
-	public DenominatedIssuedCurrency(int xrpAmount) {
-		this(BigDecimal.valueOf(xrpAmount));
+	public DenominatedIssuedCurrency(long xrpDropsAmount) {
+		this(BigDecimal.valueOf(xrpDropsAmount/(double) DROPS_PER_XRP));
 	}
 
 	public boolean isNative() {
@@ -128,6 +129,13 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		} else if (!issuer.equals(other.issuer))
 			return false;
 		return true;
+	}
+
+	public long toNativeDrops() {
+		if(isNative()==false){
+			throw new RuntimeException("Cannot get drops on a non-XRP currency");
+		}
+		return this.amount.longValueExact();
 	}
 	
 }

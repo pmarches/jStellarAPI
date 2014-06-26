@@ -7,6 +7,9 @@ public class RippleSeedAddress extends RippleIdentifier {
 
 	public RippleSeedAddress(byte[] payloadBytes) {
 		super(payloadBytes, 33);
+		if(payloadBytes.length!=16){
+			throw new RuntimeException("The seed bytes should be 16 bytes in length. They can be random bytes, or the first 128bit of the SHA512 hash of the passphrase");
+		}
 	}
 	
 	public RippleSeedAddress(String stringID) {

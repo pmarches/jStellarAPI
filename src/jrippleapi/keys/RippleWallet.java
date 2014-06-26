@@ -33,17 +33,17 @@ public class RippleWallet implements Serializable {
 		this.walletFile=walletFile;
 	}
 
-	static public RippleWallet createWallet(RippleSeedAddress seed, File walletFile) {
-		try {
-			RippleDaemonRPCConnection conn = new RippleDaemonRPCConnection();
-			RippleAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicRippleAddress());
+	static public RippleWallet createWallet(RippleSeedAddress seed, File walletFile) throws Exception {
+		RippleDaemonRPCConnection conn = new RippleDaemonRPCConnection();
+		RippleAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicRippleAddress());
 
-			RippleWallet wallet = new RippleWallet(seed, (int) publicInfo.nextTransactionSequence, walletFile);
-			wallet.saveWallet(walletFile);
-			return wallet;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		RippleWallet wallet = new RippleWallet(seed, (int) publicInfo.nextTransactionSequence, walletFile);
+		wallet.saveWallet(walletFile);
+		return wallet;
+	}
+
+	public RippleSeedAddress getSeed(){
+		return seed;
 	}
 	
 	public RippleWallet(File walletFile) throws Exception {

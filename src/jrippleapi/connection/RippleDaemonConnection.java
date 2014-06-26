@@ -1,8 +1,6 @@
 package jrippleapi.connection;
 
-import javax.xml.bind.DatatypeConverter;
-
-import org.json.simple.JSONObject;
 
 public class RippleDaemonConnection {
+	public static long GENESIS_LEDGER_NUMBER=32570; //This Should go in the RippleLedger class (which does not exist) 
 }

@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.xml.bind.DatatypeConverter;
@@ -16,10 +15,8 @@ import jrippleapi.core.DenominatedIssuedCurrency;
 import jrippleapi.core.RippleAddress;
 import jrippleapi.core.RipplePaymentTransaction;
 import jrippleapi.core.RippleSeedAddress;
-import jrippleapi.core.RippleTransaction;
 import jrippleapi.core.RippleTransactionHistory;
 
-import org.json.simple.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -155,8 +152,7 @@ public class RippleDaemonWebsocketConnectionTest {
 
 	@Test
 	public void testGetTransactionOfAccount(){
-		RippleTransactionHistory txHistory=new RippleTransactionHistory();
-		conn.getTransactionsForAccount(RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), txHistory);
+		RippleTransactionHistory txHistory=conn.getTransactionsForAccount(RippleAddress.RIPPLE_ADDRESS_PMARCHES.toString(), RippleDaemonConnection.GENESIS_LEDGER_NUMBER);
 		assertEquals(322, txHistory.size());
 	}
 }

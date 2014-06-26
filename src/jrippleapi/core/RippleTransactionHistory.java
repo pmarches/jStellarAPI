@@ -9,8 +9,9 @@ import jrippleapi.serialization.RippleBinarySerializer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class RippleTransactionHistory extends ArrayList<RippleTransaction> implements JSONSerializable {
-
+public class RippleTransactionHistory implements JSONSerializable {
+	ArrayList<RippleTransaction> txHistory=new ArrayList<RippleTransaction>();
+	
 	@Override
 	public void copyFrom(JSONObject jsonCommandResult) {
 		RippleBinarySerializer ser = new RippleBinarySerializer();
@@ -23,8 +24,28 @@ public class RippleTransactionHistory extends ArrayList<RippleTransaction> imple
 			}
 			RippleBinaryObject rbo=ser.readBinaryObject(txHexBlob);
 			RippleTransaction txObject= RippleTransaction.createFromRBO(rbo);
-			add(txObject);
+			long ledgerIndex=(long) txJSON.get("ledger_index");
+			txObject.setLedgerIndex(ledgerIndex);
+			txHistory.add(txObject);
 		}
+	}
+
+	public void filterInPaymentsOnly() {
+		ArrayList<RippleTransaction> txPaymentHistory=new ArrayList<RippleTransaction>(size());
+		for(RippleTransaction tx :txHistory){
+			if(tx instanceof RipplePaymentTransaction){
+				txPaymentHistory.add(tx);
+			}
+		}
+		txHistory=txPaymentHistory;
+	}
+
+	public int size() {
+		return txHistory.size();
+	}
+
+	public RippleTransaction get(int i) {
+		return txHistory.get(i);
 	}
 
 }

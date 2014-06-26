@@ -336,22 +336,27 @@ public class RippleDaemonWebsocketConnection extends RippleDaemonConnection {
 		return transactionFeed;
 	}
 
-	public void getTransactionsForAccount(String rippleAddress, RippleTransactionHistory txHistory) {
+	public RippleTransactionHistory getTransactionsForAccount(String rippleAddress, long startFromLedgerNumber) {
+		RippleTransactionHistory txHistory=new RippleTransactionHistory();
 		while(true){
 			int oldSize=txHistory.size();
-			getTransactionsForAccount(rippleAddress, txHistory, oldSize);
+			getTransactionsForAccount(rippleAddress, txHistory, oldSize, startFromLedgerNumber);
 			if(txHistory.size()==oldSize){
 				break;
 			}
 		}
+		return txHistory;
 	}
 	
-	public RippleTransactionHistory getTransactionsForAccount(String rippleAddress, RippleTransactionHistory txHistory, int offset) {
+	public RippleTransactionHistory getTransactionsForAccount(String rippleAddress, RippleTransactionHistory txHistory, int offset, long startFromLedgerNumber) {
 		try {
 			JSONObject command = new JSONObject();
 			command.put("command", "account_tx");
 			command.put("account", rippleAddress);
-			command.put("ledger_index_min", -1);
+			if(startFromLedgerNumber<RippleDaemonConnection.GENESIS_LEDGER_NUMBER){
+				startFromLedgerNumber=-1;
+			}
+			command.put("ledger_index_min", startFromLedgerNumber);
 			command.put("ledger_index_max", -1);
 			command.put("binary", true); //Default to false
 
