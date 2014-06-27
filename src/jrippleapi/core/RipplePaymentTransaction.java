@@ -1,5 +1,7 @@
 package jrippleapi.core;
 
+import java.math.BigDecimal;
+
 import jrippleapi.connection.JSONSerializable;
 import jrippleapi.serialization.RippleBinarySchema.BinaryFormatField;
 import jrippleapi.serialization.RippleBinarySchema.TransactionTypes;
@@ -78,12 +80,13 @@ public class RipplePaymentTransaction extends RippleTransaction implements JSONS
 	protected void fromTxJSON(JSONObject tx_json) {
 		payer=new RippleAddress((String) tx_json.get("Account"));
 		payee=new RippleAddress((String) tx_json.get("Destination"));
-//			amount = (String) tx_json.get("Amount");
+		String amountStr = (String) tx_json.get("Amount");
+		amount=new DenominatedIssuedCurrency(new BigDecimal(amountStr)); //Works only with XRP right now
 		sequenceNumber=(Long) tx_json.get("Sequence");
 		txHash = (String) tx_json.get("hash");
 		signature = (String) tx_json.get("TxnSignature");
 		publicKeyUsedToSign = (String) tx_json.get("SigningPubKey");
-//			flags = (Long) tx_json.get("Flags");
+		flags = (Long) tx_json.get("Flags");
 	}
 
 	public String getSignedTxBlob() {

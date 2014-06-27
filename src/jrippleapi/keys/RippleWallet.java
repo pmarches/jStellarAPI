@@ -1,14 +1,17 @@
 package jrippleapi.keys;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.SecureRandom;
+
+import javax.xml.bind.DatatypeConverter;
 
 import jrippleapi.connection.RippleAddressPublicInformation;
 import jrippleapi.connection.RippleDaemonRPCConnection;
@@ -18,6 +21,9 @@ import jrippleapi.core.RipplePaymentTransaction;
 import jrippleapi.core.RippleSeedAddress;
 import jrippleapi.serialization.RippleBinaryObject;
 import jrippleapi.serialization.RippleBinarySerializer;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class RippleWallet implements Serializable {
 	private static final long serialVersionUID = -4849034810727882329L;
@@ -51,15 +57,37 @@ public class RippleWallet implements Serializable {
 		if(walletFile.canWrite()==false){
 			throw new RuntimeException("We will need to write to the wallet file");
 		}
+
+		RippleDaemonRPCConnection conn = new RippleDaemonRPCConnection();
 		if(walletFile.canRead()){
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(walletFile));
-			seed = (RippleSeedAddress) ois.readObject();
-			nextTransactionSequenceNumber = ois.readInt();
-			pendingTransaction=(byte[]) ois.readObject();
-			ois.close();
+			JSONObject root=(JSONObject) new JSONParser().parse(new FileReader(walletFile));
+			seed=new RippleSeedAddress((String) root.get("seed"));
+
+			if(false){
+				long seqNumber=(Long)root.get("nextTransactionSequenceNumber");
+				nextTransactionSequenceNumber=(int) seqNumber;
+			}
+			else{
+				RippleAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicRippleAddress());
+				nextTransactionSequenceNumber=(int) publicInfo.nextTransactionSequence;
+			}
+			
+			if(root.containsKey("pendingTransaction")){
+				String hexTX=(String) root.get("pendingTransaction");
+				pendingTransaction=DatatypeConverter.parseHexBinary(hexTX);
+				if(false){
+					conn.submitTransaction(pendingTransaction);
+				}
+			}
 		}
 	}
 	
+	public RippleWallet() {
+		seed=new RippleSeedAddress(new SecureRandom().generateSeed(16));
+		nextTransactionSequenceNumber=0;
+		pendingTransaction=null;
+	}
+
 	/**
 	 * This is the all-in-one API, it constructs the TX, signs it, stores it, and submits it to the network 
 	 * 
@@ -70,6 +98,8 @@ public class RippleWallet implements Serializable {
 	public void sendXRP(BigInteger xrpAmount, RippleAddress payee) throws Exception{
 		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(new BigDecimal(xrpAmount));
 		RipplePaymentTransaction tx = new RipplePaymentTransaction(seed.getPublicRippleAddress(), payee, amount, this.nextTransactionSequenceNumber);
+		//TODO Compute the required fee from the server_info
+		tx.fee=new DenominatedIssuedCurrency(new BigDecimal("10"));
 		RippleBinaryObject rbo = tx.getBinaryObject();
 		rbo = new RippleSigner(seed.getPrivateKey(0)).sign(rbo);
 
@@ -84,13 +114,18 @@ public class RippleWallet implements Serializable {
 	}
 
 	public void saveWallet(File saveToFile) throws IOException {
+		JSONObject root=new JSONObject();
+		root.put("address", seed.getPublicRippleAddress().toString());
+		root.put("seed", seed.toString());
+		root.put("nextTransactionSequenceNumber", nextTransactionSequenceNumber);
+		if(pendingTransaction!=null){
+			root.put("pendingTransaction", DatatypeConverter.printHexBinary(pendingTransaction));
+		}
 		File tempWalletFile = new File(saveToFile.getAbsolutePath()+".tmp");
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempWalletFile));
-		oos.writeObject(seed);
-		oos.writeInt(nextTransactionSequenceNumber);
-		oos.writeObject(pendingTransaction);
-		oos.close();
-
+		Writer writer=new FileWriter(tempWalletFile);
+		root.writeJSONString(writer);
+		writer.close();
+		
 		saveToFile.delete();
 		tempWalletFile.renameTo(saveToFile);
 	}
