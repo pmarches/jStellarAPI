@@ -8,3 +8,4 @@ secrets
 *.jar
 *.war
 *.ear
+/target/
