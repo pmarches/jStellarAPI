@@ -10,7 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/jetty-io-9.2.1.v20140609.jar"/>
 	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/jetty-util-9.2.1.v20140609.jar"/>
 	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/websocket-api-9.2.1.v20140609.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/websocket-client-9.2.1.v20140609.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/websocket-client-9.2.1.v20140609.jar" sourcepath="/home/pmarches/.m2/repository/org/eclipse/jetty/websocket/websocket-client/9.2.1.v20140609/websocket-client-9.2.1.v20140609-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/websocket-common-9.2.1.v20140609.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -2,6 +2,7 @@ bin
 testAccount.txt
 *.class
 testdata
+secrets
 
 # Package Files #
 *.jar
