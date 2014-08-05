@@ -13,7 +13,7 @@ public class TestUtilities {
 	
 	public static StellarSeedAddress getTestSeed() throws Exception {
 		if(stellarAccount==null){
-			JSONObject jsonWallet = (JSONObject) new JSONParser().parse(new FileReader("jStellarapi-wallet.json"));
+			JSONObject jsonWallet = (JSONObject) new JSONParser().parse(new FileReader("secrets/jStellarAPI-wallet.json"));
 			String seedStr = (String)jsonWallet.get("master_seed");
 			stellarAccount = new StellarSeedAddress(seedStr);
 		}

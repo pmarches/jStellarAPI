@@ -61,7 +61,7 @@ public class StellarWallet implements Serializable {
 		StellarDaemonRPCConnection conn = new StellarDaemonRPCConnection();
 		if(walletFile.canRead()){
 			JSONObject root=(JSONObject) new JSONParser().parse(new FileReader(walletFile));
-			seed=new StellarSeedAddress((String) root.get("seed"));
+			seed=new StellarSeedAddress((String) root.get("master_seed"));
 
 			if(false){
 				long seqNumber=(Long)root.get("nextTransactionSequenceNumber");

@@ -32,8 +32,8 @@ public class StellarDeterministicKeyGenerator {
 	}
 
 	public StellarDeterministicKeyGenerator(byte[] bytesSeed) {
-		if(bytesSeed.length!=16){
-			throw new RuntimeException("The seed size should be 128 bit, was "+bytesSeed.length*8);
+		if(bytesSeed.length!=32){
+			throw new RuntimeException("The seed size should be 256 bit, was "+bytesSeed.length*8);
 		}
 		this.seedBytes = bytesSeed;
 	}

@@ -139,7 +139,6 @@ public class StellarDaemonWebsocketConnectionTest {
 		conn.subscribeToLedgers(true);
 		JSONSubscribtionFeed ledgerFeed=conn.getLedgerFeed();
 		assertNotNull(ledgerFeed.poll(21, TimeUnit.SECONDS));
-		assertNotNull(ledgerFeed.poll(21, TimeUnit.SECONDS));
 		conn.subscribeToLedgers(false);
 		Thread.sleep(20000);
 		assertNull(ledgerFeed.poll());
