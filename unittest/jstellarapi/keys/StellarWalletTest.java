@@ -11,10 +11,10 @@ import org.junit.Test;
 
 public class StellarWalletTest {
 	@Test
-	public void testSendXRP() throws Exception {
+	public void testSendSTR() throws Exception {
 		File testWalletFile = new File("testdata/jStellarAPI.wallet");
 		StellarWallet wallet = StellarWallet.createWallet(TestUtilities.getTestSeed(), testWalletFile);
-		wallet.sendXRP(BigInteger.ONE, StellarAddress.STELLAR_ADDRESS_PMARCHES);
+		wallet.sendSTR(BigInteger.ONE, StellarAddress.STELLAR_ADDRESS_PMARCHES);
 		testWalletFile.delete();
 	}
 }

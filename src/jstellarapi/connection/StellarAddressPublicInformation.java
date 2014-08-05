@@ -6,7 +6,7 @@ import org.json.simple.JSONObject;
 
 public class StellarAddressPublicInformation implements JSONSerializable {
 	public String account;
-	public BigDecimal xrpBalance;
+	public BigDecimal STRBalance;
 	public String urlgravatar;
 	public long nextTransactionSequence;
 	
@@ -14,7 +14,7 @@ public class StellarAddressPublicInformation implements JSONSerializable {
 	public void copyFrom(JSONObject jsonCommandResult) {
 		JSONObject jsonAccountData = (JSONObject) jsonCommandResult.get("account_data");
 		if(jsonAccountData!=null){
-			xrpBalance=new BigDecimal((String) jsonAccountData.get("Balance"));
+			STRBalance=new BigDecimal((String) jsonAccountData.get("Balance"));
 			account=(String) jsonAccountData.get("Account");
 			urlgravatar=(String) jsonAccountData.get("urlgravatar");
 			nextTransactionSequence = (long) jsonAccountData.get("Sequence");

@@ -18,12 +18,12 @@ Features
 
 Quick start
 ==
-How to send 10 XRP to the JStellarAPI project, the simplest way possible.
+How to send 10 STR to the JStellarAPI project, the simplest way possible.
 ```java
 File testWalletFile = new File("myUnEncryptedWallet.wallet");
 StellarSeedAddress seed = new StellarSeedAddress("sXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 StellarWallet wallet = StellarWallet.createWallet(seed, testWalletFile);
-wallet.sendXRP(BigInteger.TEN, new StellarAddress("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT"));
+wallet.sendSTR(BigInteger.TEN, new StellarAddress("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT"));
 ```
 
 Libraries required

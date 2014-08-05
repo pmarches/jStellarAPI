@@ -25,7 +25,7 @@ import org.json.simple.parser.JSONParser;
  * > lsaddr
  * rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS
  * rGwUWgN5BEg3QGNY3RX2HfYowjUTZdid3E
- * > mkpayment r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT 100XRP
+ * > mkpayment r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT 100STR
  * payment1
  * > show payment1
  * {json of transactions goes here}
@@ -37,7 +37,7 @@ import org.json.simple.parser.JSONParser;
  * > balance
  * BTC 100
  * USD 8
- * XRP 10000
+ * STR 10000
  * > mkaddr
  * rF3r4rgsDeFVSDFsjw023ksdpsmwofrk2
  * 

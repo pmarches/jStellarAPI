@@ -128,14 +128,14 @@ public class StellarBinarySerializer {
 	protected DenominatedIssuedCurrency readAmount(ByteBuffer input) {
 		long offsetNativeSignMagnitudeBytes = input.getLong();
 		//1 bit for Native
-		boolean isXRPAmount =(0x8000000000000000l & offsetNativeSignMagnitudeBytes)==0; 
+		boolean isSTRAmount =(0x8000000000000000l & offsetNativeSignMagnitudeBytes)==0; 
 		//1 bit for sign
 		int sign = (0x4000000000000000l & offsetNativeSignMagnitudeBytes)==0?-1:1;
 		//8 bits of offset
 		int offset = (int) ((offsetNativeSignMagnitudeBytes & 0x3FC0000000000000l)>>>54);
 		//The remaining 54 bits are magnitude
 		long longMagnitude = offsetNativeSignMagnitudeBytes&0x3FFFFFFFFFFFFFl;
-		if(isXRPAmount){
+		if(isSTRAmount){
 			BigDecimal magnitude = BigDecimal.valueOf(sign*longMagnitude);
 			return new DenominatedIssuedCurrency(magnitude);
 		}
@@ -412,7 +412,7 @@ public class StellarBinarySerializer {
 			offsetNativeSignMagnitudeBytes|= 0x4000000000000000l;
 		}
 		if(denominatedCurrency.currency==null){
-			long drops = denominatedCurrency.amount.longValue(); //XRP does not have fractional portion
+			long drops = denominatedCurrency.amount.longValue(); //STR does not have fractional portion
 			offsetNativeSignMagnitudeBytes|=drops;
 			output.putLong(offsetNativeSignMagnitudeBytes);
 		}

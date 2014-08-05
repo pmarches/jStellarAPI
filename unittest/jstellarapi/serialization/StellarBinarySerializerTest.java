@@ -37,14 +37,14 @@ public class StellarBinarySerializerTest {
 
 	@Test
 	public void testReadPayment() throws IOException {
-		MappedByteBuffer payment1ByteBuffer = fileToBuffer("testdata/r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT-to-rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS-amt-1000000XRP.bin");
+		MappedByteBuffer payment1ByteBuffer = fileToBuffer("testdata/r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT-to-rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS-amt-1000000STR.bin");
 		
 		StellarBinarySerializer binSer = new StellarBinarySerializer();
 		StellarBinaryObject serObj = binSer.readBinaryObject(payment1ByteBuffer);
 		assertEquals(TransactionTypes.PAYMENT, serObj.getTransactionType());
 		assertEquals("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT", serObj.getField(BinaryFormatField.Account).toString());
 		assertEquals("rEQQNvhuLt1KTYmDWmw12mPvmJD4KCtxmS", serObj.getField(BinaryFormatField.Destination).toString());
-		assertEquals("1 XRP", serObj.getField(BinaryFormatField.Amount).toString());
+		assertEquals("1 STR", serObj.getField(BinaryFormatField.Amount).toString());
 		ByteBuffer readBuffer = binSer.writeBinaryObject(serObj);
 		payment1ByteBuffer.rewind();
 		assertEquals(payment1ByteBuffer, readBuffer);

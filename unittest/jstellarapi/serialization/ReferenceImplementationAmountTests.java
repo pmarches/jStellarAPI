@@ -17,7 +17,7 @@ public class ReferenceImplementationAmountTests {
 	StellarBinarySerializer ser = new StellarBinarySerializer();
 	
 //    @Test
-//    public void testSerializing0XRP() throws Exception {
+//    public void testSerializing0STR() throws Exception {
 //    	DenominatedIssuedCurrency amt = new DenominatedIssuedCurrency(BigDecimal.ZERO);
 //        String s = ser.writeAmount(null, amt);
 //        assertEquals("4000000000000000", s);
@@ -43,7 +43,7 @@ public class ReferenceImplementationAmountTests {
 
 //
 //    @Test
-//    public void testXRPIOULegacySupport() throws Exception {
+//    public void testSTRIOULegacySupport() throws Exception {
 //        String json =  "{\n" +
 //                        "  \"currency\": \"0000000000000000000000005852500000000000\",\n" +
 //                        "  \"issuer\": \"rrrrrrrrrrrrrrrrrrrrBZbvji\",\n" +
@@ -51,7 +51,7 @@ public class ReferenceImplementationAmountTests {
 //                        "}";
 //
 //        Amount amount = ser.fromJSONObject(new JSONObject(json));
-//        assertEquals("XRP", amount.currencyString());
+//        assertEquals("STR", amount.currencyString());
 //        assertFalse(amount.isNative);
 //
 //        JSONObject jsonObject = ser.toJSONObject(amount);
@@ -235,13 +235,13 @@ public class ReferenceImplementationAmountTests {
 //        assertTrue(a.equals(b));
 //    }
 //    @Test
-//    public void test_Zero_XRPEquals_Zero_XRP() {
+//    public void test_Zero_STREquals_Zero_STR() {
 //        Amount a = amt("0");
 //        Amount b = amt("0.0");
 //        assertTrue(a.equals(b));
 //    }
 //    @Test
-//    public void test_Zero_XRPEquals_Negative_Zero_XRP() {
+//    public void test_Zero_STREquals_Negative_Zero_STR() {
 //        Amount a = amt("0");
 //        Amount b = amt("-0");
 //        assertTrue(a.equals(b));
@@ -265,7 +265,7 @@ public class ReferenceImplementationAmountTests {
 //        assertTrue(a.equals(b));
 //    }
 //    @Test
-//    public void test_Fractional_XRP_Equality() {
+//    public void test_Fractional_STR_Equality() {
 //        Amount a = amt("1.1");
 //        Amount b = amt("11.0").divide(10);
 //        assertTrue(a.equals(b));
@@ -289,7 +289,7 @@ public class ReferenceImplementationAmountTests {
 //        assertFalse(a.equals(b));
 //    }
 //    @Test
-//    public void test_XRP_Exponent_Mismatch() {
+//    public void test_STR_Exponent_Mismatch() {
 //        Amount a = amt("10");
 //        Amount b = amt("100");
 //        assertFalse(a.equals(b));
@@ -301,7 +301,7 @@ public class ReferenceImplementationAmountTests {
 //        assertFalse(a.equals(b));
 //    }
 //    @Test
-//    public void test_Mantissa_Mismatch_One_XRP_Not_Equaling_Two() {
+//    public void test_Mantissa_Mismatch_One_STR_Not_Equaling_Two() {
 //        Amount a = amt("1");
 //        Amount b = amt("2");
 //        assertFalse(a.equals(b));
@@ -320,7 +320,7 @@ public class ReferenceImplementationAmountTests {
 //        assertFalse(a.equals(b));
 //    }
 //    @Test
-//    public void test_Negativity_In_Equality_For_XRP() {
+//    public void test_Negativity_In_Equality_For_STR() {
 //        Amount a = amt("1");
 //        Amount b = amt("-1");
 //        assertFalse(a.equals(b));
@@ -352,11 +352,11 @@ public class ReferenceImplementationAmountTests {
 //
 //    @Test
 //    public void test_Negate_native_123() {
-//        assertEquals("-0.000123/XRP", amt("123").negate().toTextFull());
+//        assertEquals("-0.000123/STR", amt("123").negate().toTextFull());
 //    }
 //    @Test
 //    public void test_Negate_native_123_2() {
-//        assertEquals("0.000123/XRP", amt("-123").negate().toTextFull());
+//        assertEquals("0.000123/STR", amt("-123").negate().toTextFull());
 //    }
 //    @Test
 //    public void test_Negate_non_native_123() {
@@ -371,68 +371,68 @@ public class ReferenceImplementationAmountTests {
 ////        assertEquals("-123/USD/" + rootAddress, amt("-123/USD/root").clone().toTextFull());
 ////    }
 //    @Test
-//    public void test_Add_XRP_to_XRP() {
-//        assertEquals("0.0002/XRP", amt("150").add(amt("50")).toTextFull());
+//    public void test_Add_STR_to_STR() {
+//        assertEquals("0.0002/STR", amt("150").add(amt("50")).toTextFull());
 //    }
 //    @Test
 //    public void test_Add_USD_to_USD() {
 //        assertEquals("200.52/USD/" + rootAddress, amt("150.02/USD/root").add(amt("50.5/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_0_XRP_with_0_XRP() {
-//        assertEquals("0/XRP", amt("0").multiply(amt("0")).toTextFull());
+//    public void test_Multiply_0_STR_with_0_STR() {
+//        assertEquals("0/STR", amt("0").multiply(amt("0")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_0_USD_with_0_XRP() {
+//    public void test_Multiply_0_USD_with_0_STR() {
 //        assertEquals("0/USD/" + rootAddress, amt("0/USD/root").multiply(amt("0")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_0_XRP_with_0_USD() {
-//        assertEquals("0/XRP", amt("0").multiply(amt("0/USD/root")).toTextFull());
+//    public void test_Multiply_0_STR_with_0_USD() {
+//        assertEquals("0/STR", amt("0").multiply(amt("0/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_1_XRP_with_0_XRP() {
-//        assertEquals("0/XRP", amt("1").multiply(amt("0")).toTextFull());
+//    public void test_Multiply_1_STR_with_0_STR() {
+//        assertEquals("0/STR", amt("1").multiply(amt("0")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_1_USD_with_0_XRP() {
+//    public void test_Multiply_1_USD_with_0_STR() {
 //        assertEquals("0/USD/" + rootAddress, amt("1/USD/root").multiply(amt("0")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_1_XRP_with_0_USD() {
-//        assertEquals("0/XRP", amt("1").multiply(amt("0/USD/root")).toTextFull());
+//    public void test_Multiply_1_STR_with_0_USD() {
+//        assertEquals("0/STR", amt("1").multiply(amt("0/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_0_XRP_with_1_XRP() {
-//        assertEquals("0/XRP", amt("0").multiply(amt("1")).toTextFull());
+//    public void test_Multiply_0_STR_with_1_STR() {
+//        assertEquals("0/STR", amt("0").multiply(amt("1")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_0_USD_with_1_XRP() {
+//    public void test_Multiply_0_USD_with_1_STR() {
 //        assertEquals("0/USD/" + rootAddress, amt("0/USD/root").multiply(amt("1")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_0_XRP_with_1_USD() {
-//        assertEquals("0/XRP", amt("0").multiply(amt("1/USD/root")).toTextFull());
+//    public void test_Multiply_0_STR_with_1_USD() {
+//        assertEquals("0/STR", amt("0").multiply(amt("1/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_XRP_with_USD() {
-//        assertEquals("2000/XRP", amt("200.0").multiply(amt("10/USD/root")).toTextFull());
+//    public void test_Multiply_STR_with_USD() {
+//        assertEquals("2000/STR", amt("200.0").multiply(amt("10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_XRP_with_USD2() {
-//        assertEquals("0.2/XRP", amt("20000").multiply(amt("10/USD/root")).toTextFull());
+//    public void test_Multiply_STR_with_USD2() {
+//        assertEquals("0.2/STR", amt("20000").multiply(amt("10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_XRP_with_USD3() {
-//        assertEquals("20/XRP", amt("2000000").multiply(amt("10/USD/root")).toTextFull());
+//    public void test_Multiply_STR_with_USD3() {
+//        assertEquals("20/STR", amt("2000000").multiply(amt("10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_XRP_with_USD_neg() {
-//        assertEquals("-0.002/XRP", amt("200").multiply(amt("-10/USD/root")).toTextFull());
+//    public void test_Multiply_STR_with_USD_neg() {
+//        assertEquals("-0.002/STR", amt("200").multiply(amt("-10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_XRP_with_USD_neg_frac() {
-//        assertEquals("-0.222/XRP", amt("-6000").multiply(amt("37/USD/root")).toTextFull());
+//    public void test_Multiply_STR_with_USD_neg_frac() {
+//        assertEquals("-0.222/STR", amt("-6000").multiply(amt("37/USD/root")).toTextFull());
 //    }
 //    @Test
 //    public void test_Multiply_USD_with_USD() {
@@ -455,40 +455,40 @@ public class ReferenceImplementationAmountTests {
 //        assertEquals("-100/EUR/" + rootAddress, amt("0.1/EUR/root").multiply(amt("-1000/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_EUR_with_XRP_factor_1() {
+//    public void test_Multiply_EUR_with_STR_factor_1() {
 //        assertEquals("100/EUR/" + rootAddress, amt("0.05/EUR/root").multiply(amt("2000")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_EUR_with_XRP_neg() {
+//    public void test_Multiply_EUR_with_STR_neg() {
 //        assertEquals("-500/EUR/" + rootAddress, amt("-100/EUR/root").multiply(amt("5")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_EUR_with_XRP_neg_1() {
+//    public void test_Multiply_EUR_with_STR_neg_1() {
 //        assertEquals("-100/EUR/" + rootAddress, amt("-0.05/EUR/root").multiply(amt("2000")).toTextFull());
 //    }
 //    @Test
-//    public void test_Multiply_XRP_with_XRP() {
-//        assertEquals("0.0001/XRP", amt("10").multiply(amt("10")).toTextFull());
+//    public void test_Multiply_STR_with_STR() {
+//        assertEquals("0.0001/STR", amt("10").multiply(amt("10")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_XRP_by_USD() {
-//        assertEquals("0.00002/XRP", amt("200").divide(amt("10/USD/root")).toTextFull());
+//    public void test_Divide_STR_by_USD() {
+//        assertEquals("0.00002/STR", amt("200").divide(amt("10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_XRP_by_USD2() {
-//        assertEquals("0.002/XRP", amt("20000").divide(amt("10/USD/root")).toTextFull());
+//    public void test_Divide_STR_by_USD2() {
+//        assertEquals("0.002/STR", amt("20000").divide(amt("10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_XRP_by_USD3() {
-//        assertEquals("0.2/XRP", amt("2000000").divide(amt("10/USD/root")).toTextFull());
+//    public void test_Divide_STR_by_USD3() {
+//        assertEquals("0.2/STR", amt("2000000").divide(amt("10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_XRP_by_USD_neg() {
-//        assertEquals("-0.00002/XRP", amt("200").divide(amt("-10/USD/root")).toTextFull());
+//    public void test_Divide_STR_by_USD_neg() {
+//        assertEquals("-0.00002/STR", amt("200").divide(amt("-10/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_XRP_by_USD_neg_frac() {
-//        assertEquals("-0.000162/XRP", amt("-6000").divide(amt("37/USD/root")).toTextFull());
+//    public void test_Divide_STR_by_USD_neg_frac() {
+//        assertEquals("-0.000162/STR", amt("-6000").divide(amt("37/USD/root")).toTextFull());
 //    }
 //    @Test
 //    public void test_Divide_USD_by_USD() {
@@ -515,45 +515,45 @@ public class ReferenceImplementationAmountTests {
 //        assertEquals("-0.1/EUR/" + rootAddress, amt("100/EUR/root").divide(amt("-1000/USD/root")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_EUR_by_XRP_result_1() {
+//    public void test_Divide_EUR_by_STR_result_1() {
 //        assertEquals("0.05/EUR/" + rootAddress, amt("100/EUR/root").divide(amt("2000")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_EUR_by_XRP_neg() {
+//    public void test_Divide_EUR_by_STR_neg() {
 //        assertEquals("-20/EUR/" + rootAddress, amt("-100/EUR/root").divide(amt("5")).toTextFull());
 //    }
 //    @Test
-//    public void test_Divide_EUR_by_XRP_neg_1() {
+//    public void test_Divide_EUR_by_STR_neg_1() {
 //        assertEquals("-0.05/EUR/" + rootAddress, amt("-100/EUR/root").divide(amt("2000")).toTextFull());
 //    }
 //
 //    @Test
 //    public void test_Parse_native_0(){
-//        assertEquals("0/XRP", amt("0").toTextFull());
+//        assertEquals("0/STR", amt("0").toTextFull());
 //    }
 //    @Test
 //    public void test_Parse_native_0_pt_0(){
-//        assertEquals("0/XRP", amt("0.0").toTextFull());
+//        assertEquals("0/STR", amt("0.0").toTextFull());
 //    }
 //    @Test
 //    public void test_Parse_native_negative_0(){
-//        assertEquals("0/XRP", amt("-0").toTextFull());
+//        assertEquals("0/STR", amt("-0").toTextFull());
 //    }
 //    @Test
 //    public void test_Parse_native_negative_0_pt_0(){
-//        assertEquals("0/XRP", amt("-0.0").toTextFull());
+//        assertEquals("0/STR", amt("-0.0").toTextFull());
 //    }
 //    @Test
 //    public void test_Parse_native_1000_drops(){
-//        assertEquals("0.001/XRP", amt("1000").toTextFull());
+//        assertEquals("0.001/STR", amt("1000").toTextFull());
 //    }
 //    @Test
 //    public void test_Parse_native_12_pt_3(){
-//        assertEquals("12.3/XRP", amt("12.3").toTextFull());
+//        assertEquals("12.3/STR", amt("12.3").toTextFull());
 //    }
 //    @Test
 //    public void test_Parse_native__12_pt_3(){
-//        assertEquals("-12.3/XRP", amt("-12.3").toTextFull());
+//        assertEquals("-12.3/STR", amt("-12.3").toTextFull());
 //    }
 //    @Test
 //    public void test_Parse_123_trailing_pt_USD(){

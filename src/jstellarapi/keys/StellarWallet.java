@@ -91,12 +91,12 @@ public class StellarWallet implements Serializable {
 	/**
 	 * This is the all-in-one API, it constructs the TX, signs it, stores it, and submits it to the network 
 	 * 
-	 * @param xrpAmount
+	 * @param STRAmount
 	 * @param payee
 	 * @throws Exception
 	 */
-	public void sendXRP(BigInteger xrpAmount, StellarAddress payee) throws Exception{
-		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(new BigDecimal(xrpAmount));
+	public void sendSTR(BigInteger STRAmount, StellarAddress payee) throws Exception{
+		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(new BigDecimal(STRAmount));
 		StellarPaymentTransaction tx = new StellarPaymentTransaction(seed.getPublicStellarAddress(), payee, amount, this.nextTransactionSequenceNumber);
 		//TODO Compute the required fee from the server_info
 		tx.fee=new DenominatedIssuedCurrency(new BigDecimal("10"));

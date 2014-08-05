@@ -12,11 +12,11 @@ public class DenominatedIssuedCurrencyTest {
 
 	@Test
 	public void testToJSON() {
-		DenominatedIssuedCurrency xrpAmount = new DenominatedIssuedCurrency(new BigDecimal(1));
+		DenominatedIssuedCurrency STRAmount = new DenominatedIssuedCurrency(new BigDecimal(1));
 		
-		DenominatedIssuedCurrency xrpAmount2 = new DenominatedIssuedCurrency();
-		xrpAmount2.copyFrom(xrpAmount.toJSON());
-		assertEquals(xrpAmount, xrpAmount2);
+		DenominatedIssuedCurrency STRAmount2 = new DenominatedIssuedCurrency();
+		STRAmount2.copyFrom(STRAmount.toJSON());
+		assertEquals(STRAmount, STRAmount2);
 	}
 
 }

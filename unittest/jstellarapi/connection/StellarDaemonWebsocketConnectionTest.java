@@ -49,7 +49,7 @@ public class StellarDaemonWebsocketConnectionTest {
 	public void testAccountInfo() throws Exception {
 		StellarAddressPublicInformation jStellarAccount = conn.getAccountInfo(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI.toString());
 		assertEquals(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI.toString(), jStellarAccount.account);
-		assertEquals(1, jStellarAccount.xrpBalance.compareTo(BigDecimal.valueOf(200)));
+		assertEquals(1, jStellarAccount.STRBalance.compareTo(BigDecimal.valueOf(200)));
 	}
 	
 	@Test
@@ -65,7 +65,7 @@ public class StellarDaemonWebsocketConnectionTest {
 	@Test
 	public void testOrderBook() throws Exception {
 		final int NB_ENTRIES=9;
-		OrderBook book = conn.getOrderBook(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI.toString(), "BTC", "XRP", NB_ENTRIES);
+		OrderBook book = conn.getOrderBook(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI.toString(), "BTC", "STR", NB_ENTRIES);
 		assertEquals(NB_ENTRIES, book.size());
 		
 	}
@@ -89,10 +89,10 @@ public class StellarDaemonWebsocketConnectionTest {
 //	@Ignore
 	public void testPayment() throws Exception{
 		StellarSeedAddress secret = TestUtilities.getTestSeed();
-		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
-		oneXRP.issuer=StellarAddress.STELLAR_ADDRESS_JSTELLARAPI;
-		oneXRP.amount=new BigDecimal("1000000");
-		conn.sendPayment(secret, StellarAddress.STELLAR_ADDRESS_PMARCHES, oneXRP);
+		DenominatedIssuedCurrency oneSTR = new DenominatedIssuedCurrency();
+		oneSTR.issuer=StellarAddress.STELLAR_ADDRESS_JSTELLARAPI;
+		oneSTR.amount=new BigDecimal("1000000");
+		conn.sendPayment(secret, StellarAddress.STELLAR_ADDRESS_PMARCHES, oneSTR);
 
 		DenominatedIssuedCurrency oneMiliBTC = new DenominatedIssuedCurrency();
 		oneMiliBTC.issuer=StellarAddress.STELLAR_ADDRESS_JSTELLARAPI;
@@ -118,11 +118,11 @@ public class StellarDaemonWebsocketConnectionTest {
 	
 	@Test
 	public void testSignTransaction() throws Exception {
-		DenominatedIssuedCurrency oneXRP = new DenominatedIssuedCurrency();
-		oneXRP.issuer=StellarAddress.STELLAR_ADDRESS_JSTELLARAPI;
-		oneXRP.amount=new BigDecimal("1000000");
+		DenominatedIssuedCurrency oneSTR = new DenominatedIssuedCurrency();
+		oneSTR.issuer=StellarAddress.STELLAR_ADDRESS_JSTELLARAPI;
+		oneSTR.amount=new BigDecimal("1000000");
 		StellarSeedAddress testAccount=TestUtilities.getTestSeed();
-		StellarPaymentTransaction tx = new StellarPaymentTransaction(testAccount.getPublicStellarAddress(), StellarAddress.STELLAR_ADDRESS_PMARCHES, oneXRP, 1);
+		StellarPaymentTransaction tx = new StellarPaymentTransaction(testAccount.getPublicStellarAddress(), StellarAddress.STELLAR_ADDRESS_PMARCHES, oneSTR, 1);
 		StellarPaymentTransaction signedTx = conn.signTransaction(testAccount, tx);
 		assertNotNull(signedTx.publicKeyUsedToSign);
 		assertNotNull(signedTx.signature);
@@ -151,7 +151,7 @@ public class StellarDaemonWebsocketConnectionTest {
 		JSONSubscribtionFeed txFeed=conn.getTransactionFeed();
 
 		StellarSeedAddress secret = TestUtilities.getTestSeed();
-		conn.sendPayment(secret, StellarAddress.STELLAR_ADDRESS_PMARCHES, DenominatedIssuedCurrency.ONE_XRP);
+		conn.sendPayment(secret, StellarAddress.STELLAR_ADDRESS_PMARCHES, DenominatedIssuedCurrency.ONE_STR);
 		StellarPaymentTransaction tx=new StellarPaymentTransaction(txFeed.take());
 		assertEquals(StellarAddress.STELLAR_ADDRESS_PMARCHES, tx.payee);
 		assertEquals(secret.getPublicStellarAddress(), tx.payer);
