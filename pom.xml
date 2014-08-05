@@ -29,4 +29,39 @@
   </build>
   
     <url>https://github.com/pmarches/jStellarAPI</url>
+    <dependencies>
+    	<dependency>
+    		<groupId>org.eclipse.jetty</groupId>
+    		<artifactId>jetty-io</artifactId>
+    		<version>9.2.2.v20140723</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.eclipse.jetty</groupId>
+    		<artifactId>jetty-util</artifactId>
+    		<version>9.2.2.v20140723</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.eclipse.jetty.websocket</groupId>
+    		<artifactId>websocket-api</artifactId>
+    		<version>9.2.2.v20140723</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.eclipse.jetty.websocket</groupId>
+    		<artifactId>websocket-client</artifactId>
+    		<version>9.2.2.v20140723</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>com.googlecode.json-simple</groupId>
+    		<artifactId>json-simple</artifactId>
+    		<version>1.1.1</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.bouncycastle</groupId>
+    		<artifactId>bcprov-jdk15on</artifactId>
+    		<version>1.51</version>
+    	</dependency>
+    </dependencies>
+    <properties>
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 </project>

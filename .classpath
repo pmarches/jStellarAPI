@@ -15,14 +15,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry exported="true" kind="lib" path="lib/json-simple-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15on-149.jar"/>
-	<classpathentry kind="lib" path="lib/jreadline-0.17.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/jetty-io-9.2.1.v20140609.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/jetty-util-9.2.1.v20140609.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/websocket-api-9.2.1.v20140609.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/websocket-client-9.2.1.v20140609.jar" sourcepath="/home/pmarches/.m2/repository/org/eclipse/jetty/websocket/websocket-client/9.2.1.v20140609/websocket-client-9.2.1.v20140609-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/pmarches/projects/candlerws/jRippleAPI/lib/websocket-common-9.2.1.v20140609.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
