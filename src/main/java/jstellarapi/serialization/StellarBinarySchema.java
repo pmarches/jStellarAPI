@@ -60,7 +60,7 @@ public class StellarBinarySchema {
 		SigningTime(PrimitiveTypes.UINT32, 9),
 		Expiration(PrimitiveTypes.UINT32, 10),
 		TransferRate(PrimitiveTypes.UINT32, 11),
-		WalletSize(PrimitiveTypes.UINT32, 12),
+//		WalletSize(PrimitiveTypes.UINT32, 12),
 		OwnerCount(PrimitiveTypes.UINT32, 13),
 		DestinationTag(PrimitiveTypes.UINT32, 14),
 
@@ -93,7 +93,7 @@ public class StellarBinarySchema {
 		LowNode(PrimitiveTypes.UINT64, 7),
 		HighNode(PrimitiveTypes.UINT64, 8),
 		
-		EmailHash(PrimitiveTypes.HASH128, 1),
+//		EmailHash(PrimitiveTypes.HASH128, 1),
 		
 		LedgerHash(PrimitiveTypes.HASH256, 1),
 		ParentHash(PrimitiveTypes.HASH256, 2),
@@ -101,7 +101,7 @@ public class StellarBinarySchema {
 		AccountHash(PrimitiveTypes.HASH256, 4),
 		PreviousTxnID(PrimitiveTypes.HASH256, 5),
 		LedgerIndex(PrimitiveTypes.HASH256, 6),
-		WalletLocator(PrimitiveTypes.HASH256, 7),
+//		WalletLocator(PrimitiveTypes.HASH256, 7),
 		RootIndex(PrimitiveTypes.HASH256, 8),
 		BookDirectory(PrimitiveTypes.HASH256, 16),
 		InvoiceID(PrimitiveTypes.HASH256, 17),
@@ -126,12 +126,12 @@ public class StellarBinarySchema {
 		StellarEscrow(PrimitiveTypes.AMOUNT, 17),
 
 		PublicKey(PrimitiveTypes.VARIABLE_LENGTH, 1),
-		MessageKey(PrimitiveTypes.VARIABLE_LENGTH, 2),
+//		MessageKey(PrimitiveTypes.VARIABLE_LENGTH, 2),
 		SigningPubKey(PrimitiveTypes.VARIABLE_LENGTH, 3),
 		TxnSignature(PrimitiveTypes.VARIABLE_LENGTH, 4),
 		Generator(PrimitiveTypes.VARIABLE_LENGTH, 5),
 		Signature(PrimitiveTypes.VARIABLE_LENGTH, 6),
-		Domain(PrimitiveTypes.VARIABLE_LENGTH, 7),
+//		Domain(PrimitiveTypes.VARIABLE_LENGTH, 7),
 		FundCode(PrimitiveTypes.VARIABLE_LENGTH, 8),
 		RemoveCode(PrimitiveTypes.VARIABLE_LENGTH, 9),
 		ExpireCode(PrimitiveTypes.VARIABLE_LENGTH, 10),
@@ -145,6 +145,7 @@ public class StellarBinarySchema {
 		Issuer(PrimitiveTypes.ACCOUNT, 4),
 		Target(PrimitiveTypes.ACCOUNT, 7),
 		RegularKey(PrimitiveTypes.ACCOUNT, 8),
+		InflationDest(PrimitiveTypes.ACCOUNT, 9),
 
 		Paths(PrimitiveTypes.PATHSET, 1),
 

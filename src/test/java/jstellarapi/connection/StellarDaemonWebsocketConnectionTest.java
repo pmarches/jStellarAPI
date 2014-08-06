@@ -35,7 +35,7 @@ public class StellarDaemonWebsocketConnectionTest {
 	
 	@BeforeClass
 	public static void setupConnection() throws Exception{
-		conn = new StellarDaemonWebsocketConnection(StellarDaemonWebsocketConnection.TEST_SERVER_URL);
+		conn = new StellarDaemonWebsocketConnection(StellarDaemonWebsocketConnection.LIVE_SERVER_URL);
 	}
 	
 	@AfterClass
@@ -49,6 +49,7 @@ public class StellarDaemonWebsocketConnectionTest {
 	public void testAccountInfo() throws Exception {
 		StellarAddressPublicInformation jStellarAccount = conn.getAccountInfo(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI.toString());
 		assertEquals(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI.toString(), jStellarAccount.account);
+		assertEquals(StellarAddress.STELLAR_ADDRESS_DEFAULT_INFLATION_ADDRESS.toString(), jStellarAccount.inflationDestination);
 		assertEquals(1, jStellarAccount.STRBalance.compareTo(BigDecimal.valueOf(200)));
 	}
 	
@@ -89,10 +90,7 @@ public class StellarDaemonWebsocketConnectionTest {
 //	@Ignore
 	public void testPayment() throws Exception{
 		StellarSeedAddress secret = TestUtilities.getTestSeed();
-		DenominatedIssuedCurrency oneSTR = new DenominatedIssuedCurrency();
-		oneSTR.issuer=StellarAddress.STELLAR_ADDRESS_JSTELLARAPI;
-		oneSTR.amount=new BigDecimal("1000000");
-		conn.sendPayment(secret, StellarAddress.STELLAR_ADDRESS_PMARCHES, oneSTR);
+		conn.sendPayment(secret, StellarAddress.STELLAR_ADDRESS_PMARCHES, DenominatedIssuedCurrency.ONE_STR);
 
 		DenominatedIssuedCurrency oneMiliBTC = new DenominatedIssuedCurrency();
 		oneMiliBTC.issuer=StellarAddress.STELLAR_ADDRESS_JSTELLARAPI;
@@ -152,15 +150,15 @@ public class StellarDaemonWebsocketConnectionTest {
 		StellarSeedAddress secret = TestUtilities.getTestSeed();
 		conn.sendPayment(secret, StellarAddress.STELLAR_ADDRESS_PMARCHES, DenominatedIssuedCurrency.ONE_STR);
 		StellarPaymentTransaction tx=new StellarPaymentTransaction(txFeed.take());
+		conn.unsubscribeToTransactionOfAddress(StellarAddress.STELLAR_ADDRESS_PMARCHES.toString());
 		assertEquals(StellarAddress.STELLAR_ADDRESS_PMARCHES, tx.payee);
 		assertEquals(secret.getPublicStellarAddress(), tx.payer);
 		assertTrue(txFeed.isEmpty());
-		conn.unsubscribeToTransactionOfAddress(StellarAddress.STELLAR_ADDRESS_PMARCHES.toString());
 	}
 
 	@Test
 	public void testGetTransactionOfAccount(){
 		StellarTransactionHistory txHistory=conn.getTransactionsForAccount(StellarAddress.STELLAR_ADDRESS_PMARCHES.toString(), StellarDaemonConnection.GENESIS_LEDGER_NUMBER);
-		assertEquals(322, txHistory.size());
+		assertEquals(12, txHistory.size());
 	}
 }

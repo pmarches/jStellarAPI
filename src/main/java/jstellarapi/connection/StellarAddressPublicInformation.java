@@ -9,6 +9,7 @@ public class StellarAddressPublicInformation implements JSONSerializable {
 	public BigDecimal STRBalance;
 	public String urlgravatar;
 	public long nextTransactionSequence;
+	public String inflationDestination;
 	
 	@Override
 	public void copyFrom(JSONObject jsonCommandResult) {
@@ -18,6 +19,7 @@ public class StellarAddressPublicInformation implements JSONSerializable {
 			account=(String) jsonAccountData.get("Account");
 			urlgravatar=(String) jsonAccountData.get("urlgravatar");
 			nextTransactionSequence = (long) jsonAccountData.get("Sequence");
+			inflationDestination=(String) jsonAccountData.get("InflationDest");
 		}
 	}
 }

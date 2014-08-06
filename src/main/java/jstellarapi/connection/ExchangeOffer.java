@@ -1,7 +1,5 @@
 package jstellarapi.connection;
 
-import java.math.BigDecimal;
-
 import jstellarapi.core.DenominatedIssuedCurrency;
 
 import org.json.simple.JSONObject;
@@ -25,7 +23,7 @@ public class ExchangeOffer implements JSONSerializable {
 			return amount;
 		}
 		else{
-			return new DenominatedIssuedCurrency(new BigDecimal((String) jsonDenominatedAmount));
+			return new DenominatedIssuedCurrency((String) jsonDenominatedAmount);
 		}
 	}
 

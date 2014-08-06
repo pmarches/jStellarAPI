@@ -8,14 +8,21 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.math.ec.ECPoint;
 
 public class StellarPrivateKey extends StellarIdentifier {
-	boolean isDeterministic=false; //Deterministic private keys should never be exported, since the public generator+one private key yields the private generator!  
 	StellarPublicKey publicKey;
 	
 	public StellarPrivateKey(byte[] privateKeyBytes) {
-		super(privateKeyBytes, 34);
+		super(privateKeyBytes, 101);
 		if(privateKeyBytes.length!=32){
 			throw new RuntimeException("The private key must be of length 32 bytes");
 		}
+	}
+
+	public StellarPrivateKey(byte[] privateKeyBytes, byte[] publicKeyBytes) {
+		super(privateKeyBytes, 101);
+		if(privateKeyBytes.length!=32){
+			throw new RuntimeException("The private key must be of length 32 bytes");
+		}
+		publicKey=new StellarPublicKey(publicKeyBytes);
 	}
 
 	public static byte[] bigIntegerToBytes(BigInteger biToConvert, int nbBytesToReturn){

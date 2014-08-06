@@ -10,6 +10,7 @@ import jstellarapi.core.StellarPublicGeneratorAddress;
 import jstellarapi.core.StellarPublicKey;
 import jstellarapi.core.StellarSeedAddress;
 
+import org.abstractj.kalium.keys.PrivateKey;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -19,7 +20,7 @@ import org.bouncycastle.util.Arrays;
 public class StellarDeterministicKeyGenerator {
 	public static ECDomainParameters SECP256K1_PARAMS;
 	protected byte[] seedBytes;
-
+	
 	static {
 //		ECGenParameterSpec ecSpec = new ECGenParameterSpec("SECp256k1");
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());

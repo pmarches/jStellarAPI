@@ -12,7 +12,7 @@ public class DenominatedIssuedCurrencyTest {
 
 	@Test
 	public void testToJSON() {
-		DenominatedIssuedCurrency STRAmount = new DenominatedIssuedCurrency(new BigDecimal(1));
+		DenominatedIssuedCurrency STRAmount = DenominatedIssuedCurrency.ONE_STR;
 		
 		DenominatedIssuedCurrency STRAmount2 = new DenominatedIssuedCurrency();
 		STRAmount2.copyFrom(STRAmount.toJSON());

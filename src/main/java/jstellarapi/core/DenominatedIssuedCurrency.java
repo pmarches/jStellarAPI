@@ -1,6 +1,7 @@
 package jstellarapi.core;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import jstellarapi.connection.JSONSerializable;
 
@@ -8,18 +9,20 @@ import org.json.simple.JSONObject;
 
 public class DenominatedIssuedCurrency implements JSONSerializable {
 	public BigDecimal amount;
+	public BigInteger microStrAmount;
 	public StellarAddress issuer;
 	public String currency;
 	public static final int MIN_SCALE = -96;
 	public static final int MAX_SCALE = 80;
-	public static final int DROPS_PER_STR = 1_000_000;
-	public static final DenominatedIssuedCurrency ONE_STR=new DenominatedIssuedCurrency(DROPS_PER_STR);
+	public static final BigInteger MICROSTR_PER_STR = BigInteger.valueOf(1_000_000);
+	public static final DenominatedIssuedCurrency ONE_STR=new DenominatedIssuedCurrency(BigInteger.ONE);
+	public static final DenominatedIssuedCurrency FEE = new DenominatedIssuedCurrency(BigInteger.TEN);
 
 	public DenominatedIssuedCurrency(){ //FIXME get rid of this
 	}
 
-	public DenominatedIssuedCurrency(String amountStr, StellarAddress issuer, String currencyStr){
-		this(new BigDecimal(amountStr).stripTrailingZeros(), issuer, currencyStr);
+	public DenominatedIssuedCurrency(String amount, StellarAddress issuer, String currencyStr){
+		this(new BigDecimal(amount).stripTrailingZeros(), issuer, currencyStr);
 	}
 	
 	public DenominatedIssuedCurrency(BigDecimal amount, StellarAddress issuer, String currencyStr){
@@ -34,14 +37,17 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		this.amount = amount;
 		this.issuer = issuer;
 		this.currency = currencyStr;
+		if(issuer==null || currencyStr==null){
+			throw new Error("Issuer or currency canot be null for non-STR currency");
+		}
 	}
 	
-	public DenominatedIssuedCurrency(BigDecimal STRAmount) {
-		this.amount=STRAmount;
+	public DenominatedIssuedCurrency(BigInteger stellarAmount) {
+		this.microStrAmount=stellarAmount.multiply(MICROSTR_PER_STR);
 	}
 	
-	public DenominatedIssuedCurrency(long STRDropsAmount) {
-		this(BigDecimal.valueOf(STRDropsAmount/(double) DROPS_PER_STR));
+	public DenominatedIssuedCurrency(String amountInMicroSTR) {
+		microStrAmount=new BigInteger(amountInMicroSTR);
 	}
 
 	public boolean isNative() {
@@ -55,7 +61,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	@Override
 	public String toString() {
 		if(issuer==null || currency==null){
-			return amount.movePointLeft(6).stripTrailingZeros().toPlainString()+" STR";
+			return new BigDecimal(microStrAmount).movePointLeft(6).stripTrailingZeros().toPlainString()+" STR";
 		}
 		return amount.stripTrailingZeros().toPlainString()+"/"+currency+"/"+issuer;
 	}
@@ -80,8 +86,8 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 	}
 
 	public Object toJSON(){
-		if(currency==null){
-			return amount.toString();
+		if(isNative()){
+			return microStrAmount.toString();
 		}
 		else{
 			JSONObject jsonThis = new JSONObject();
@@ -131,11 +137,10 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		return true;
 	}
 
-	public long toNativeDrops() {
+	public long toMicroSTR() {
 		if(isNative()==false){
-			throw new RuntimeException("Cannot get drops on a non-STR currency");
+			throw new RuntimeException("Cannot get micro STR on a non-STR currency");
 		}
-		return this.amount.longValueExact();
-	}
-	
+		return this.microStrAmount.longValue();
+	}	
 }

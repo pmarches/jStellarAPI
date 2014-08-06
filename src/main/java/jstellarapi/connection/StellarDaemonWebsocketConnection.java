@@ -28,7 +28,7 @@ public class StellarDaemonWebsocketConnection extends StellarDaemonConnection {
 		
 	private int requestCounter=1;
 	public final static URI TEST_SERVER_URL=URI.create("ws://test.stellar.org:9001");
-	public final static URI MAIN_SERVER_URL=URI.create("ws://live.stellar.org:9001");
+	public final static URI LIVE_SERVER_URL=URI.create("ws://live.stellar.org:9001");
 	public final static URI LOCALHOST_SERVER_URL=URI.create("ws://localhost:5006");
 	JSONResponseHolder responseHolder = new JSONResponseHolder();
 	JSONSubscribtionFeed ledgerFeed=new JSONSubscribtionFeed();
@@ -202,15 +202,15 @@ public class StellarDaemonWebsocketConnection extends StellarDaemonConnection {
 		return sendCommand(command, new GenericJSONSerializable());
 	}
 
-	public GenericJSONSerializable subscribeToTransactionOfAddress(String StellarAddressToMonitor) {
+	public GenericJSONSerializable subscribeToTransactionOfAddress(String stellarAddressToMonitor) {
 		try {
-			return subscribeToTransactionOfAddressFuture(StellarAddressToMonitor).get();
+			return subscribeToTransactionOfAddressFuture(stellarAddressToMonitor).get();
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	public FutureJSONResponse<GenericJSONSerializable> subscribeToTransactionOfAddressFuture(String StellarAddressToMonitor) {
+	public FutureJSONResponse<GenericJSONSerializable> subscribeToTransactionOfAddressFuture(String stellarAddressToMonitor) {
 		JSONObject command = new JSONObject();
     	command.put("command", "subscribe");
 
@@ -220,7 +220,7 @@ public class StellarDaemonWebsocketConnection extends StellarDaemonConnection {
 //    	command.put("streams", streams);
 
     	JSONArray accounts = new JSONArray();
-    	accounts.add(StellarAddressToMonitor);
+    	accounts.add(stellarAddressToMonitor);
     	command.put("accounts", accounts);
 		return sendCommand(command, new GenericJSONSerializable());
 	}

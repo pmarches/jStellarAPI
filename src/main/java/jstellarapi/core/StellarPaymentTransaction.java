@@ -1,6 +1,6 @@
 package jstellarapi.core;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import jstellarapi.connection.JSONSerializable;
 import jstellarapi.serialization.StellarBinaryObject;
@@ -26,7 +26,7 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 		this.payee=payee;
 		this.amount = amount;
 		this.sequenceNumber = sequenceNumber;
-		this.fee = new DenominatedIssuedCurrency(10);
+		this.fee = DenominatedIssuedCurrency.FEE;
 	}
 	
 	public StellarPaymentTransaction(StellarBinaryObject serObj){
@@ -80,8 +80,8 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 	protected void fromTxJSON(JSONObject tx_json) {
 		payer=new StellarAddress((String) tx_json.get("Account"));
 		payee=new StellarAddress((String) tx_json.get("Destination"));
-		String amountStr = (String) tx_json.get("Amount");
-		amount=new DenominatedIssuedCurrency(new BigDecimal(amountStr)); //Works only with STR right now
+		String amountInMicroSTR = (String) tx_json.get("Amount");
+		amount=new DenominatedIssuedCurrency(amountInMicroSTR); //Works only with STR right now
 		sequenceNumber=(Long) tx_json.get("Sequence");
 		txHash = (String) tx_json.get("hash");
 		signature = (String) tx_json.get("TxnSignature");

@@ -9,9 +9,9 @@ import org.bouncycastle.math.ec.ECPoint;
 public class StellarPublicKey extends StellarIdentifier {
 	//int accountId; //-1 means this public key is not deterministic?
 	public StellarPublicKey(byte[] publicKeyBytes) {
-		super(publicKeyBytes, 35);
-		if(publicKeyBytes.length!=33){
-			throw new RuntimeException("The public key must be of length 33 bytes was of length "+publicKeyBytes.length);
+		super(publicKeyBytes, 67);
+		if(publicKeyBytes.length!=32){
+			throw new RuntimeException("The public key must be of length 32 bytes was of length "+publicKeyBytes.length);
 		}
 	}
 	

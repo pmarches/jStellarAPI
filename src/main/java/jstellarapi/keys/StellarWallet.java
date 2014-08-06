@@ -1,13 +1,11 @@
 package jstellarapi.keys;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -96,12 +94,12 @@ public class StellarWallet implements Serializable {
 	 * @throws Exception
 	 */
 	public void sendSTR(BigInteger STRAmount, StellarAddress payee) throws Exception{
-		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(new BigDecimal(STRAmount));
+		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(STRAmount);
 		StellarPaymentTransaction tx = new StellarPaymentTransaction(seed.getPublicStellarAddress(), payee, amount, this.nextTransactionSequenceNumber);
 		//TODO Compute the required fee from the server_info
-		tx.fee=new DenominatedIssuedCurrency(new BigDecimal("10"));
+		tx.fee=new DenominatedIssuedCurrency(new BigInteger("10"));
 		StellarBinaryObject rbo = tx.getBinaryObject();
-		rbo = new StellarSigner(seed.getPrivateKey(0)).sign(rbo);
+		rbo = new StellarSigner(seed.getPrivateKey()).sign(rbo);
 
 		StellarDaemonRPCConnection conn = new StellarDaemonRPCConnection();
 		byte[] signedTXBytes = new StellarBinarySerializer().writeBinaryObject(rbo).array();

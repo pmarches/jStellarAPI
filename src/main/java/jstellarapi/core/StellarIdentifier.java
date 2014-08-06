@@ -15,7 +15,7 @@ public class StellarIdentifier implements Serializable {
 		
 	/**
 	 * @param payloadBytes
-	 * @param identifierType : See https://Stellar.com/wiki/Encodings
+	 * @param identifierType : See ripple_data/protocol/RippleAddress.h
 	 */
 	public StellarIdentifier(byte[] payloadBytes, int identifierType){
 		this.payloadBytes = payloadBytes;

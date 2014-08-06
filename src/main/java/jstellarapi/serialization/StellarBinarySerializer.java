@@ -136,8 +136,7 @@ public class StellarBinarySerializer {
 		//The remaining 54 bits are magnitude
 		long longMagnitude = offsetNativeSignMagnitudeBytes&0x3FFFFFFFFFFFFFl;
 		if(isSTRAmount){
-			BigDecimal magnitude = BigDecimal.valueOf(sign*longMagnitude);
-			return new DenominatedIssuedCurrency(magnitude);
+			return new DenominatedIssuedCurrency(BigInteger.valueOf(sign*longMagnitude).multiply(DenominatedIssuedCurrency.MICROSTR_PER_STR));
 		}
 		else{
 			String currencyStr = readCurrency(input);

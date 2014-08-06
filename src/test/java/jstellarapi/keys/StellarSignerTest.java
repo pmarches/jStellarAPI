@@ -25,7 +25,7 @@ public class StellarSignerTest {
 	@Test
 	public void testSubmitSignedTransaction() throws Exception{
 		StellarBinarySerializer binSer=new StellarBinarySerializer();
-		StellarPrivateKey privateKey = TestUtilities.getTestSeed().getPrivateKey(0);
+		StellarPrivateKey privateKey = TestUtilities.getTestSeed().getPrivateKey();
 		StellarSigner signer = new StellarSigner(privateKey);
 		JSONArray allTx = (JSONArray) new JSONParser().parse(new FileReader("testdata/unittest-tx.json"));
 		for(Object obj : allTx){

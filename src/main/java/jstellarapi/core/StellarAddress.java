@@ -10,6 +10,7 @@ public class StellarAddress extends StellarIdentifier {
 //	public static final StellarAddress STELLAR_ADDRESS_NAN=new StellarAddress("grrrrrrrrrrrrrrrrrrn5RM1rHd");
 	public static final StellarAddress STELLAR_ADDRESS_JSTELLARAPI=new StellarAddress("gB2ZjFkenMnZLGZHEckAXn7xzTpn1omFti");
 	public static final StellarAddress STELLAR_ADDRESS_PMARCHES=new StellarAddress("gDh15vDi6gN4ZXvxNPoo2wZ2KNmMRBGto1");
+	public static final StellarAddress STELLAR_ADDRESS_DEFAULT_INFLATION_ADDRESS=new StellarAddress("g4eRqgZfzfj3132y17iaf2fp6HQj1gofjt");
 
 	public StellarAddress(byte[] payloadBytes) {
 		super(payloadBytes, 0);

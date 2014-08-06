@@ -1,9 +1,7 @@
 package jstellarapi.serialization;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,8 +21,6 @@ import javax.xml.bind.DatatypeConverter;
 import jstellarapi.core.DenominatedIssuedCurrency;
 import jstellarapi.core.StellarAddress;
 import jstellarapi.core.StellarPaymentTransaction;
-import jstellarapi.serialization.StellarBinaryObject;
-import jstellarapi.serialization.StellarBinarySerializer;
 import jstellarapi.serialization.StellarBinarySchema.BinaryFormatField;
 import jstellarapi.serialization.StellarBinarySchema.TransactionTypes;
 
@@ -59,7 +55,7 @@ public class StellarBinarySerializerTest {
 		assertEquals(TransactionTypes.TRUST_SET, serObj.getTransactionType());
 		assertEquals(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI, serObj.getField(BinaryFormatField.Account));
 
-		final DenominatedIssuedCurrency EXPECTED_FEE = new DenominatedIssuedCurrency(BigDecimal.TEN);
+		final DenominatedIssuedCurrency EXPECTED_FEE = DenominatedIssuedCurrency.FEE;
 		assertEquals(EXPECTED_FEE, serObj.getField(BinaryFormatField.Fee));
 
 		final DenominatedIssuedCurrency EXPECTED_TRUST_AMOUNT = new DenominatedIssuedCurrency(BigDecimal.valueOf(1), StellarAddress.STELLAR_ADDRESS_PMARCHES, "BTC");
@@ -120,7 +116,7 @@ public class StellarBinarySerializerTest {
 	@Test
 	public void testWriteAndReadPaymentTransaction(){
 		StellarBinarySerializer binSer = new StellarBinarySerializer();
-		DenominatedIssuedCurrency amount = new DenominatedIssuedCurrency(BigDecimal.valueOf(1));
+		DenominatedIssuedCurrency amount = DenominatedIssuedCurrency.ONE_STR;
 		StellarPaymentTransaction payment = new StellarPaymentTransaction(StellarAddress.STELLAR_ADDRESS_JSTELLARAPI, StellarAddress.STELLAR_ADDRESS_PMARCHES, amount, 1);
 		ByteBuffer byteBuffer = binSer.writeBinaryObject(payment.getBinaryObject());
 		StellarBinaryObject serObjRead = binSer.readBinaryObject(byteBuffer);
