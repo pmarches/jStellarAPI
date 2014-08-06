@@ -23,7 +23,7 @@ How to send 10 STR to the JStellarAPI project, the simplest way possible.
 File testWalletFile = new File("myUnEncryptedWallet.wallet");
 StellarSeedAddress seed = new StellarSeedAddress("sXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 StellarWallet wallet = StellarWallet.createWallet(seed, testWalletFile);
-wallet.sendSTR(BigInteger.TEN, new StellarAddress("r32fLio1qkmYqFFYkwdnsaVN7cxBwkW4cT"));
+wallet.sendSTR(BigInteger.TEN, new StellarAddress("gB2ZjFkenMnZLGZHEckAXn7xzTpn1omFti"));
 ```
 
 Libraries required
