@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.xml.bind.DatatypeConverter;
 
+import jstellarapi.SlowTests;
 import jstellarapi.TestUtilities;
 import jstellarapi.connection.ExchangeOffers;
 import jstellarapi.connection.GenericJSONSerializable;
@@ -29,6 +30,7 @@ import jstellarapi.core.StellarTransactionHistory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 public class StellarDaemonWebsocketConnectionTest {
 	static StellarDaemonWebsocketConnection conn;
@@ -133,6 +135,7 @@ public class StellarDaemonWebsocketConnectionTest {
 	}
 	
 	@Test
+	@Category(SlowTests.class)
 	public void testSubscribeToLedgers() throws InterruptedException, ExecutionException{
 		conn.subscribeToLedgers(true);
 		JSONSubscribtionFeed ledgerFeed=conn.getLedgerFeed();
@@ -143,6 +146,7 @@ public class StellarDaemonWebsocketConnectionTest {
 	}
 	
 	@Test
+	@Category(SlowTests.class)
 	public void testSubscribeToTransaction() throws Exception{
 		conn.subscribeToTransactionOfAddress(StellarAddress.STELLAR_ADDRESS_PMARCHES.toString());
 		JSONSubscribtionFeed txFeed=conn.getTransactionFeed();

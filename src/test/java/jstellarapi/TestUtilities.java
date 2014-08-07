@@ -3,7 +3,14 @@ package jstellarapi;
 
 import java.io.FileReader;
 
+import jstellarapi.connection.StellarDaemonWebsocketConnectionTest;
+import jstellarapi.core.DenominatedIssuedCurrencyTest;
 import jstellarapi.core.StellarSeedAddress;
+import jstellarapi.core.StellarSeedAddressTest;
+import jstellarapi.keys.StellarSignerTest;
+import jstellarapi.keys.StellarWalletTest;
+import jstellarapi.serialization.ReferenceImplementationAmountTests;
+import jstellarapi.serialization.StellarBinarySerializerTest;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,5 +26,4 @@ public class TestUtilities {
 		}
 		return stellarAccount;
 	}
-
 }
