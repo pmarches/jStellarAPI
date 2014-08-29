@@ -1,13 +1,17 @@
 package jstellarapi.core;
 
 import jstellarapi.keys.StellarDeterministicKeyGenerator;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveSpec;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.math.ec.ECPoint;
 
 public class StellarPublicKey extends StellarIdentifier {
-	//int accountId; //-1 means this public key is not deterministic?
+    public static final EdDSANamedCurveSpec ed25519 = EdDSANamedCurveTable.getByName("ed25519-sha-512");
+
+    //int accountId; //-1 means this public key is not deterministic?
 	public StellarPublicKey(byte[] publicKeyBytes) {
 		super(publicKeyBytes, 67);
 		if(publicKeyBytes.length!=32){

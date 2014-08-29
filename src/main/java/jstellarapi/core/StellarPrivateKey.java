@@ -1,8 +1,10 @@
 package jstellarapi.core;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import jstellarapi.keys.StellarDeterministicKeyGenerator;
+import net.i2p.crypto.eddsa.math.GroupElement;
 
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.math.ec.ECPoint;
@@ -56,10 +58,9 @@ public class StellarPrivateKey extends StellarIdentifier {
 			return publicKey;
 		}
 
-		BigInteger privateBI=new BigInteger(1, this.payloadBytes);
-		ECPoint uncompressed= StellarDeterministicKeyGenerator.SECP256K1_PARAMS.getG().multiply(privateBI);
-		ECPoint publicPoint = new ECPoint.Fp(StellarDeterministicKeyGenerator.SECP256K1_PARAMS.getCurve(), uncompressed.getX(), uncompressed.getY(), true);
-		publicKey = new StellarPublicKey(publicPoint.getEncoded());
+        GroupElement A = StellarPublicKey.ed25519.getB().scalarMultiply(payloadBytes);
+		byte[] encodedAndCompressedPublicKeyBytes=A.toByteArray();
+		publicKey = new StellarPublicKey(encodedAndCompressedPublicKeyBytes);
 		return publicKey;
 	}
 

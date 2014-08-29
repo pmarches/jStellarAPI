@@ -13,20 +13,22 @@ import jstellarapi.core.StellarPrivateKey;
 import jstellarapi.core.StellarPublicKey;
 import jstellarapi.core.StellarSeedAddress;
 
-import org.abstractj.kalium.NaCl;
 import org.junit.Test;
 
 public class StellarWalletTest {
 	@Test
 	public void testKeys(){
-		byte[] seedBytes=DatatypeConverter.parseHexBinary("C30BC4C509C78EB6D44369B598F4FFECC4006AB83B31D9DBB2EC9900ACF3240B");
+		String seedBytesStr="B0739E1908429A4E259960E99E6B50883BFF4CCC58B546F798F8CB829674730A";
+		byte[] seedBytes=DatatypeConverter.parseHexBinary(seedBytesStr);
+		assertEquals(32, seedBytes.length);
 		StellarSeedAddress seed = new StellarSeedAddress(seedBytes);
 		StellarPrivateKey privateKey=seed.getPrivateKey();
-		StellarPublicKey publicKey=privateKey.getPublicKey();
-		String expectedPublicKeyHex="807E474895C2CD542B9699BF07C37BB5C995FB9CD563982AF8021838CFDAC79A";
 
+		StellarPublicKey publicKey=privateKey.getPublicKey();
+		String expectedPublicKeyHex="58ADFD3A60E59396E625D37C217B2BE80D1DB45D3C6B0E7A942CAE7223D3EF3C";
+		assertEquals(expectedPublicKeyHex, DatatypeConverter.printHexBinary(publicKey.getBytes()));
 		StellarAddress address=publicKey.getAddress();
-		assertEquals("gnmMadkFCvPdq9ojhBmPh65HZDw9BDGo1n", address.toString());
+		assertEquals("ga2S7sAuSqU4zseNDs2cRxMQXxmVEPm4MW", address.toString());
 	}
 	
 	@Test

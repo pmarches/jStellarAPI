@@ -25,9 +25,3 @@ StellarSeedAddress seed = new StellarSeedAddress("sXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 StellarWallet wallet = StellarWallet.createWallet(seed, testWalletFile);
 wallet.sendSTR(BigInteger.TEN, new StellarAddress("gB2ZjFkenMnZLGZHEckAXn7xzTpn1omFti"));
 ```
-
-Libraries required
-==
-*  [Jetty](http://www.eclipse.org/jetty/) as the websocket client
-*  [JSONSimple](https://code.google.com/p/json-simple/) for JSON handling
-*  [BouncyCastle](http://www.bouncycastle.org/) for crypto
