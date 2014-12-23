@@ -8,8 +8,6 @@ public class TrustLine implements JSONSerializable {
 	public String currency;
 	public String limit;
 	public String limit_peer;
-	public long quality_in;
-	public long quality_out;
 	
 	@Override
 	public void copyFrom(JSONObject jsonTrustLine) {
@@ -18,8 +16,11 @@ public class TrustLine implements JSONSerializable {
 		currency=(String) jsonTrustLine.get("currency");
 		limit=(String) jsonTrustLine.get("limit");
 		limit_peer=(String) jsonTrustLine.get("limit_peer");
-		quality_in=(Long) jsonTrustLine.get("quality_in");
-		quality_out=(Long) jsonTrustLine.get("quality_out");
+	}
+
+	@Override
+	public String toString() {
+		return "TrustLine [otherAccount=" + otherAccount + ", balance=" + balance + ", currency=" + currency + ", limit=" + limit + ", limit_peer=" + limit_peer + "]";
 	}
 
 }

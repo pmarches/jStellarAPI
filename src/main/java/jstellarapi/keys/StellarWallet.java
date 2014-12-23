@@ -61,21 +61,12 @@ public class StellarWallet implements Serializable {
 			JSONObject root=(JSONObject) new JSONParser().parse(new FileReader(walletFile));
 			seed=new StellarSeedAddress((String) root.get("master_seed"));
 
-			if(false){
-				long seqNumber=(Long)root.get("nextTransactionSequenceNumber");
-				nextTransactionSequenceNumber=(int) seqNumber;
-			}
-			else{
-				StellarAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicStellarAddress());
-				nextTransactionSequenceNumber=(int) publicInfo.nextTransactionSequence;
-			}
+			StellarAddressPublicInformation publicInfo = conn.getPublicInformation(seed.getPublicStellarAddress());
+			nextTransactionSequenceNumber=(int) publicInfo.nextTransactionSequence;
 			
 			if(root.containsKey("pendingTransaction")){
 				String hexTX=(String) root.get("pendingTransaction");
 				pendingTransaction=DatatypeConverter.parseHexBinary(hexTX);
-				if(false){
-					conn.submitTransaction(pendingTransaction);
-				}
 			}
 		}
 	}
@@ -111,6 +102,7 @@ public class StellarWallet implements Serializable {
 		saveWallet(walletFile);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void saveWallet(File saveToFile) throws IOException {
 		JSONObject root=new JSONObject();
 		root.put("address", seed.getPublicStellarAddress().toString());

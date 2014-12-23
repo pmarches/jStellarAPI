@@ -40,27 +40,28 @@ public class StellarDaemonWebsocketConnection extends StellarDaemonConnection {
     
 	@OnWebSocketMessage
     public void onMessage(String msg) {
+		JSONObject jsonMessage = null;
     	try {
-			JSONObject jsonMessage = (JSONObject) new JSONParser().parse(msg);
-			Object messageType=jsonMessage.get("type");
-			if("response".equals(messageType)){
-				responseHolder.setResponseContent(jsonMessage);
-			}
-			else if("error".equals(messageType)){ //FIXME Can we remove this? Errors are responses also?
-				responseHolder.setResponseError(jsonMessage);
-			}
-			else if("ledgerClosed".equals(messageType)){
-				ledgerFeed.add(jsonMessage);
-			}
-			else if("transaction".equals(messageType)){
-				transactionFeed.add((JSONObject) jsonMessage.get("transaction"));
-			}
-			else{
-				//TODO Notify the subscribtions
-				System.out.println("subscription of type "+messageType+" "+jsonMessage);
-			}
+			jsonMessage = (JSONObject) new JSONParser().parse(msg);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			return;
+		}
+		Object messageType=jsonMessage.get("type");
+		if("response".equals(messageType)){
+			responseHolder.setResponseContent(jsonMessage);
+		}
+		else if("error".equals(messageType)){ //FIXME Can we remove this? Errors are responses also?
+			responseHolder.setResponseError(jsonMessage);
+		}
+		else if("ledgerClosed".equals(messageType)){
+			ledgerFeed.add(jsonMessage);
+		}
+		else if("transaction".equals(messageType)){
+			transactionFeed.add((JSONObject) jsonMessage.get("transaction"));
+		}
+		else{
+			//TODO Notify the subscribtions
+			System.out.println("subscription of type "+messageType+" "+jsonMessage);
 		}
     }
 
