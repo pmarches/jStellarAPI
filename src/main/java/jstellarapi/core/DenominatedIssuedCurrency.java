@@ -85,6 +85,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object toJSON(){
 		if(isNative()){
 			return microStrAmount.toString();
