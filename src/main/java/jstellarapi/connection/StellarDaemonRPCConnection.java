@@ -91,4 +91,14 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		return info;
 	}
 
+	public TrustLines getTrustLines(StellarAddress StellarAddress) throws Exception {
+		JSONObject account=new JSONObject();
+		account.put("account", StellarAddress.toString());
+		JSONObject command = createJSONCommand("account_lines", account);
+		JSONObject response = executeJSONCommand(command);
+		TrustLines info = new TrustLines();
+		info.copyFrom((JSONObject) response.get("result"));
+		return info;
+	}
+
 }

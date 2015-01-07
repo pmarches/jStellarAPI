@@ -22,4 +22,10 @@ public class StellarAddressPublicInformation implements JSONSerializable {
 			inflationDestination=(String) jsonAccountData.get("InflationDest");
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "StellarAddressPublicInformation [account=" + account + ", STRBalance=" + STRBalance + ", urlgravatar=" + urlgravatar + ", nextTransactionSequence=" + nextTransactionSequence
+				+ ", inflationDestination=" + inflationDestination + "]";
+	}
 }
