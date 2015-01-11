@@ -80,13 +80,21 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 	protected void fromTxJSON(JSONObject tx_json) {
 		payer=new StellarAddress((String) tx_json.get("Account"));
 		payee=new StellarAddress((String) tx_json.get("Destination"));
-		String amountInMicroSTR = (String) tx_json.get("Amount");
-		amount=new DenominatedIssuedCurrency(amountInMicroSTR); //Works only with STR right now
 		sequenceNumber=(Long) tx_json.get("Sequence");
 		txHash = (String) tx_json.get("hash");
 		signature = (String) tx_json.get("TxnSignature");
 		publicKeyUsedToSign = (String) tx_json.get("SigningPubKey");
 		flags = (Long) tx_json.get("Flags");
+		Object amount = tx_json.get("Amount");
+		if (amount instanceof String) {
+			String amountInMicroSTR = (String) amount;
+			this.amount = new DenominatedIssuedCurrency(amountInMicroSTR);
+		}else if(amount instanceof JSONObject){
+			JSONObject jamt = (JSONObject) amount;
+			this.amount = new DenominatedIssuedCurrency(jamt.get("value").toString(), new StellarAddress(jamt.get("issuer").toString()), jamt.get("currency").toString());
+		}else{
+			this.amount = new DenominatedIssuedCurrency();
+		}
 	}
 
 	public String getSignedTxBlob() {

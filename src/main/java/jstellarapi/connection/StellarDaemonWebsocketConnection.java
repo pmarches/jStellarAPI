@@ -360,7 +360,7 @@ public class StellarDaemonWebsocketConnection extends StellarDaemonConnection {
 			}
 			command.put("ledger_index_min", startFromLedgerNumber);
 			command.put("ledger_index_max", -1);
-			command.put("binary", true); //Default to false
+//			command.put("binary", true); //Default to false
 
 			command.put("count", false);
 			command.put("descending", false);
