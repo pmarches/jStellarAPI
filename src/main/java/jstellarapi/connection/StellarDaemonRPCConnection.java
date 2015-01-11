@@ -11,10 +11,15 @@ import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 
 import jstellarapi.core.StellarAddress;
+import jstellarapi.ds.account.tx.AccountTx;
+import jstellarapi.ds.account.tx.Balance;
+import jstellarapi.ds.account.tx.BalanceAdapter;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
+import com.google.gson.GsonBuilder;
 
 /**
  * This class should use only http POST/GET, not the websocket. For small operations,
@@ -99,6 +104,30 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		TrustLines info = new TrustLines();
 		info.copyFrom((JSONObject) response.get("result"));
 		return info;
+	}
+	
+	public AccountTx getAccountTx(StellarAddress StellarAddress,int limit) throws Exception {
+		JSONObject account=new JSONObject();
+		account.put("account", StellarAddress.toString());
+		JSONObject command = createJSONCommand("account_tx", account);
+		String jsonString = command.toJSONString();
+		
+		HttpURLConnection connection = (HttpURLConnection) stellarDaemonURI.toURL().openConnection();
+		connection.setUseCaches(false);
+		connection.setRequestProperty("Content-Length", ""+jsonString.length());
+		connection.setRequestMethod("POST");
+		connection.setDoOutput(true);
+
+		OutputStream os = connection.getOutputStream();
+		os.write(jsonString.getBytes());
+		os.close();
+
+		InputStream is = connection.getInputStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		AccountTx atx = new GsonBuilder().registerTypeAdapter(Balance.class, new BalanceAdapter()).create().fromJson(rd, AccountTx.class);
+		rd.close();
+		is.close();
+		return atx;
 	}
 
 }
