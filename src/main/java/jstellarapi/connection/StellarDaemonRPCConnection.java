@@ -105,10 +105,21 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		info.copyFrom((JSONObject) response.get("result"));
 		return info;
 	}
-	
-	public AccountTx getAccountTx(StellarAddress StellarAddress,int limit) throws Exception {
+	public AccountTx getAccountTx(StellarAddress StellarAddress) throws Exception {
+		return getAccountTx(StellarAddress,null,null,null);
+	}
+	public AccountTx getAccountTx(StellarAddress StellarAddress,Integer ledger_index_min, Integer ledger_index_max,Integer limit) throws Exception {
 		JSONObject account=new JSONObject();
 		account.put("account", StellarAddress.toString());
+		if (ledger_index_min!=null) {
+			account.put("ledger_index_min", ledger_index_min);
+		}
+		if (ledger_index_max!=null) {
+			account.put("ledger_index_max", ledger_index_max);
+		}
+		if (limit!=null) {
+			account.put("limit", limit);
+		}
 		JSONObject command = createJSONCommand("account_tx", account);
 		String jsonString = command.toJSONString();
 		
