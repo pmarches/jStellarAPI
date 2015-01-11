@@ -22,14 +22,15 @@ import org.json.simple.parser.JSONParser;
 import com.google.gson.GsonBuilder;
 
 /**
- * This class should use only http POST/GET, not the websocket. For small operations,
- * (submit a TX), this could be faster than setting up a websocket connection. 
+ * This class should use only http POST/GET, not the websocket. For small
+ * operations, (submit a TX), this could be faster than setting up a websocket
+ * connection.
  *
  * @author pmarches
  */
 public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 	protected URI stellarDaemonURI;
-	public static URI STELLAR_RPC_URI=URI.create("http://test.stellar.org:9002");
+	public static URI STELLAR_RPC_URI = URI.create("http://test.stellar.org:9002");
 
 	public StellarDaemonRPCConnection(URI StellarDaemonURI) throws Exception {
 		this.stellarDaemonURI = StellarDaemonURI;
@@ -44,15 +45,15 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		txBlob.put("tx_blob", DatatypeConverter.printHexBinary(signedTransactionBytes));
 		JSONObject command = createJSONCommand("submit", txBlob);
 		JSONObject response = executeJSONCommand(command);
-		
+
 		JSONObject result = (JSONObject) response.get("result");
-		if((Long) result.get("engine_result_code")!=0){
+		if ((Long) result.get("engine_result_code") != 0) {
 			System.err.println(response.toJSONString());
 			throw new RuntimeException((String) result.get("engine_result_message"));
 		}
 	}
-	
-	protected JSONObject createJSONCommand(String commandName, JSONObject ... parameterObjects){
+
+	protected JSONObject createJSONCommand(String commandName, JSONObject... parameterObjects) {
 		JSONObject command = new JSONObject();
 		command.put("method", commandName);
 		JSONArray parameterArray = new JSONArray();
@@ -66,7 +67,7 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 
 		HttpURLConnection connection = (HttpURLConnection) stellarDaemonURI.toURL().openConnection();
 		connection.setUseCaches(false);
-		connection.setRequestProperty("Content-Length", ""+jsonString.length());
+		connection.setRequestProperty("Content-Length", "" + jsonString.length());
 		connection.setRequestMethod("POST");
 		connection.setDoOutput(true);
 
@@ -75,7 +76,8 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		os.close();
 
 		try {
-			//TODO The response handling is probably common between the websocket and the RPC
+			// TODO The response handling is probably common between the
+			// websocket and the RPC
 			InputStream is = connection.getInputStream();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 			JSONObject response = (JSONObject) new JSONParser().parse(rd);
@@ -87,7 +89,7 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 	}
 
 	public StellarAddressPublicInformation getPublicInformation(StellarAddress StellarAddress) throws Exception {
-		JSONObject account=new JSONObject();
+		JSONObject account = new JSONObject();
 		account.put("account", StellarAddress.toString());
 		JSONObject command = createJSONCommand("account_info", account);
 		JSONObject response = executeJSONCommand(command);
@@ -97,7 +99,7 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 	}
 
 	public TrustLines getTrustLines(StellarAddress StellarAddress) throws Exception {
-		JSONObject account=new JSONObject();
+		JSONObject account = new JSONObject();
 		account.put("account", StellarAddress.toString());
 		JSONObject command = createJSONCommand("account_lines", account);
 		JSONObject response = executeJSONCommand(command);
@@ -105,27 +107,32 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		info.copyFrom((JSONObject) response.get("result"));
 		return info;
 	}
+
 	public AccountTx getAccountTx(StellarAddress StellarAddress) throws Exception {
-		return getAccountTx(StellarAddress,null,null,null);
+		return getAccountTx(StellarAddress, null, null, null, false);
 	}
-	public AccountTx getAccountTx(StellarAddress StellarAddress,Integer ledger_index_min, Integer ledger_index_max,Integer limit) throws Exception {
-		JSONObject account=new JSONObject();
+
+	public AccountTx getAccountTx(StellarAddress StellarAddress, Integer ledger_index_min, Integer ledger_index_max, Integer limit, boolean forward) throws Exception {
+		JSONObject account = new JSONObject();
 		account.put("account", StellarAddress.toString());
-		if (ledger_index_min!=null) {
+		if (ledger_index_min != null) {
 			account.put("ledger_index_min", ledger_index_min);
 		}
-		if (ledger_index_max!=null) {
+		if (ledger_index_max != null) {
 			account.put("ledger_index_max", ledger_index_max);
 		}
-		if (limit!=null) {
+		if (limit != null) {
 			account.put("limit", limit);
+		}
+		if (forward) {
+			account.put("forward", true);
 		}
 		JSONObject command = createJSONCommand("account_tx", account);
 		String jsonString = command.toJSONString();
-		
+
 		HttpURLConnection connection = (HttpURLConnection) stellarDaemonURI.toURL().openConnection();
 		connection.setUseCaches(false);
-		connection.setRequestProperty("Content-Length", ""+jsonString.length());
+		connection.setRequestProperty("Content-Length", "" + jsonString.length());
 		connection.setRequestMethod("POST");
 		connection.setDoOutput(true);
 
