@@ -11,6 +11,9 @@ import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 
 import jstellarapi.core.StellarAddress;
+import jstellarapi.core.StellarEngineException;
+import jstellarapi.core.StellarPaymentTransaction;
+import jstellarapi.core.StellarSeedAddress;
 import jstellarapi.ds.account.tx.AccountTx;
 import jstellarapi.ds.account.tx.Balance;
 import jstellarapi.ds.account.tx.BalanceAdapter;
@@ -40,17 +43,23 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		this(StellarDaemonRPCConnection.STELLAR_RPC_URI);
 	}
 
-	public void submitTransaction(byte[] signedTransactionBytes) throws Exception {
+	public StellarPaymentTransaction submitTransaction(byte[] signedTransactionBytes) throws Exception {
+		return submitTransaction(DatatypeConverter.printHexBinary(signedTransactionBytes));
+	}
+
+	public StellarPaymentTransaction submitTransaction(String tx_blob) throws Exception {
 		JSONObject txBlob = new JSONObject();
-		txBlob.put("tx_blob", DatatypeConverter.printHexBinary(signedTransactionBytes));
+		txBlob.put("tx_blob", tx_blob);
 		JSONObject command = createJSONCommand("submit", txBlob);
 		JSONObject response = executeJSONCommand(command);
 
 		JSONObject result = (JSONObject) response.get("result");
 		if ((Long) result.get("engine_result_code") != 0) {
-			System.err.println(response.toJSONString());
-			throw new RuntimeException((String) result.get("engine_result_message"));
+			throw new StellarEngineException((String) result.get("engine_result"), (Long) result.get("engine_result_code"), (String) result.get("engine_result_message"));
 		}
+		StellarPaymentTransaction txToSign = new StellarPaymentTransaction(null, null, null, 0);
+		txToSign.copyFrom(result);
+		return txToSign;
 	}
 
 	protected JSONObject createJSONCommand(String commandName, JSONObject... parameterObjects) {
@@ -142,10 +151,44 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 
 		InputStream is = connection.getInputStream();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		while(rd.ready()){
+			String line = rd.readLine();
+			System.out.println(line);
+		}
 		AccountTx atx = new GsonBuilder().registerTypeAdapter(Balance.class, new BalanceAdapter()).create().fromJson(rd, AccountTx.class);
 		rd.close();
 		is.close();
 		return atx;
 	}
+	
+	public StellarPaymentTransaction signTransaction(StellarSeedAddress secret, StellarPaymentTransaction txToSign) throws Exception {
+		JSONObject param = new JSONObject();
+    	param.put("secret", secret.toString());
+		param.put("tx_json", txToSign.toTxJSON());
+		JSONObject command = createJSONCommand("sign", param);
+		String jsonString = command.toJSONString();
+
+		HttpURLConnection connection = (HttpURLConnection) stellarDaemonURI.toURL().openConnection();
+		connection.setUseCaches(false);
+		connection.setRequestProperty("Content-Length", "" + jsonString.length());
+		connection.setRequestMethod("POST");
+		connection.setDoOutput(true);
+
+		OutputStream os = connection.getOutputStream();
+		os.write(jsonString.getBytes());
+		os.close();
+
+		InputStream is = connection.getInputStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		JSONObject result = (JSONObject) new JSONParser().parse(rd);
+		result = (JSONObject) result.get("result");
+		String status = (String) result.get("status");
+		if(!status.equals("success")){
+			throw new IllegalStateException(status);
+		}
+		txToSign.copyFrom(result);
+		return txToSign;
+	}
+
 
 }

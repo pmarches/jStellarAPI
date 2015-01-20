@@ -42,8 +42,8 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		}
 	}
 	
-	public DenominatedIssuedCurrency(BigInteger stellarAmount) {
-		this.microStrAmount=stellarAmount.multiply(MICROSTR_PER_STR);
+	public DenominatedIssuedCurrency(BigInteger micro_stellarAmount) {
+		this.microStrAmount=micro_stellarAmount;
 	}
 	
 	public DenominatedIssuedCurrency(String amountInMicroSTR) {
@@ -92,7 +92,7 @@ public class DenominatedIssuedCurrency implements JSONSerializable {
 		}
 		else{
 			JSONObject jsonThis = new JSONObject();
-			jsonThis.put("value", amount.toString());
+			jsonThis.put("value", amount.toPlainString());
 			jsonThis.put("issuer", issuer.toString());
 			jsonThis.put("currency", currency);
 			return jsonThis;

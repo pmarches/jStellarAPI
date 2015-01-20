@@ -95,9 +95,22 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 		}else{
 			this.amount = new DenominatedIssuedCurrency();
 		}
+		Object fee = tx_json.get("Fee");
+		if(fee!=null){
+			this.fee = new DenominatedIssuedCurrency(new BigInteger(fee.toString()));
+		}
 	}
 
 	public String getSignedTxBlob() {
 		return signedTransactionBlob;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("StellarPaymentTransaction [payer=").append(payer).append(", payee=").append(payee).append(", amount=").append(amount).append(", signedTransactionBlob=")
+				.append(signedTransactionBlob).append(", sequenceNumber=").append(sequenceNumber).append(", txHash=").append(txHash).append(", signature=").append(signature)
+				.append(", publicKeyUsedToSign=").append(publicKeyUsedToSign).append(", fee=").append(fee).append(", flags=").append(flags).append("]");
+		return builder.toString();
 	}	
 }
