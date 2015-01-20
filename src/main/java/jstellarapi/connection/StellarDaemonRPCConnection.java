@@ -17,6 +17,9 @@ import jstellarapi.core.StellarSeedAddress;
 import jstellarapi.ds.account.tx.AccountTx;
 import jstellarapi.ds.account.tx.Balance;
 import jstellarapi.ds.account.tx.BalanceAdapter;
+import jstellarapi.ds.tx.Amount;
+import jstellarapi.ds.tx.AmountAdapter;
+import jstellarapi.ds.tx.Tx;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -151,19 +154,15 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 
 		InputStream is = connection.getInputStream();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-		while(rd.ready()){
-			String line = rd.readLine();
-			System.out.println(line);
-		}
 		AccountTx atx = new GsonBuilder().registerTypeAdapter(Balance.class, new BalanceAdapter()).create().fromJson(rd, AccountTx.class);
 		rd.close();
 		is.close();
 		return atx;
 	}
-	
+
 	public StellarPaymentTransaction signTransaction(StellarSeedAddress secret, StellarPaymentTransaction txToSign) throws Exception {
 		JSONObject param = new JSONObject();
-    	param.put("secret", secret.toString());
+		param.put("secret", secret.toString());
 		param.put("tx_json", txToSign.toTxJSON());
 		JSONObject command = createJSONCommand("sign", param);
 		String jsonString = command.toJSONString();
@@ -183,12 +182,35 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		JSONObject result = (JSONObject) new JSONParser().parse(rd);
 		result = (JSONObject) result.get("result");
 		String status = (String) result.get("status");
-		if(!status.equals("success")){
+		if (!status.equals("success")) {
 			throw new IllegalStateException(status);
 		}
 		txToSign.copyFrom(result);
 		return txToSign;
 	}
 
+	public Tx getTranscation(String txHash) throws Exception {
+		JSONObject param = new JSONObject();
+		param.put("transaction", txHash);
+		JSONObject command = createJSONCommand("tx", param);
+		String jsonString = command.toJSONString();
+
+		HttpURLConnection connection = (HttpURLConnection) stellarDaemonURI.toURL().openConnection();
+		connection.setUseCaches(false);
+		connection.setRequestProperty("Content-Length", "" + jsonString.length());
+		connection.setRequestMethod("POST");
+		connection.setDoOutput(true);
+
+		OutputStream os = connection.getOutputStream();
+		os.write(jsonString.getBytes());
+		os.close();
+
+		InputStream is = connection.getInputStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		Tx tx = new GsonBuilder().registerTypeAdapter(Amount.class, new AmountAdapter()).create().fromJson(rd, Tx.class);
+		rd.close();
+		is.close();
+		return tx;
+	}
 
 }
