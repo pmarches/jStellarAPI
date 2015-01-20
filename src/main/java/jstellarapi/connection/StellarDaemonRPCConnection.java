@@ -39,11 +39,11 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 	protected URI stellarDaemonURI;
 	public static URI STELLAR_RPC_URI = URI.create("http://test.stellar.org:9002");
 
-	public StellarDaemonRPCConnection(URI StellarDaemonURI) throws Exception {
+	public StellarDaemonRPCConnection(URI StellarDaemonURI){
 		this.stellarDaemonURI = StellarDaemonURI;
 	}
 
-	public StellarDaemonRPCConnection() throws Exception {
+	public StellarDaemonRPCConnection(){
 		this(StellarDaemonRPCConnection.STELLAR_RPC_URI);
 	}
 
