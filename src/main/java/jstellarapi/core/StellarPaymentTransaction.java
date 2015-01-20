@@ -16,31 +16,32 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 	public DenominatedIssuedCurrency amount;
 	public String signedTransactionBlob;
 	public long sequenceNumber;
+	public long destinationTag = -1;
 	public String txHash;
 	public String signature;
 	public String publicKeyUsedToSign;
 	public DenominatedIssuedCurrency fee;
 	public long flags;
-	
-	public StellarPaymentTransaction(StellarAddress payer, StellarAddress payee, DenominatedIssuedCurrency amount, int sequenceNumber){
-		this.payer=payer;
-		this.payee=payee;
+
+	public StellarPaymentTransaction(StellarAddress payer, StellarAddress payee, DenominatedIssuedCurrency amount, int sequenceNumber) {
+		this.payer = payer;
+		this.payee = payee;
 		this.amount = amount;
 		this.sequenceNumber = sequenceNumber;
 		this.fee = DenominatedIssuedCurrency.FEE;
 	}
-	
-	public StellarPaymentTransaction(StellarBinaryObject serObj){
+
+	public StellarPaymentTransaction(StellarBinaryObject serObj) {
 		super(serObj);
-		if(serObj.getTransactionType()!=TransactionTypes.PAYMENT){
-			throw new RuntimeException("The StellarBinaryObject is not a payment transaction, but a "+serObj.getTransactionType());
+		if (serObj.getTransactionType() != TransactionTypes.PAYMENT) {
+			throw new RuntimeException("The StellarBinaryObject is not a payment transaction, but a " + serObj.getTransactionType());
 		}
 		payer = (StellarAddress) serObj.getField(BinaryFormatField.Account);
 		payee = (StellarAddress) serObj.getField(BinaryFormatField.Destination);
 		amount = (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Amount);
 		sequenceNumber = (long) serObj.getField(BinaryFormatField.Sequence);
-		fee= (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Fee);
-		flags= (long) serObj.getField(BinaryFormatField.Flags);
+		fee = (DenominatedIssuedCurrency) serObj.getField(BinaryFormatField.Fee);
+		flags = (long) serObj.getField(BinaryFormatField.Flags);
 	}
 
 	public StellarPaymentTransaction(JSONObject jsonTx) {
@@ -67,22 +68,25 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 		jsonTx.put("Destination", payee.toString());
 		jsonTx.put("Amount", amount.toJSON());
 		jsonTx.put("TransactionType", "Payment");
+		if(destinationTag>=0&&destinationTag<=4294967295l){
+			jsonTx.put("DestinationTag", String.valueOf(destinationTag));
+		}
 		return jsonTx;
 	}
 
 	@Override
 	public void copyFrom(JSONObject jsonCommandResult) {
-		signedTransactionBlob=(String) jsonCommandResult.get("tx_blob");
+		signedTransactionBlob = (String) jsonCommandResult.get("tx_blob");
 		JSONObject tx_json = (JSONObject) jsonCommandResult.get("tx_json");
-		if(tx_json!=null){
+		if (tx_json != null) {
 			fromTxJSON(tx_json);
 		}
 	}
 
 	protected void fromTxJSON(JSONObject tx_json) {
-		payer=new StellarAddress((String) tx_json.get("Account"));
-		payee=new StellarAddress((String) tx_json.get("Destination"));
-		sequenceNumber=(Long) tx_json.get("Sequence");
+		payer = new StellarAddress((String) tx_json.get("Account"));
+		payee = new StellarAddress((String) tx_json.get("Destination"));
+		sequenceNumber = (Long) tx_json.get("Sequence");
 		txHash = (String) tx_json.get("hash");
 		signature = (String) tx_json.get("TxnSignature");
 		publicKeyUsedToSign = (String) tx_json.get("SigningPubKey");
@@ -91,14 +95,14 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 		if (amount instanceof String) {
 			String amountInMicroSTR = (String) amount;
 			this.amount = new DenominatedIssuedCurrency(amountInMicroSTR);
-		}else if(amount instanceof JSONObject){
+		} else if (amount instanceof JSONObject) {
 			JSONObject jamt = (JSONObject) amount;
 			this.amount = new DenominatedIssuedCurrency(jamt.get("value").toString(), new StellarAddress(jamt.get("issuer").toString()), jamt.get("currency").toString());
-		}else{
+		} else {
 			this.amount = new DenominatedIssuedCurrency();
 		}
 		Object fee = tx_json.get("Fee");
-		if(fee!=null){
+		if (fee != null) {
 			this.fee = new DenominatedIssuedCurrency(new BigInteger(fee.toString()));
 		}
 	}
