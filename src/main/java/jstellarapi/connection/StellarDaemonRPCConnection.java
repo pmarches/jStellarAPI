@@ -34,6 +34,7 @@ import com.google.gson.GsonBuilder;
  *
  * @author pmarches
  */
+@SuppressWarnings("unchecked")
 public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 	protected URI stellarDaemonURI;
 	public static URI STELLAR_RPC_URI = URI.create("http://test.stellar.org:9002");
@@ -186,6 +187,8 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 			throw new IllegalStateException(status);
 		}
 		txToSign.copyFrom(result);
+		rd.close();
+		is.close();
 		return txToSign;
 	}
 

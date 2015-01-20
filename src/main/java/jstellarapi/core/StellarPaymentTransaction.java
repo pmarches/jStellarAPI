@@ -7,6 +7,7 @@ import jstellarapi.serialization.StellarBinaryObject;
 import jstellarapi.serialization.StellarBinarySchema.BinaryFormatField;
 import jstellarapi.serialization.StellarBinarySchema.TransactionTypes;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.json.simple.JSONObject;
 
 public class StellarPaymentTransaction extends StellarTransaction implements JSONSerializable {
@@ -59,6 +60,7 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 		return rbo;
 	}
 
+	@SuppressWarnings("unchecked")
 	public JSONObject toTxJSON() {
 		JSONObject jsonTx = new JSONObject();
 		jsonTx.put("Account", payer.toString());
@@ -107,10 +109,7 @@ public class StellarPaymentTransaction extends StellarTransaction implements JSO
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("StellarPaymentTransaction [payer=").append(payer).append(", payee=").append(payee).append(", amount=").append(amount).append(", signedTransactionBlob=")
-				.append(signedTransactionBlob).append(", sequenceNumber=").append(sequenceNumber).append(", txHash=").append(txHash).append(", signature=").append(signature)
-				.append(", publicKeyUsedToSign=").append(publicKeyUsedToSign).append(", fee=").append(fee).append(", flags=").append(flags).append("]");
-		return builder.toString();
-	}	
+		return ToStringBuilder.reflectionToString(this);
+	}
+
 }

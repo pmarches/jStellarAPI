@@ -12,15 +12,6 @@ public class Tx {
 
 	@Expose
 	@Valid
-	private String error;
-	@Expose
-	@Valid
-	private String error_message;
-	@Expose
-	@Valid
-	private long error_code;
-	@Expose
-	@Valid
 	private Result result;
 
 	/**
@@ -43,30 +34,6 @@ public class Tx {
 	public Tx withResult(Result result) {
 		this.result = result;
 		return this;
-	}
-
-	public String getError() {
-		return error;
-	}
-
-	public void setError(String error) {
-		this.error = error;
-	}
-
-	public String getError_message() {
-		return error_message;
-	}
-
-	public void setError_message(String error_message) {
-		this.error_message = error_message;
-	}
-
-	public long getError_code() {
-		return error_code;
-	}
-
-	public void setError_code(long error_code) {
-		this.error_code = error_code;
 	}
 
 	@Override
