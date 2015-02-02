@@ -51,7 +51,7 @@ public class AmountAdapter extends TypeAdapter<Amount> {
 					amount.setIssuer(val);
 					break;
 				case "value":
-					amount.setValue(new BigDecimal(val).movePointLeft(6));
+					amount.setValue(new BigDecimal(val));
 					break;
 				}
 			}
