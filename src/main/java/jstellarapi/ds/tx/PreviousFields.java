@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class PreviousFields {
 
     @Expose
-    private String Balance;
+    private Amount Balance;
     @Expose
     private long Sequence;
 
@@ -20,7 +20,7 @@ public class PreviousFields {
      * @return
      *     The Balance
      */
-    public String getBalance() {
+    public Amount getBalance() {
         return Balance;
     }
 
@@ -29,11 +29,11 @@ public class PreviousFields {
      * @param Balance
      *     The Balance
      */
-    public void setBalance(String Balance) {
+    public void setBalance(Amount Balance) {
         this.Balance = Balance;
     }
 
-    public PreviousFields withBalance(String Balance) {
+    public PreviousFields withBalance(Amount Balance) {
         this.Balance = Balance;
         return this;
     }

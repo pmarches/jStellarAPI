@@ -13,7 +13,7 @@ public class FinalFields {
     @Expose
     private String Account;
     @Expose
-    private String Balance;
+    private Amount Balance;
     @Expose
     private long Flags;
     @Expose
@@ -49,7 +49,7 @@ public class FinalFields {
      * @return
      *     The Balance
      */
-    public String getBalance() {
+    public Amount getBalance() {
         return Balance;
     }
 
@@ -58,11 +58,11 @@ public class FinalFields {
      * @param Balance
      *     The Balance
      */
-    public void setBalance(String Balance) {
+    public void setBalance(Amount Balance) {
         this.Balance = Balance;
     }
 
-    public FinalFields withBalance(String Balance) {
+    public FinalFields withBalance(Amount Balance) {
         this.Balance = Balance;
         return this;
     }
