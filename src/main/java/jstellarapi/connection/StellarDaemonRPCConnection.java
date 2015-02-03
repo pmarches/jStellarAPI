@@ -184,7 +184,7 @@ public class StellarDaemonRPCConnection extends StellarDaemonConnection {
 		result = (JSONObject) result.get("result");
 		String status = (String) result.get("status");
 		if (!status.equals("success")) {
-			throw new IllegalStateException(status);
+			throw new IllegalStateException(result.get("error_message").toString());
 		}
 		txToSign.copyFrom(result);
 		rd.close();
