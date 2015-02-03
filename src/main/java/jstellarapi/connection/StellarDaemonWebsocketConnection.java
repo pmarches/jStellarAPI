@@ -98,6 +98,17 @@ public class StellarDaemonWebsocketConnection extends StellarDaemonConnection {
 		}
 	}
 
+	public String random() {
+		JSONObject pingComand = new JSONObject();
+		pingComand.put("command", "random");
+		Future<GenericJSONSerializable> pingResponse = sendCommand(pingComand, new GenericJSONSerializable());
+		try {
+			return pingResponse.get().jsonCommandResult.get("random").toString();
+		} catch (InterruptedException | ExecutionException e) {
+			return null;
+		}
+	}
+
 	public Future<StellarAddressPublicInformation> getAccountInfoFuture(String account) {
 		JSONObject accountInfoComand = new JSONObject();
 		accountInfoComand.put("command", "account_info");
