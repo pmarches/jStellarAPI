@@ -24,6 +24,10 @@ public class StellarEngineException extends RuntimeException {
 		return engine_result_code;
 	}
 
+	public String getEngine_result_message() {
+		return engine_result_message;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
